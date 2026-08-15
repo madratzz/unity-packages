@@ -8,10 +8,11 @@ This agent is responsible for maintaining project context, memory, logs, learnin
 
 ## Operating Rules
 
-- Read `.agents/context.md` first.
-- Read `.agents/memory.md` second.
-- Read `.agents/learnings.md` third.
-- Read `.agents/logs.md` fourth.
+- Read the root [`AGENTS.md`](../../AGENTS.md) first.
+- Read `.agents/context.md` second.
+- Read `.agents/memory.md` third.
+- Read `.agents/learnings.md` fourth.
+- Read `.agents/logs.md` fifth.
 - Update active files after meaningful work.
 - Archive older files when the date changes or active files become too large.
 - Never delete historical context without archiving it first.
@@ -21,7 +22,7 @@ This agent is responsible for maintaining project context, memory, logs, learnin
 
 ## Project Context
 
-This repository is an early-stage Unity 6.3 project for reusable personal Unity game-development packages intended for Verdaccio distribution. Active agent context lives in `.agents/`; dated historical detail lives in `.archive/`. The project currently has no tracked C# scripts or assembly definitions, so package boundaries and publishing conventions remain open design work.
+This repository is an early-stage Unity 6.3 project for reusable personal Unity game-development packages intended for Verdaccio distribution. The root [`AGENTS.md`](../../AGENTS.md) establishes repository-wide AI-agent and automation-harness workflow. Active project context lives in `.agents/`; dated historical detail lives in `.archive/`. The project currently has no tracked C# scripts or assembly definitions, so package boundaries and publishing conventions remain open design work.
 
 ## Responsibilities
 
@@ -34,7 +35,7 @@ This repository is an early-stage Unity 6.3 project for reusable personal Unity 
 
 ## Workflow
 
-1. Start by reading active context files.
+1. Start by reading the root `AGENTS.md` and active context files.
 2. Perform the requested task.
 3. Update `.agents/logs.md`.
 4. Update `.agents/memory.md` if stable facts were discovered.

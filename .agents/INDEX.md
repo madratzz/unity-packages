@@ -23,4 +23,4 @@ Last updated: 2026-08-15
 
 ## Notes
 
-Keep this index updated whenever active files or archive files change.
+Start with the root [AGENTS.md](../AGENTS.md), then use this index to navigate the active context. Keep this index updated whenever active files or archive files change.

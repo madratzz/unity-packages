@@ -8,6 +8,8 @@ Last updated: 2026-08-15
 - The repository is a Unity project for personal reusable game-development packages.
 - Package distribution is intended to use a Verdaccio server.
 - The project uses Unity `6000.3.21f1` (Unity 6.3) and includes the Unity Test Framework and URP.
+- `AGENTS.md` is the root repository guide for AI agents and automation harnesses; `.agents/` provides the active project context it directs them to read.
+- `IDEA.md` records the high-level reusable-package intent and Verdaccio distribution direction.
 
 ## User Preferences
 
@@ -15,6 +17,7 @@ Last updated: 2026-08-15
 - Keep archive indexes and dated lists in reverse chronological order.
 - Preserve concise active summaries after archival so agents do not need to read every historical file.
 - Never record secrets, API keys, passwords, tokens, private keys, credentials, or other sensitive values.
+- Provide one concise root guide that works for AI agents and automation harnesses, then place evolving project-specific knowledge in `.agents/`.
 
 ## Naming Conventions
 
@@ -24,6 +27,8 @@ Last updated: 2026-08-15
 
 ## Important Entities
 
+- `AGENTS.md` — root AI-agent and automation-harness guide.
+- `IDEA.md` — high-level project-intent document.
 - `.agents/` — active AI-agent context.
 - `.archive/` — dated historical AI-agent material.
 - `Packages/manifest.json` — Unity package dependencies.

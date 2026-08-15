@@ -4,6 +4,10 @@ This folder stores active AI-agent context for this project.
 
 It exists so that any AI agent can quickly understand the project, continue previous work, preserve useful discoveries, and avoid repeating mistakes.
 
+## Main Repository Guide
+
+Start with the root [AGENTS.md](../AGENTS.md), then use this folder for active project-specific context. The root guide defines the repository-wide workflow for AI agents and automation harnesses.
+
 ## Purpose
 
 - Store active project context.
