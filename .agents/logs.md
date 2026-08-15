@@ -4,6 +4,42 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-15 19:54 PST
+
+Summary of what was done:
+
+- Added root `AGENTS.md` as the repository entry point for AI agents and automation harnesses.
+- Formalized the previously untracked `IDEA.md` as the high-level project-intent document.
+- Integrated the root guide into active context, memory, learnings, and default-agent startup rules.
+
+Files touched:
+
+- `AGENTS.md`
+- `IDEA.md`
+- `.agents/README.md`
+- `.agents/INDEX.md`
+- `.agents/context.md`
+- `.agents/memory.md`
+- `.agents/learnings.md`
+- `.agents/logs.md`
+- `.agents/agents/default-agent.md`
+
+Decisions made:
+
+- `AGENTS.md` is the concise, repository-wide guide; `.agents/` remains the source for active project-specific context, and `.archive/` remains the source for deeper history.
+- The guide avoids undocumented Unity build or package-layout assumptions and requires agents to discover available tooling before using it.
+
+Issues found:
+
+- No root `AGENTS.md` existed before this work.
+
+Next steps:
+
+- Use the root startup sequence before future package implementation work.
+- Define the first package's public API, assembly, testing, versioning, and Verdaccio publishing conventions.
+
+## Recent Previous Sessions
+
 ### 2026-08-15 19:44 PST
 
 Summary of what was done:
@@ -44,10 +80,6 @@ Next steps:
 
 - Decide the first package scope and package registry conventions.
 - Commit the agent-context system if it should be shared with other repository users.
-
-## Recent Previous Sessions
-
-No earlier context-system work logs are available.
 
 ## Archive Summary
 
