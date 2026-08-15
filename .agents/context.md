@@ -8,11 +8,14 @@ Last updated: 2026-08-15
 
 ## Current Goals
 
-- Establish a durable, repository-local agent-context system without placing operational context in Unity's `Assets/` tree.
+- Maintain a durable, repository-local agent-context system without placing operational context in Unity's `Assets/` tree.
+- Provide a root `AGENTS.md` guide so AI agents and automation harnesses start from one consistent workflow.
 - Bootstrap reusable Unity package foundations and define package boundaries as implementation work begins.
 
 ## Current Architecture / Structure
 
+- `AGENTS.md` — repository-wide operating guide for AI agents and automation harnesses.
+- `IDEA.md` — high-level project intent and intended Verdaccio distribution.
 - `Assets/` — Unity content; no tracked C# scripts or assembly definitions were present at setup time.
 - `Packages/` — Unity Package Manager manifest and lockfile; the manifest includes URP, Input System, AI Navigation, Test Framework, and Unity AI packages.
 - `ProjectSettings/` — Unity project configuration.
@@ -21,6 +24,7 @@ Last updated: 2026-08-15
 
 ## Important Decisions
 
+- `AGENTS.md` is the root entry point for repository-wide AI-agent and automation-harness workflow; `.agents/` supplies current project context.
 - Active agent material is maintained in `.agents/`; detailed historical material is retained in `.archive/` rather than deleted.
 - The context system uses Markdown, relative links, ISO dates in content, DD-MM-YY archive filenames, and reverse-chronological indexes.
 - Context files must never include credentials or other sensitive values; use placeholders if redaction is required.
@@ -34,9 +38,8 @@ Last updated: 2026-08-15
 
 ## Current Open Questions
 
-- Which reusable Unity packages should be implemented first, and what public package/assembly boundaries should they expose?
+- Which reusable Unity package should establish the first concrete package, assembly, test, and publishing conventions?
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
-- Should the agent-context folders remain versioned in Git for team sharing, or should a future repository policy exclude some local-only context?
 
 ## Archive Summary
 
