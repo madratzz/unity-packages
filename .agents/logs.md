@@ -4,6 +4,20 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-17 13:00 PST
+
+Summary of what was done:
+
+- Ported `com.madratzz.scriptableobject.statemachine.core` on branch `feature/state-machine` (commit `cc368cd`). FSM stays caller-driven (`Tick()` coroutine the caller runs via CoroutineHandler).
+- **Real bug fixed during port:** the archived FSM's `Tick()` transitioned to a new state but **never called `Init`/`Execute` on it** (only the boot path did). Transition targets ran `Tick` from a never-initialized state — silently broken for any state with non-trivial `Init`. Fixed by re-running `Init` → `Execute` after every transition.
+- Other fixes: null-guards on `CurrentState` before `Tick()`/pop; explicit `Transition()` rejection of null transitions and null `ToState`; `CleanupAllPausedStates` now requires caller to be the current owner (was a footgun); removed dead `State.Paused` field.
+- 11 EditMode tests covering full lifecycle (boot Init/Execute-once, per-frame Tick, transition Exit→Init→Execute, null rejection, double-transition only-first-fires, pause-stack push, resume exit+resume+pop, empty-stack no-op, owner-checked cleanup, no-boot-state exit). Suite: **104/104 EditMode passing, 0 console errors**.
+
+Next steps:
+
+- Merge `feature/state-machine` to development when accepted.
+- Remaining archived packages: adsmodule, analytics.system, remoteconfig (needs Firebase tarballs from ExternalPackages/), architecture.soap, utilities.addressables.
+
 ### 2026-08-17 12:10 PST
 
 Summary of what was done:
