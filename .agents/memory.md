@@ -4,6 +4,7 @@ Last updated: 2026-08-17
 
 ## Stable Project Facts
 
+- All merges into `development` go through pull requests (via `gh pr create` / `gh pr merge`), never via local direct merges. Feature branches are pushed as PRs and reviewed before merge — local `--no-ff git merge` is reserved for squashing already-merged branches or recovering from a botched merge, not for landing new work.
 - Repository name: `unity-packages`.
 - License for all `com.madratzz.*` packages is MIT (Copyright (c) 2026 Raza Butt); each package carries `LICENSE.md` and `"license": "MIT"` in `package.json`.
 - The repository is a Unity project for personal reusable game-development packages.
