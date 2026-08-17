@@ -4,6 +4,17 @@ All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.0.3] - 2026-08-17
+
+### Added
+- `BuilderConfig` is now the single build-settings surface: new `BuildVersionOverride`, `OutputDirectory`, and `ReadFromResourcesFile` fields
+- Project-root `buildsettings.json` file source — when the toggle is enabled, fields are populated from the JSON before each build (partial files merge over inspector values; missing/invalid file falls back with a warning). Project-root placement keeps secrets out of player builds, unlike a Resources asset
+- `BuilderConfig.Current` — cached config accessor that never returns null (replaces `LoadDefault`)
+
+### Changed
+- Build version precedence: `-buildversion` CLI arg > `BuildVersionOverride` > Player Settings' bundle version
+- Build output directory is configurable via `OutputDirectory` (was hardcoded `Builds/`)
+
 ## [0.0.2] - 2026-08-17
 
 ### Security

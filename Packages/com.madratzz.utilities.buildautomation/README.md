@@ -1,29 +1,59 @@
 # Build Automation
 
-Editor utility for triggering iOS and Android (APK/AAB) builds with keystore credential management via a ScriptableObject configuration asset.
+Editor utility for triggering iOS and Android (APK/AAB) builds, driven by a single
+`BuilderConfig` ScriptableObject with an optional project-root JSON source.
 
-## Overview
+## How it works
 
-`BuilderConfig` stores Android keystore credentials as a ScriptableObject asset, keeping sensitive values out of code and source control. `Builder` adds a `Build/` menu to the Unity Editor with one-click targets for iOS, Android APK, and Android AAB. This is an Editor-only package with no runtime overhead.
+Every **Build → …** menu item resolves its settings in this order:
 
-## Types
+1. **`-buildversion` CLI argument** — always wins (CI override).
+2. **`buildsettings.json`** at the project root — when the config's
+   **Read From Resources File** toggle is enabled. Missing keys merge over
+   inspector values; a missing/invalid file falls back to them with a warning.
+3. **Inspector values** on the `BuilderConfig` asset.
 
-| Type | Description |
-|------|-------------|
-| `BuilderConfig` | ScriptableObject storing keystore path, keystore password, and key alias password |
-| `Builder` | Editor class providing `Build/` menu items for iOS, Android APK, and Android AAB |
+## Setup
 
-## Usage
+1. **Create the config asset:** **Assets → Create → Build Automation → Builder Config**,
+   place it under a `Resources/` folder, name it `BuilderConfig`.
+2. **Set values in the Inspector:** keystore passwords (empty = keep Player Settings'
+   values), optional bundle-version override, and output directory (default `Builds`).
+3. **Build:** **Build → Android APK**, **Android AAB**, **Android Development APK**, or **iOS**.
 
-1. Create a `BuilderConfig` asset via **Assets → Create → Build Automation → Builder Config**, place it under a `Resources/` folder, and name it `BuilderConfig`.
-2. Fill in keystore credentials in the Inspector. **Never commit this asset to source control** — add it to `.gitignore`. Defaults are empty; with no asset present, builds fall back to the keystore passwords set in Player Settings.
-3. Use **Build → Android APK** or **Build → Android AAB** from the Unity menu bar to trigger a build.
+⚠️ **Never commit keystore passwords** — not in the asset, not in the JSON file.
+Keep `BuilderConfig.asset` and `buildsettings.json` in `.gitignore`, or commit the
+JSON without the password fields (missing keys merge, they don't blank).
 
-Keystore credentials are only applied to Android builds. Version codes are derived from the bundle version by stripping dots (`1.2.3` → `123`); override the bundle version from CI with the `-buildversion <version>` command-line argument.
+## JSON file source (toggle)
 
-## Installation
+Enable **Read From Resources File** on the config to populate it from
+`buildsettings.json` at the project root (next to `Packages/`, not inside `Assets/`):
 
-Install via the Unity Package Manager pointing to your Verdaccio registry.
+```json
+{
+  "buildVersion": "1.2.3",
+  "outputDirectory": "CIBuilds",
+  "keystorePassword": "<SECRET>",
+  "keyAliasPassword": "<SECRET>"
+}
+```
+
+The project-root location is deliberate: the file is **not** a Unity asset, so it can
+never be bundled into a player build (a `Resources/` JSON with secrets would ship
+inside your APK/AAB). The Inspector still shows the populated values — the file is
+the source, the SO is the surface.
+
+## CI usage
+
+```bash
+"$UNITY" -batchmode -projectPath "$PROJECT" \
+  -executeMethod CustomEditorUtilities.Builder.BuildAndroidAAB \
+  -buildversion 1.4.2
+```
+
+Version codes derive from the bundle version by stripping dots (`1.4.2` → `142`).
+Keystore passwords apply to Android only.
 
 ## License
 

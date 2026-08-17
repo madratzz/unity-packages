@@ -39,16 +39,18 @@ namespace CustomEditorUtilities
         private static void ConfigurePlayerSettingsForBuild(BuildTarget target)
         {
             var buildVersion = GetArgument("-buildversion");
+            var config = BuilderConfig.Current;
 
             if (string.IsNullOrEmpty(buildVersion))
             {
-                // If the argument is missing, pick the default from PlayerSettings
-                buildVersion = PlayerSettings.bundleVersion;
+                // CLI arg absent — the config's override wins over PlayerSettings;
+                // fall back to PlayerSettings when the override is empty too.
+                buildVersion = !string.IsNullOrEmpty(config.BuildVersionOverride)
+                    ? config.BuildVersionOverride
+                    : PlayerSettings.bundleVersion;
             }
-            else
-            {
-                PlayerSettings.bundleVersion = buildVersion;
-            }
+
+            PlayerSettings.bundleVersion = buildVersion;
 
             int versionCode = GenerateVersionCode(buildVersion);
 
@@ -58,7 +60,6 @@ namespace CustomEditorUtilities
                 PlayerSettings.Android.bundleVersionCode = versionCode;
 
                 // Keystore credentials apply to Android only — never to iOS.
-                var config = BuilderConfig.LoadDefault();
                 if (!string.IsNullOrEmpty(config.KeystorePassword))
                 {
                     PlayerSettings.Android.keystorePass = config.KeystorePassword;
@@ -121,7 +122,7 @@ namespace CustomEditorUtilities
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions
             {
                 scenes = GetActiveScenes(),
-                locationPathName = $"Builds/{pathName}",
+                locationPathName = $"{BuilderConfig.Current.OutputDirectory}/{pathName}",
                 target = target,
                 options = options
             };

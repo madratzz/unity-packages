@@ -62,17 +62,31 @@ namespace Madratzz.Tests.BuildAutomation
 
     public class BuilderConfigTests
     {
-        [Test]
-        public void LoadDefault_WithoutAsset_ReturnsNonNullBlankConfig()
+        [TearDown]
+        public void TearDown()
         {
-            // No Resources/BuilderConfig asset exists in this project — the loader
+            BuilderConfig.ResetCache();
+        }
+
+        [Test]
+        public void Current_WithoutAsset_ReturnsNonNullBlankConfig()
+        {
+            // No Resources/BuilderConfig asset exists in this project — Current
             // must return a blank instance rather than null (regression: archived
             // code NRE'd on the unassigned static config field).
-            var config = BuilderConfig.LoadDefault();
+            BuilderConfig.ResetCache();
+            var config = BuilderConfig.Current;
 
             Assert.IsNotNull(config);
             Assert.AreEqual(string.Empty, config.KeystorePassword);
             Assert.AreEqual(string.Empty, config.KeyAliasPassword);
+        }
+
+        [Test]
+        public void Current_IsCachedAcrossCalls()
+        {
+            BuilderConfig.ResetCache();
+            Assert.AreSame(BuilderConfig.Current, BuilderConfig.Current);
         }
     }
 }
