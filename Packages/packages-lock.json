@@ -62,6 +62,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.madratzz.utilities.buildautomation": {
+      "version": "file:com.madratzz.utilities.buildautomation",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.madratzz.utilities.core": {
       "version": "file:com.madratzz.utilities.core",
       "depth": 0,
@@ -83,6 +89,12 @@
       "dependencies": {
         "com.unity.ugui": "2.0.0"
       }
+    },
+    "com.madratzz.utilities.unity.alwaysstartfromscenezero": {
+      "version": "file:com.madratzz.utilities.unity.alwaysstartfromscenezero",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
