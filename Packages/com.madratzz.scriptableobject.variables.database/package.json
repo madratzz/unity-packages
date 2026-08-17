@@ -1,6 +1,7 @@
 {
   "name": "com.madratzz.scriptableobject.variables.database",
   "version": "0.0.1",
+  "license": "MIT",
   "displayName": "Madratzz ScriptableObject: Variable Database",
   "description": "Persistent ScriptableObject variables backed by PlayerPrefs, providing typed DB variables for int, float, bool, string, and epoch time with JSON export support.",
   "unity": "6000.0",
@@ -22,7 +23,7 @@
   },
   "dependencies": {
     "com.madratzz.scriptableobject.variables": "0.0.1",
-    "com.madratzz.utilities.extensions": "0.0.1"
+    "com.madratzz.utilities.attributes": "0.0.1"
   },
   "category": "Tooling",
   "repository": {

@@ -3,7 +3,7 @@
     "rootNamespace": "ProjectCore",
     "references": [
         "madratzz.scriptableobject.variables.runtime",
-        "com.madratzz.utilities.extensions.runtime"
+        "com.madratzz.utilities.attributes.runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

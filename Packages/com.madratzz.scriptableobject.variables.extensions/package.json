@@ -1,6 +1,7 @@
 {
   "name": "com.madratzz.scriptableobject.variables.extensions",
   "version": "0.0.1",
+  "license": "MIT",
   "displayName": "Madratzz ScriptableObject: Variable Extensions",
   "description": "Extended ScriptableObject variable types including generic arrays, shared Vector2/Vector3 values, and serialized dictionaries (dictionary types require Odin Inspector).",
   "unity": "6000.0",

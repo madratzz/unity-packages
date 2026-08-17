@@ -1,20 +1,21 @@
 {
-  "name": "com.madratzz.scriptableobject.variables",
+  "name": "com.madratzz.utilities.ui",
   "version": "0.0.1",
   "license": "MIT",
-  "displayName": "Madratzz ScriptableObject: Variables",
-  "description": "ScriptableObject variables for int, float, bool, and string with typed get/set interfaces, default value reset, and cumulative change support.",
+  "displayName": "Madratzz Utilities: UI Extensions",
+  "description": "uGUI and TextMeshPro extension methods: alpha/opacity helpers, RectTransform anchoring, ScrollRect snapping, and RectTransform coordinate conversion.",
   "unity": "6000.0",
   "unityRelease": "0f1",
   "documentationUrl": "https://example.com/",
   "changelogUrl": "https://example.com/changelog.html",
   "licensesUrl": "https://example.com/licensing.html",
   "keywords": [
-    "scriptable",
-    "variable",
-    "system",
-    "database",
-    "presistent"
+    "ui",
+    "ugui",
+    "textmeshpro",
+    "recttransform",
+    "scrollrect",
+    "utilities"
   ],
   "author": {
     "name": "Raza Butt",
@@ -22,13 +23,13 @@
     "email": "hello@madratzz.net"
   },
   "dependencies": {
-    "com.madratzz.utilities.attributes": "0.0.1"
+    "com.unity.ugui": "2.0.0"
   },
   "category": "Tooling",
   "repository": {
     "type": "git",
     "url": "https://github.com/madratzz/unity-packages",
-    "directory": "Packages/com.madratzz.scriptableobject.variables"
+    "directory": "Packages/com.madratzz.utilities.ui"
   },
   "bugs": {
     "url": "https://github.com/madratzz/unity-packages/issues"
