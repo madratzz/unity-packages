@@ -1,0 +1,36 @@
+{
+  "name": "com.madratzz.scriptableobject.variables.database",
+  "version": "0.0.1",
+  "displayName": "Madratzz ScriptableObject: Variable Database",
+  "description": "Persistent ScriptableObject variables backed by PlayerPrefs, providing typed DB variables for int, float, bool, string, and epoch time with JSON export support.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "scriptable",
+    "variable",
+    "system",
+    "database",
+    "presistent"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "dependencies": {
+    "com.madratzz.scriptableobject.variables": "0.0.1",
+    "com.madratzz.utilities.extensions": "0.0.1"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.variables.database"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}

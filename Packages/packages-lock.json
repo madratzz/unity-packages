@@ -1,5 +1,36 @@
 {
   "dependencies": {
+    "com.madratzz.scriptableobject.variables": {
+      "version": "file:com.madratzz.scriptableobject.variables",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.utilities.extensions": "0.0.1"
+      }
+    },
+    "com.madratzz.scriptableobject.variables.database": {
+      "version": "file:com.madratzz.scriptableobject.variables.database",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.scriptableobject.variables": "0.0.1",
+        "com.madratzz.utilities.extensions": "0.0.1"
+      }
+    },
+    "com.madratzz.scriptableobject.variables.extensions": {
+      "version": "file:com.madratzz.scriptableobject.variables.extensions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.madratzz.utilities.extensions": {
+      "version": "file:com.madratzz.utilities.extensions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.ugui": "2.0.0"
+      }
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 1,

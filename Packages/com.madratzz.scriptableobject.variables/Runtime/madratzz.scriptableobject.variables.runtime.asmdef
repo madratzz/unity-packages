@@ -1,0 +1,16 @@
+{
+    "name": "madratzz.scriptableobject.variables.runtime",
+    "rootNamespace": "ProjectCore",
+    "references": [
+        "com.madratzz.utilities.extensions.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

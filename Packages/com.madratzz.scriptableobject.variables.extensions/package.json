@@ -1,0 +1,32 @@
+{
+  "name": "com.madratzz.scriptableobject.variables.extensions",
+  "version": "0.0.1",
+  "displayName": "Madratzz ScriptableObject: Variable Extensions",
+  "description": "Extended ScriptableObject variable types including generic arrays, shared Vector2/Vector3 values, and serialized dictionaries (dictionary types require Odin Inspector).",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "scriptable",
+    "variable",
+    "system",
+    "database",
+    "presistent"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.variables.extensions"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}
