@@ -4,6 +4,25 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-17 11:00 PST
+
+Summary of what was done:
+
+- Ported `com.madratzz.scriptableobject.eventsystem.core`, `.eventsystem.extensions`, and `.event.variables` from the archive on new branch `feature/eventsystem-packages` (commit `0d73211`).
+- Fixed 4 defects during the port: `GameEventWithReturn<T>.Raise()` NRE when unsubscribed (now returns `default(T)`); `GameEventReturnsVector3`'s swallow-all try/catch removed as redundant; `GameEventWithIntStringBool` menu name missing "Bool"; null-guards added to all three `*WithEvent` variable types (unassigned `ValueChanged` NRE'd on SetValue/ApplyChange/AddListener).
+- Deps re-pointed: eventsystem.core + .extensions → `utilities.attributes`; event.variables unchanged (eventsystem.core + variables + variables.database). MIT licenses, package-specific newest-first changelogs with 0.0.2 entries.
+- 18 new EditMode tests: GameEvent subscribe/invoke/multi/unsubscribe, typed param passing (int/string/float/bool/3-param), Raise-with-subscriber + Raise-default regression, event-variable raise on SetValue/ApplyChange + null-assignment paths (ValueChanged wired via SerializedObject in tests).
+- Full suite via `unity command run_tests`: **76/76 passing, 0 console errors** (58 prior + 18 new).
+
+Issues found:
+
+- None new; Pipeline connection drops during domain reload continue to self-recover.
+
+Next steps:
+
+- Merge `feature/eventsystem-packages` to `development` when accepted; push `development` to origin (currently 9+ commits ahead).
+- Remaining archived packages: statemachine.core, time.machine, adsmodule, analytics.system, remoteconfig, architecture.soap, utilities.addressables, utilities.buildautomation, alwaysstartfromscenezero.
+
 ### 2026-08-17 10:15 PST
 
 Summary of what was done:
