@@ -1,0 +1,16 @@
+{
+    "name": "madratzz.scriptableobject.eventsystem.core.runtime",
+    "rootNamespace": "ProjectCore",
+    "references": [
+        "com.madratzz.utilities.attributes.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

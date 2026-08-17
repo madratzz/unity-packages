@@ -1,0 +1,23 @@
+# Changelog
+
+All notable changes to this package will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [0.0.2] - 2026-08-17
+
+### Changed
+- Dependency moved from the retired `com.madratzz.utilities.extensions` to `com.madratzz.utilities.attributes`
+
+### Fixed
+- Removed unused `madratzz.scriptableobjectvariables.runtime` reference from runtime asmdef
+- Corrected asmdef `name` from `madratzz.scriptableobjecteventsystem.runtime` to `madratzz.scriptableobject.eventsystem.runtime` (missing dot)
+
+## [0.0.1] - 2026-04-05
+
+### Added
+- Initial release
+- `GameEvent` ScriptableObject — parameterless event asset with `Action`-based handler and `Invoke` method
+- `GameEventListener` MonoBehaviour — subscribes to a `GameEvent` and forwards calls to a `UnityEvent`
+- `GameEventRaiser` MonoBehaviour — invokes a stored `GameEvent` via `InvokeEvent`
+- `GameEventRaiserOnEnable` MonoBehaviour — automatically invokes its `GameEvent` on `OnEnable`

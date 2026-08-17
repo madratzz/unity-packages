@@ -6,6 +6,33 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.madratzz.scriptableobject.event.variables": {
+      "version": "file:com.madratzz.scriptableobject.event.variables",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.scriptableobject.eventsystem.core": "0.0.1",
+        "com.madratzz.scriptableobject.variables": "0.0.1",
+        "com.madratzz.scriptableobject.variables.database": "0.0.1"
+      }
+    },
+    "com.madratzz.scriptableobject.eventsystem.core": {
+      "version": "file:com.madratzz.scriptableobject.eventsystem.core",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.utilities.attributes": "0.0.1"
+      }
+    },
+    "com.madratzz.scriptableobject.eventsystem.extensions": {
+      "version": "file:com.madratzz.scriptableobject.eventsystem.extensions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.scriptableobject.eventsystem.core": "0.0.1",
+        "com.madratzz.utilities.attributes": "0.0.1"
+      }
+    },
     "com.madratzz.scriptableobject.variables": {
       "version": "file:com.madratzz.scriptableobject.variables",
       "depth": 0,
