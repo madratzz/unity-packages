@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfeb96e7dfa604f0eb1f7b7d2749bf67, type: 3}
+  m_Script: {fileID: 11500000, guid: c1100394a96fd48e69c8ab426c6c0221, type: 3}
   m_Name: TimeMachine
-  m_EditorClassIdentifier: 
-  TickEvent: {fileID: 11400000, guid: 6b4deaa06bbcc854d8a34f686815d411, type: 2}
+  m_EditorClassIdentifier: madratzz.scriptableobject.time.machine::ProjectCore.TimeMachine.TimeMachine
+  TickEvent: {fileID: 11400000, guid: 82eebdeba319a4a08a49c342dbe279bc, type: 2}

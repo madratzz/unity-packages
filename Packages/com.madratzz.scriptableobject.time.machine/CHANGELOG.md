@@ -16,7 +16,7 @@ The initial release collects all pre-release changes into a single entry; versio
 
 ### Changed
 - Now depends on `com.madratzz.utilities.coroutines` for the persistent coroutine runner (in addition to `scriptableobject.eventsystem.core`)
-- Archived `Runtime/*.asset` instances are not shipped in the package — Unity regenerates GUIDs on import, so the archived references would dangle; the `Samples~/` copies are the correct vehicle
+- Example assets (`e_TimeMachineTick.asset`, `TimeMachine.asset`) ship under `Runtime/ExampleAssets/` so they're available immediately when the package is imported — they reference types via fileID, not GUID, so they survive fresh imports unchanged
 
 ### Fixed
 - `TickEvent.Invoke()` no longer throws `NullReferenceException` when the tick event asset is unassigned — the tick loop runs and skips the raise
