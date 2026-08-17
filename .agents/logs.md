@@ -4,6 +4,20 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-17 12:30 PST
+
+Summary of what was done:
+
+- Built the buildautomation settings feature on `feature/editor-utilities` (commit `09c367c`): `BuilderConfig` is the single settings SO with new `BuildVersionOverride`/`OutputDirectory`/`ReadFromResourcesFile` fields and a `Current` cached accessor; project-root `buildsettings.json` file source populates the SO when the toggle is on (partial files merge, missing/invalid file falls back to inspector values with a warning).
+- Version precedence: `-buildversion` CLI arg > `BuildVersionOverride` > Player Settings. Output directory configurable (was hardcoded `Builds/`).
+- Chose project-root over `Resources/` for the JSON: a Resources file with keystore secrets would ship inside player builds; the project-root file is not a Unity asset and cannot be bundled. The Inspector still displays populated values (file = source, SO = surface).
+- 7 new EditMode tests (JSON parse/invalid/missing-file fallback/partial-merge/empty-string no-overwrite/toggle-off/Current caching). Suite: **90/90 passing, 0 console errors**.
+- User directed: no `[Obsolete]` on `BuilderConfig` — evolve the existing type instead of adding a parallel `BuildSettings` class.
+
+Next steps:
+
+- Merge `feature/editor-utilities` (now 3 commits) to development when accepted.
+
 ### 2026-08-17 11:45 PST
 
 Summary of what was done:
