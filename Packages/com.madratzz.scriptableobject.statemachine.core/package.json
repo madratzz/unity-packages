@@ -1,0 +1,32 @@
+{
+  "name": "com.madratzz.scriptableobject.statemachine.core",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz ScriptableObject: State Machine",
+  "description": "ScriptableObject-based finite state machine with coroutine-driven state lifecycle methods (Init, Execute, Tick, Exit, Pause, Resume) and declarative Transition assets.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "scriptable",
+    "state",
+    "system",
+    "statemachine"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.statemachine.core"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}
