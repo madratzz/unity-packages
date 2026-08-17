@@ -1,0 +1,26 @@
+{
+    "name": "com.madratzz.scriptableobject.time.machine.tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "madratzz.scriptableobject.eventsystem.core.runtime",
+        "madratzz.scriptableobject.time.machine.runtime",
+        "com.madratzz.utilities.core.runtime",
+        "com.madratzz.utilities.coroutines.runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

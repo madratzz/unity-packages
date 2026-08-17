@@ -33,6 +33,16 @@
         "com.madratzz.utilities.attributes": "0.0.1"
       }
     },
+    "com.madratzz.scriptableobject.time.machine": {
+      "version": "file:com.madratzz.scriptableobject.time.machine",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.scriptableobject.eventsystem.core": "0.0.1",
+        "com.madratzz.utilities.coroutines": "0.0.1",
+        "com.madratzz.utilities.core": "0.0.1"
+      }
+    },
     "com.madratzz.scriptableobject.variables": {
       "version": "file:com.madratzz.scriptableobject.variables",
       "depth": 0,
