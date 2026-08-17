@@ -1,0 +1,26 @@
+{
+  "name": "com.madratzz.utilities.addressables",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz - Addressables Helper",
+  "description": "Safe coroutine-based Addressables asset loading utilities with AssetReference validation, component extraction, and contextual error reporting.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "utilities",
+    "addressables",
+    "helper",
+    "instantiate"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "dependencies": {
+    "com.unity.addressables": "2.9.1"
+  }
+}
