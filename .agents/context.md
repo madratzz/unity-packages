@@ -1,6 +1,6 @@
 # Active Project Context
 
-Last updated: 2026-08-15
+Last updated: 2026-08-17
 
 ## Project Summary
 
@@ -16,8 +16,8 @@ Last updated: 2026-08-15
 
 - `AGENTS.md` — repository-wide operating guide for AI agents and automation harnesses.
 - `IDEA.md` — high-level project intent and intended Verdaccio distribution.
-- `Assets/` — Unity content; no tracked C# scripts or assembly definitions were present at setup time.
-- `Packages/` — Unity Package Manager manifest and lockfile; the manifest includes URP, Input System, AI Navigation, Test Framework, and Unity AI packages.
+- `Assets/` — Unity content; URP settings, sample scene, and Input System actions only (no tracked C# scripts).
+- `Packages/` — Unity Package Manager manifest and lockfile; the manifest includes URP, Input System, AI Navigation, Test Framework, and Unity AI packages. Eight custom embedded packages now live under `Packages/`: `com.madratzz.utilities.attributes`, `com.madratzz.utilities.core`, `com.madratzz.utilities.coroutines`, `com.madratzz.utilities.ui`, `com.madratzz.platform.device`, `com.madratzz.scriptableobject.variables`, `com.madratzz.scriptableobject.variables.database`, and `com.madratzz.scriptableobject.variables.extensions`. Utility packages use `com.madratzz.*` assembly names; scriptableobject packages use `madratzz.scriptableobject.*`; namespaces remain the archived `ProjectCore.*` / `CustomUtilities.*` / `ExtensionMethods` mix (cleanup deferred).
 - `ProjectSettings/` — Unity project configuration.
 - `.agents/` — concise, active context for agents.
 - `.archive/` — dated historical context, organized by logs, memory, learnings, context snapshots, and agent files.
@@ -38,7 +38,7 @@ Last updated: 2026-08-15
 
 ## Current Open Questions
 
-- Which reusable Unity package should establish the first concrete package, assembly, test, and publishing conventions?
+- Which package should establish test and publishing conventions first (no embedded package has tests yet)?
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
 
 ## Archive Summary

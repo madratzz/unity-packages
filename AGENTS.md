@@ -54,7 +54,7 @@ Never store durable information in Unity-generated directories such as `Library/
 
 1. **Discover first.** Inspect existing conventions, dependency versions, and relevant tests before editing.
 2. **Keep scope explicit.** Change only files needed for the task. Do not stage unrelated modifications or untracked files.
-3. **Preserve boundaries.** Prefer clear package, assembly, and interface boundaries over convenience coupling. Do not introduce global state, service locators, or scene searches as hidden dependencies.
+3. **Preserve boundaries.** Prefer clear package, assembly, and interface boundaries over convenience coupling. Do not introduce global state, service locators, or scene searches as hidden dependencies. Cross-system wiring should be explicit — ScriptableObject references (the project's SOAP architecture) or constructor injection — never implicit lookups.
 4. **Keep changes reviewable.** Use focused, logically independent commits when commits are requested. Do not mix documentation, generated files, dependency upgrades, and feature code without a concrete reason.
 5. **Treat generated state as disposable.** Do not commit `Library/`, `Temp/`, `Logs/`, `UserSettings/`, build output, or IDE caches.
 6. **Do not fabricate results.** Report blocked validation, unavailable tools, and failed builds honestly.
@@ -65,7 +65,7 @@ When implementing a package or runtime feature:
 
 - Confirm the intended package location, package name, public API, and assembly boundary before creating source files.
 - Keep runtime code, editor code, tests, and samples separated according to Unity package conventions once a package structure is selected.
-- Prefer explicit dependency injection and narrow interfaces for cross-system behavior.
+- Prefer ScriptableObject Architecture (SOAP) for shared state and cross-system communication: ScriptableObject variables, events, and small single-purpose systems, following the conventions of the `com.madratzz.scriptableobject.*` packages. Dependency injection (VContainer) is an acceptable option for genuine service dependencies, but is not a default requirement — do not mandate a DI container where ScriptableObject wiring is sufficient. In all cases, prefer narrow interfaces for cross-system behavior.
 - Add or update Unity Test Framework Edit Mode tests for deterministic logic; use Play Mode tests only for engine/scene integration that requires them.
 - Avoid per-frame allocations, implicit scene lookups, and implementation details that prevent isolated testing.
 - Validate on the lowest-cost relevant path first, then run Unity or device-specific validation when the requested change requires it.

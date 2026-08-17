@@ -1,10 +1,11 @@
 # Active Memory
 
-Last updated: 2026-08-15
+Last updated: 2026-08-17
 
 ## Stable Project Facts
 
 - Repository name: `unity-packages`.
+- License for all `com.madratzz.*` packages is MIT (Copyright (c) 2026 Raza Butt); each package carries `LICENSE.md` and `"license": "MIT"` in `package.json`.
 - The repository is a Unity project for personal reusable game-development packages.
 - Package distribution is intended to use a Verdaccio server.
 - The project uses Unity `6000.3.21f1` (Unity 6.3) and includes the Unity Test Framework and URP.
@@ -13,6 +14,7 @@ Last updated: 2026-08-15
 
 ## User Preferences
 
+- Prioritize SOAP (ScriptableObject Architecture) for Unity design: ScriptableObject variables for shared state, ScriptableObject events for decoupled communication, small single-purpose systems. DI (VContainer) may be suggested for genuine service dependencies but must never be mandated or used to reject a SOAP design.
 - Maintain practical, inspectable, idempotent agent context with active files kept in `.agents/` and historical material kept in `.archive/`.
 - Keep archive indexes and dated lists in reverse chronological order.
 - Preserve concise active summaries after archival so agents do not need to read every historical file.
