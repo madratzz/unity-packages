@@ -1,0 +1,21 @@
+{
+    "name": "madratzz.scriptableobject.architecture.runtime",
+    "rootNamespace": "ProjectCore.Architecture",
+    "references": [
+        "madratzz.scriptableobject.eventsystem.core.runtime",
+        "madratzz.scriptableobject.eventsystem.extensions.runtime",
+        "madratzz.scriptableobject.statemachine.core.runtime",
+        "madratzz.scriptableobject.time.machine.runtime",
+        "madratzz.scriptableobject.variables.runtime",
+        "madratzz.scriptableobject.variables.database.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
