@@ -4,6 +4,26 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-17 12:10 PST
+
+Summary of what was done:
+
+- Ported `com.madratzz.scriptableobject.time.machine` on branch `feature/time-machine` (commit `136e934`). `StartTicking`/`StopTicking` are now real: the SO starts/stops its own loop via `CoroutineHandler` (utilities.coroutines); survives scene loads. TickInterval (default 1s) + UseRealTime Inspector options added; TickEvent.Invoke null-guarded.
+- Archived `Runtime/*.asset` excluded — Unity regenerates GUIDs on import so the archived TickEvent reference and script GUIDs would dangle; `Samples~/` copies carry the right pattern.
+- Dependencies: scriptableobject.eventsystem.core + utilities.core + utilities.coroutines (transitive: CoroutineHandler extends SingletonPersistent<T> from core).
+- Tests: 3 EditMode (config surface) + 4 PlayMode (StartTicking ticks, StopTicking halts, double-start no-op, unassigned event no-throw).
+- **Suite: 97/97 passing, 0 console errors** (93 EditMode + 4 PlayMode).
+
+Issues found:
+
+- **PlayMode tests hung indefinitely** — root cause: `alwaysstartfromscenezero`'s `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)` loads scene 0 during UTF play-mode setup, destroying the test scene. Fix: disable the `EditorUtilities/Always Start From Scene 0 &p` EditorPref before running PlayMode tests. The pref is per-editor-process and re-armed whenever anyone toggles the menu item, so any subsequent PlayMode run may hang again.
+- EditMode tests pass cleanly; only PlayMode is affected.
+- Pipeline server hung once after PlayMode tests completed (commands timed out). Restarting the editor cleanly restored it.
+
+Next steps:
+
+- Merge `feature/time-machine` to development when accepted (currently ahead by 1 commit). Consider making the always-start-from-scene-0 utility opt-in for tests, or recording the EditorPref-disable requirement in the package README so future agents know.
+
 ### 2026-08-17 12:30 PST
 
 Summary of what was done:

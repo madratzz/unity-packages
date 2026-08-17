@@ -4,6 +4,7 @@ Last updated: 2026-08-17
 
 ## Recent Learnings
 
+- **PlayMode tests hang when `alwaysstartfromscenezero` is enabled.** The package's `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)` calls `EditorSceneManager.LoadScene(0)` before UTF's play-mode setup completes, destroying the test scene. Disable via `EditorPrefs.SetBool("EditorUtilities/Always Start From Scene 0 &p", false)` before running `unity command run_tests --mode PlayMode`. The pref is per-editor-process and re-arms whenever anyone toggles the menu item.
 - Version bookkeeping convention: until a package is first published to Verdaccio, its CHANGELOG keeps a single `## [0.0.1] - Unreleased` entry collecting all pre-release changes; `package.json` stays at `0.0.1`. Do not introduce 0.0.2/0.0.3 headings for unpublished work — they describe releases that don't exist.
 - `unity command eval_file` can return HTTP 500 "main thread timed out" while the evaluated code still runs to completion — treat `console`/`get_console_logs` as the source of truth for eval results, not the eval call's HTTP status.
 - Splitting one embedded package into several is safe when done as: move files (excluding `.meta`), author fresh asmdefs/package.json per concern, re-point consumer package.json + asmdef references in the same pass, delete the old package dir, then `package_resolve` + recompile. Unity regenerates the lockfile and `.meta` GUIDs.
