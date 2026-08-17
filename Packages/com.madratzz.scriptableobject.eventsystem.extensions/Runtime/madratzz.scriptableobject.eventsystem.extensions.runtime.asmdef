@@ -1,0 +1,17 @@
+{
+    "name": "madratzz.scriptableobject.eventsystem.extensions.runtime",
+    "rootNamespace": "",
+    "references": [
+        "madratzz.scriptableobject.eventsystem.core.runtime",
+        "com.madratzz.utilities.attributes.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
