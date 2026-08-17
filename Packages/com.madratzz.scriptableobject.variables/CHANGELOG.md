@@ -4,10 +4,13 @@ All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.0.2] - 2026-08-17
+
+### Changed
+- Dependency moved from the retired `com.madratzz.utilities.extensions` to `com.madratzz.utilities.attributes` (zero-dependency attributes package); the runtime asmdef reference updated accordingly
 
 ### Fixed
-- Corrected asmdef `name` from `madratzz.scriptableobjectvariables.runtime` to `madratzz.scriptableobject.variables.runtime` (missing dot).
+- Corrected asmdef `name` from `madratzz.scriptableobjectvariables.runtime` to `madratzz.scriptableobject.variables.runtime` (missing dot)
 
 ## [0.0.1] - 2026-04-05
 
