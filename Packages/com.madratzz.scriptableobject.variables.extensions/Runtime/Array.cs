@@ -5,7 +5,7 @@ namespace ProjectCore.Variables
 {
     public abstract class Array<T> : ScriptableObject
     {
-        public List<T> list;
+        public List<T> list = new List<T>();
         [SerializeField] protected bool ResetToDefaultOnPlay = true;
 
         private void OnEnable()

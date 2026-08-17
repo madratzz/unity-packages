@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.0.2] - 2026-08-17
 
+### Fixed
+- `Array<T>.list` is now initialized inline — previously null on runtime-created assets, causing `NullReferenceException` on the first `Add`/`Remove` (caught by the new EditMode tests)
+
 ### Changed
 - Runtime asmdef no longer references the retired `com.madratzz.utilities.extensions.runtime` assembly (the package only needs `madratzz.scriptableobject.variables.runtime`)
 
