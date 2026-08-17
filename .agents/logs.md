@@ -4,6 +4,40 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-17 12:30 PST
+
+Summary of what was done:
+
+- Built the buildautomation settings feature on `feature/editor-utilities` (commit `09c367c`): `BuilderConfig` is the single settings SO with new `BuildVersionOverride`/`OutputDirectory`/`ReadFromResourcesFile` fields and a `Current` cached accessor; project-root `buildsettings.json` file source populates the SO when the toggle is on (partial files merge, missing/invalid file falls back to inspector values with a warning).
+- Version precedence: `-buildversion` CLI arg > `BuildVersionOverride` > Player Settings. Output directory configurable (was hardcoded `Builds/`).
+- Chose project-root over `Resources/` for the JSON: a Resources file with keystore secrets would ship inside player builds; the project-root file is not a Unity asset and cannot be bundled. The Inspector still displays populated values (file = source, SO = surface).
+- 7 new EditMode tests (JSON parse/invalid/missing-file fallback/partial-merge/empty-string no-overwrite/toggle-off/Current caching). Suite: **90/90 passing, 0 console errors**.
+- User directed: no `[Obsolete]` on `BuilderConfig` — evolve the existing type instead of adding a parallel `BuildSettings` class.
+
+Next steps:
+
+- Merge `feature/editor-utilities` (now 3 commits) to development when accepted.
+
+### 2026-08-17 11:45 PST
+
+Summary of what was done:
+
+- Ported `com.madratzz.utilities.buildautomation` and `com.madratzz.utilities.unity.alwaysstartfromscenezero` on branch `feature/editor-utilities` (commit `bf901cc`). `utilities.extensions` skipped per user — superseded by the 4-way split.
+- **Security fix (buildautomation):** removed hardcoded keystore credentials (`sgs123`) from `BuilderConfig` defaults and excluded the committed `BuilderConfig.asset` from the port — a secrets-in-source-control violation under the repo's Sensitive Data policy. Defaults are now empty; config loads via `Resources/BuilderConfig` with blank fallback.
+- Fixes: `Builder` static `BuilderConfig` field was never assigned → NRE on any build (now `LoadDefault()`); keystore passwords applied on Android only (were set for iOS too); `CreateAssetMenu` restored on `BuilderConfig`.
+- alwaysstartfromscenezero fixes: editor asmdef now `includePlatforms: ["Editor"]` (was leaking editor code into player builds); dropped brute-force deactivate-all-GameObjects pass (`LoadScene(Single)` replaces the scene); README menu path corrected.
+- Test seams: `Builder.TryGenerateVersionCode` + `Builder.GetEnabledScenePaths` extracted internal with `[InternalsVisibleTo("com.madratzz.utilities.buildautomation.tests")]` — no behavior change. 7 new EditMode tests (version-code parsing incl. null/empty/non-numeric, enabled-scene filtering, LoadDefault no-asset regression).
+- Full suite: **83/83 passing, 0 console errors** (76 prior + 7 new).
+
+Issues found:
+
+- First compile failed: `internal` members aren't visible across asmdef boundaries without `[InternalsVisibleTo]` — fixed with an `AssemblyInfo.cs` in the editor assembly. Recorded as a convention for testing editor-only internal seams.
+
+Next steps:
+
+- Merge `feature/editor-utilities` to development when accepted.
+- Remaining archived packages: statemachine.core, time.machine, adsmodule, analytics.system, remoteconfig (needs Firebase tarballs — ExternalPackages/ not present in this repo), architecture.soap, utilities.addressables.
+
 ### 2026-08-17 11:00 PST
 
 Summary of what was done:

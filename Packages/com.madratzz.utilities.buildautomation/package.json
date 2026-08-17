@@ -1,0 +1,33 @@
+{
+  "name": "com.madratzz.utilities.buildautomation",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz Utilities: Build Automation",
+  "description": "Editor utility for triggering iOS and Android (APK/AAB) builds with keystore credential management via a ScriptableObject configuration asset.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "tools",
+    "scene",
+    "always",
+    "utilities",
+    "editor"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "email": "hello@madratzz.net",
+    "url": "https://portfolio.madratzz.net"
+  },
+  "category": "Editor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.utilities.buildautomation"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}
