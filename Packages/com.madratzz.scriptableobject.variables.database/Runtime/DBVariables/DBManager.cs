@@ -45,19 +45,6 @@ namespace ProjectCore.Variables
             }
         }
 
-        public static string GetJsonData()
-        {
-            Dictionary<string, object> dataDict = new Dictionary<string, object>();
-            foreach (var pair in _dbVariables)
-            {
-                dataDict.Add(pair.Key, pair.Value.GetValue());
-            }
-
-            // string currentState = dataDict.ToJson();
-            string currentState =  null;
-            return currentState;
-        }
-
         public static bool HasKey(IDBVariable dBVariable, string key)
         {
             TrackVariable(dBVariable, key);
