@@ -4,6 +4,33 @@ Last updated: 2026-08-15
 
 ## Current Session
 
+### 2026-08-17 10:15 PST
+
+Summary of what was done:
+
+- Added EditMode test suites to 4 packages: `scriptableobject.variables` (Int/Float/Bool/String contracts, ApplyChange, implicit operators), `variables.database` (Database/DBManager PlayerPrefs round-trips with per-test GUID keys, DBInt persistence), `variables.extensions` (ArrayInt collection semantics, Vector2/3Shared), `utilities.core` (Utilities parsing/epoch/time, DateTimeExtensions, UnitySerializedDictionary callbacks, GetOrAddComponent regression).
+- Test asmdefs follow the Unity 6000 pattern from the unity-development skill: `overrideReferences: true`, name-based `UnityEngine.TestRunner`/`UnityEditor.TestRunner` references, `nunit.framework.dll` precompiled, `UNITY_INCLUDE_TESTS` constraint.
+- Ran via `unity command run_tests --mode EditMode` on the live editor: first run 52/58 — the 6 failures all traced to one real package bug: `Array<T>.list` was never initialized (NRE on first Add/Remove at Array.cs:37). Fixed inline (`= new List<T>()`), reran: **58/58 passed, 0 console errors**.
+- Fixed a test compile error caused by an archived inconsistency: `Vector2Shared` is in `ProjectCore.Variables` while `Vector3Shared` is in the global namespace.
+- Recorded the `Array<T>` fix in the extensions CHANGELOG (0.0.2 entry).
+- Committed as `a8d0d51` + `2088ee3` (meta files).
+
+Decisions made:
+
+- Tests live inside each package under `Tests/EditMode/` — per-package test assemblies, matching Unity package conventions.
+- PlayerPrefs-touching tests use unique GUID keys per test to avoid cross-talk and editor-pref pollution.
+- Skipped tests for: attributes (editor drawers — no testable runtime logic), coroutines (timing-based — needs PlayMode), ui (rendering — needs PlayMode), platform.device (needs device; its logic was eval-probed earlier).
+- The Array<T> NRE was fixed in the package rather than working around it in tests — tests-as-contract caught archived latent bug.
+
+Issues found:
+
+- `Vector2Shared` (ProjectCore.Variables) vs `Vector3Shared` (global namespace) — archived namespace inconsistency; noted in test comment, cleanup deferred.
+
+Next steps:
+
+- PlayMode tests for coroutines/ui when a scene harness exists.
+- Port eventsystem packages from archive; add their tests following this suite's conventions.
+
 ### 2026-08-17 09:45 PST
 
 Summary of what was done:
