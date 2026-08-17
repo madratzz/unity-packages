@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "v_", menuName = "ProjectCore/Variables/Shared Vector3")]
-public class Vector3Shared : ScriptableObject
+namespace ProjectCore.Variables
 {
+    [CreateAssetMenu(fileName = "v_", menuName = "ProjectCore/Variables/Shared Vector3")]
+    public class Vector3Shared : ScriptableObject
+    {
     [SerializeField] protected Vector3 Value;
     [SerializeField] protected Vector3 DefaultValue;
     [SerializeField] protected bool ResetToDefaultOnPlay = true;
@@ -45,5 +47,6 @@ public class Vector3Shared : ScriptableObject
     public static implicit operator Vector3(Vector3Shared vectorValue)
     {
         return vectorValue.Value;
+    }
     }
 }

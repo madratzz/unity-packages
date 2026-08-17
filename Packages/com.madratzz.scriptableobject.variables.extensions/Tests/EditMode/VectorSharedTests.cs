@@ -2,8 +2,6 @@ using NUnit.Framework;
 using ProjectCore.Variables;
 using UnityEngine;
 
-// NOTE: Vector3Shared lives in the global namespace (archived inconsistency);
-// Vector2Shared is properly namespaced under ProjectCore.Variables.
 namespace Madratzz.Tests.VariablesExtensions
 {
     public class VectorSharedTests

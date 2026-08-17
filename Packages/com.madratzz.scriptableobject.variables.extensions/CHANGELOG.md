@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.0.2] - 2026-08-17
 
+### Changed
+- `Vector3Shared` moved into the `ProjectCore.Variables` namespace (was global) — consistent with `Vector2Shared` and the rest of the package; update any `using` directives in consuming code
+
 ### Fixed
 - `Array<T>.list` is now initialized inline — previously null on runtime-created assets, causing `NullReferenceException` on the first `Add`/`Remove` (caught by the new EditMode tests)
 
