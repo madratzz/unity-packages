@@ -1,9 +1,10 @@
 # Active Learnings
 
-Last updated: 2026-08-17
+Last updated: 2026-09-16
 
 ## Recent Learnings
 
+- **`[SerializeField]` naming is inconsistent across the repo, not a settled convention.** The ported `scriptableobject.*` family (time.machine, statemachine.core, variables.extensions, variables.database) uses PascalCase for serialized private/protected fields (`TickInterval`, `BootState`, `Key`, `Value`); the newer `scriptableobject.architecture` package (ported from asteroids-demo on `feature/architecture`) uses camelCase (`androidTargetFrameRate`, `applicationTimeMachine`, `appPaused`). Do not assume or assert a single project-wide rule without checking the specific package/file first.
 - **PlayMode tests hang when `alwaysstartfromscenezero` is enabled.** The package's `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)` calls `EditorSceneManager.LoadScene(0)` before UTF's play-mode setup completes, destroying the test scene. Disable via `EditorPrefs.SetBool("EditorUtilities/Always Start From Scene 0 &p", false)` before running `unity command run_tests --mode PlayMode`. The pref is per-editor-process and re-arms whenever anyone toggles the menu item.
 - Version bookkeeping convention: until a package is first published to Verdaccio, its CHANGELOG keeps a single `## [0.0.1] - Unreleased` entry collecting all pre-release changes; `package.json` stays at `0.0.1`. Do not introduce 0.0.2/0.0.3 headings for unpublished work — they describe releases that don't exist.
 - `unity command eval_file` can return HTTP 500 "main thread timed out" while the evaluated code still runs to completion — treat `console`/`get_console_logs` as the source of truth for eval results, not the eval call's HTTP status.

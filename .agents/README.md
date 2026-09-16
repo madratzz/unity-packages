@@ -1,5 +1,7 @@
 # Agent Context System
 
+Schema version: 1
+
 This folder stores active AI-agent context for this project.
 
 It exists so that any AI agent can quickly understand the project, continue previous work, preserve useful discoveries, and avoid repeating mistakes.
@@ -19,12 +21,12 @@ Start with the root [AGENTS.md](../AGENTS.md), then use this folder for active p
 
 ## Active Files
 
-- `context.md` — holistic current project context.
-- `memory.md` — stable project facts and user preferences.
-- `learnings.md` — discoveries, gotchas, and lessons learned.
-- `logs.md` — recent work logs.
+- `CONTEXT.md` — holistic current project context.
+- `MEMORY.md` — stable project facts and user preferences.
+- `LEARNINGS.md` — discoveries, gotchas, and lessons learned.
+- `LOGS.md` — recent work logs.
 - `INDEX.md` — table of contents for active context files.
-- `agents/default-agent.md` — default agent operating file.
+- `agents/DEFAULT-AGENT.md` — default agent operating file.
 
 ## Archive
 
