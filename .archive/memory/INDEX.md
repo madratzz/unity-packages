@@ -1,5 +1,7 @@
 # Archived Memory Index
 
+Schema version: 1
+
 Last updated: 2026-08-15
 
 | Date | File | Summary |

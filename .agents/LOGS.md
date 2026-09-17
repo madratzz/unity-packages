@@ -1,8 +1,45 @@
 # Active Logs
 
-Last updated: 2026-08-15
+Last updated: 2026-09-16
 
 ## Current Session
+
+### 2026-09-16T22:34:50+05:00 — claude-sonnet-5/agent-context-system-v2
+
+Summary of what was done:
+
+- Executed a user-supplied "AI Agent Context System Setup" spec against the already-established `.agents/`/`.archive/` system (in use since 2026-08-15 with substantial real history). Discovery found the existing system incompatible with the new spec on two points: lowercase active filenames (`context.md`, etc.) vs. required uppercase, and `DD-MM-YY` archive-date convention vs. required `YYYY-MM-DD` — both previously recorded as deliberate decisions in `.agents/MEMORY.md`. Per the spec's own "report before major restructure" rule, asked the user; they chose the uppercase/`YYYY-MM-DD` spec convention.
+- Created branch `feature/agent-context-system-v2` from `development` (not from `feature/architecture`, which carries unrelated, unmerged GameFlow-port work) per the spec's branch-per-task policy.
+- Renamed active files to uppercase via `git mv`: `context.md`→`CONTEXT.md`, `memory.md`→`MEMORY.md`, `learnings.md`→`LEARNINGS.md`, `logs.md`→`LOGS.md`, `agents/default-agent.md`→`agents/DEFAULT-AGENT.md`. Updated all cross-links in `AGENTS.md`, `.agents/README.md`, `.agents/INDEX.md`, and `.agents/agents/DEFAULT-AGENT.md`. Left historical "Files touched" references to the old lowercase names inside existing `LOGS.md` entries as-is (accurate record of what was literally touched at the time).
+- Added `Schema version: 1` to every README/INDEX file under `.agents/` and `.archive/`.
+- Rewrote root `AGENTS.md` to fold in the full policy set from the pasted spec: a "Version Control, Branching, and Pull Requests" section (feature branches from `development`, PR-only merges, no squash-merge, `main` only via PR from `development`), a "Version Naming" section (`X.Y.Z` with `Z` = epoch-minutes), an expanded documentation-policy paragraph (doc update or LOGS.md doc-review note required per task, same commit), multi-agent shared-state editing rules, and expanded sensitive-data placeholders — while preserving all existing project-specific content (SOAP/DI guidance, Unity conventions, repository layout).
+- Added root `CLAUDE.md` as a short pointer to `AGENTS.md` (did not exist before).
+- Updated `.agents/MEMORY.md` naming-conventions and stable-facts sections to record the new uppercase/`YYYY-MM-DD` convention, the branch/PR/version-naming facts, and a note that the prior convention is superseded (no archive files existed yet, so no historical archive filenames needed migration).
+- Updated `.agents/CONTEXT.md` (decisions, architecture list, open questions) and `.agents/LEARNINGS.md` to record an inconsistency found while drafting the Unity-naming guidance: `[SerializeField]` fields are PascalCase in the ported `scriptableobject.*` family but camelCase in the newer `scriptableobject.architecture` package — did not adopt the spec's example naming rule as fact since it doesn't match this repo's actual code.
+
+Files touched:
+
+- `AGENTS.md`, `CLAUDE.md` (new)
+- `.agents/README.md`, `.agents/INDEX.md`, `.agents/CONTEXT.md`, `.agents/MEMORY.md`, `.agents/LEARNINGS.md`, `.agents/LOGS.md`
+- `.agents/agents/DEFAULT-AGENT.md` (renamed from `default-agent.md`)
+- `.agents/context.md`, `.agents/memory.md`, `.agents/learnings.md`, `.agents/logs.md` (renamed to uppercase)
+- `.archive/README.md`, `.archive/INDEX.md`, `.archive/logs/INDEX.md`, `.archive/memory/INDEX.md`, `.archive/learnings/INDEX.md`, `.archive/context/INDEX.md`, `.archive/agents/INDEX.md` (Schema version added)
+
+Decisions made:
+
+- Adopt uppercase active/archive filenames and `YYYY-MM-DD` archive-date convention going forward (user-approved, superseding the 2026-08-15 lowercase/`DD-MM-YY` convention).
+- `AGENTS.md` remains the single canonical policy source; `CLAUDE.md` stays a pointer only, per the spec's own anti-duplication instruction.
+- Did not archive anything in this session — no active file exceeded its size/age threshold, and the only content change to existing entries was additive.
+
+Issues found:
+
+- Existing system was materially more mature (dozens of real log entries, settled conventions) than the spec's "brand-new setup" framing assumed; a blind literal execution would have silently overwritten a documented, deliberate decision — flagged instead of auto-restructuring.
+- `[SerializeField]` naming is not actually consistent project-wide (see Learnings); recorded as an open question rather than asserting the spec's example convention as project fact.
+
+Next steps:
+
+- Commit this work as small logical commits (rename+links, then policy/CLAUDE.md, then this log/context/memory/learnings update — bundled here per the doc-policy "same commit as the change" rule) and open a PR from `feature/agent-context-system-v2` into `development`.
+- Decide the `[SerializeField]` casing convention project-wide and record it in `AGENTS.md`/`MEMORY.md` once decided.
 
 ### 2026-08-17 13:45 PST
 
