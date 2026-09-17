@@ -1,0 +1,41 @@
+{
+  "name": "com.madratzz.scriptableobject.architecture",
+  "version": "0.0.1",
+  "displayName": "Madratzz ScriptableObject: Architecture",
+  "description": "Top-level GameFlow orchestrator: wires FSM transitions to a (Context, Close-Reason) → Intent strategy table. Depends only on the rest of the scriptableobject.* package family — no DI container, no third-party deps.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "architecture",
+    "scriptable",
+    "gameflow",
+    "fsm",
+    "states",
+    "navigation"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "com.madratzz.scriptableobject.eventsystem.extensions": "0.0.1",
+    "com.madratzz.scriptableobject.statemachine.core": "0.0.1",
+    "com.madratzz.scriptableobject.time.machine": "0.0.1",
+    "com.madratzz.scriptableobject.variables": "0.0.1",
+    "com.madratzz.scriptableobject.variables.database": "0.0.1"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.architecture"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}

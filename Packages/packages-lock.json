@@ -6,6 +6,18 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.madratzz.scriptableobject.architecture": {
+      "version": "file:com.madratzz.scriptableobject.architecture",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.madratzz.scriptableobject.eventsystem.extensions": "0.0.1",
+        "com.madratzz.scriptableobject.statemachine.core": "0.0.1",
+        "com.madratzz.scriptableobject.time.machine": "0.0.1",
+        "com.madratzz.scriptableobject.variables": "0.0.1",
+        "com.madratzz.scriptableobject.variables.database": "0.0.1"
+      }
+    },
     "com.madratzz.scriptableobject.event.variables": {
       "version": "file:com.madratzz.scriptableobject.event.variables",
       "depth": 0,
