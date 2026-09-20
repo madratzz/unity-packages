@@ -4,6 +4,39 @@ Last updated: 2026-09-20
 
 ## Current Session
 
+### 2026-09-20T19:32:11+05:00 — claude-sonnet-5/codebase-obsidian-vault
+
+Summary of what was done:
+
+- User asked for "how to" documentation for the whole codebase, in the form of an Obsidian vault. Created `Docs/` at the repository root (outside `Assets/`, alongside `.agents/`/`.archive/`) as that vault: `Home.md` (entry point + package catalog), `Architecture Overview.md` (SOAP explanation + Mermaid dependency graph across all packages), `Getting Started.md`, `Contributing.md` (summary — `AGENTS.md` stays canonical), `Glossary.md`, and one note per package under `Docs/Packages/` (17 notes: 16 merged packages + the unmerged `scriptableobject.architecture` GameFlow package, marked as unmerged/WIP with its known issues from the 2026-09-20 code review carried over).
+- Design choice: notes link out to the real source (package `README.md`/`CHANGELOG.md` files, `AGENTS.md`) via relative links/wikilinks rather than duplicating their content, to avoid drift — same anti-duplication principle `AGENTS.md`/`CLAUDE.md` already use. `Home.md` instructs opening the *repository root* as the vault, not just `Docs/`, so those cross-links resolve.
+- Verified every `[[wikilink]]` in the vault resolves to an existing note title and every `../../Packages/...` README link resolves to an existing file (scripted check, no broken links).
+- While writing `Docs/Getting Started.md`'s "Running tests" section, found `.agents/CONTEXT.md`'s open question "no embedded package has tests yet" is stale — 11 of 16 packages actually have a `Tests/` folder. Corrected both the vault note and the `.agents/CONTEXT.md` open question.
+- Updated `.agents/CONTEXT.md`'s package list, which still said "eight custom embedded packages" — 16 are now merged (plus the unmerged 17th on `feature/architecture`); added a `Docs/` row to the architecture/structure list.
+- Added a `Docs/` row to `AGENTS.md`'s Repository Layout table.
+- Added a "Documentation" pointer section to the root `README.md` (was previously just a one-line title) linking to `Docs/Home.md`.
+- Created branch `feature/codebase-obsidian-vault` from `development` (not stacked on the still-unmerged `feature/sync-context-editor-bump`, since this is an unrelated task) per the branch-per-task policy.
+
+Files touched:
+
+- `Docs/Home.md`, `Docs/Architecture Overview.md`, `Docs/Getting Started.md`, `Docs/Contributing.md`, `Docs/Glossary.md` (all new)
+- `Docs/Packages/*.md` — 17 new notes (one per package, including the unmerged `scriptableobject.architecture`)
+- `README.md`, `AGENTS.md`, `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- The vault lives at `Docs/` and is scoped to the whole repository root, not a subfolder vault — this lets it link into `Packages/*/README.md` and `AGENTS.md` without copying them.
+- Documented the unmerged `scriptableobject.architecture` package in the vault (clearly marked unmerged) rather than omitting it, since "the whole codebase" reasonably includes in-progress branches a reader would otherwise not know about.
+
+Issues found:
+
+- `.agents/CONTEXT.md`'s package list and "no tests yet" open question were stale relative to the actual repository state (16 packages merged, 11 with tests) — likely because `CONTEXT.md` wasn't updated as packages were ported across multiple past sessions. Corrected in this pass; worth checking for further drift the next time `.agents/CONTEXT.md` is touched.
+
+Next steps:
+
+- Push `feature/codebase-obsidian-vault` and open its PR once GitHub auth is available in this environment (`git push` failed here with no GitHub credentials configured — the same blocker hit on `feature/sync-context-editor-bump` earlier today).
+- Consider whether `scriptableobject.architecture`'s known issues (duplicate FSM references, implicit `Resources.Load` fallback) should be fixed before that branch's PR, since the vault now documents them as known, unfixed issues.
+
 ### 2026-09-20T19:14:52+05:00 — claude-sonnet-5/sync-context-editor-bump
 
 Summary of what was done:

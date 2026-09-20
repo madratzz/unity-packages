@@ -48,6 +48,7 @@ Do not infer undocumented product requirements, package APIs, registry policies,
 | `ProjectSettings/` | Unity configuration | Preserve Unity serialization and only change settings required by the task. |
 | `.agents/` | Active, concise project context | Read at startup and update after meaningful, authorized work. |
 | `.archive/` | Dated historical context | Archive rather than delete useful history. |
+| `Docs/` | Human-facing wiki (Obsidian vault, entry point `Docs/Home.md`) | Update the relevant note in the same commit as a change that affects package APIs, dependencies, or setup steps; keep policy content pointing to this file rather than duplicated there. |
 | `AGENTS.md` | Repository-wide operating guide | Keep this guide concise, accurate, harness-neutral, and the single canonical source of policy. |
 | `CLAUDE.md` | Tool-specific entry pointer | Keep as a short pointer to this file; never duplicate policy into it. |
 | `IDEA.md` | High-level project intent | Update only when the product/package direction changes. |
