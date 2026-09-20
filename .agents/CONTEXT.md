@@ -1,6 +1,6 @@
 # Active Project Context
 
-Last updated: 2026-09-16
+Last updated: 2026-09-20
 
 ## Project Summary
 
@@ -18,10 +18,11 @@ Last updated: 2026-09-16
 - `CLAUDE.md` — short pointer to `AGENTS.md` for Claude Code; never duplicates policy.
 - `IDEA.md` — high-level project intent and intended Verdaccio distribution.
 - `Assets/` — Unity content; URP settings, sample scene, and Input System actions only (no tracked C# scripts).
-- `Packages/` — Unity Package Manager manifest and lockfile; the manifest includes URP, Input System, AI Navigation, Test Framework, and Unity AI packages. Eight custom embedded packages now live under `Packages/`: `com.madratzz.utilities.attributes`, `com.madratzz.utilities.core`, `com.madratzz.utilities.coroutines`, `com.madratzz.utilities.ui`, `com.madratzz.platform.device`, `com.madratzz.scriptableobject.variables`, `com.madratzz.scriptableobject.variables.database`, and `com.madratzz.scriptableobject.variables.extensions`. Utility packages use `com.madratzz.*` assembly names; scriptableobject packages use `madratzz.scriptableobject.*`; namespaces remain the archived `ProjectCore.*` / `CustomUtilities.*` / `ExtensionMethods` mix (cleanup deferred).
+- `Packages/` — Unity Package Manager manifest and lockfile; the manifest includes URP, Input System, AI Navigation, Test Framework, and Unity AI packages. Sixteen custom embedded packages now live under `Packages/` (up from the initial eight): the `com.madratzz.utilities.*` family (`attributes`, `core`, `coroutines`, `ui`, `addressables`, `buildautomation`, `unity.alwaysstartfromscenezero`), `com.madratzz.platform.device`, and the `com.madratzz.scriptableobject.*` (SOAP) family (`variables`, `variables.database`, `variables.extensions`, `eventsystem.core`, `eventsystem.extensions`, `event.variables`, `statemachine.core`, `time.machine`). A seventeenth, `scriptableobject.architecture` (the GameFlow orchestrator), exists only on the unmerged `feature/architecture` branch. Utility packages use `com.madratzz.*` assembly names; scriptableobject packages use `madratzz.scriptableobject.*`; namespaces remain the archived `ProjectCore.*` / `CustomUtilities.*` / `ExtensionMethods` mix (cleanup deferred). Full catalog and dependency graph: `Docs/Home.md` / `Docs/Architecture Overview.md`.
 - `ProjectSettings/` — Unity project configuration.
 - `.agents/` — concise, active context for agents.
 - `.archive/` — dated historical context, organized by logs, memory, learnings, context snapshots, and agent files.
+- `Docs/` — human-facing wiki (Obsidian vault; entry point `Docs/Home.md`) covering getting-started, architecture, contributing, and a per-package catalog. Links out to package READMEs and `AGENTS.md` rather than duplicating them.
 
 ## Important Decisions
 
@@ -40,7 +41,7 @@ Last updated: 2026-09-16
 
 ## Current Open Questions
 
-- Which package should establish test and publishing conventions first (no embedded package has tests yet)?
+- What Verdaccio publishing conventions should the 5 packages still without EditMode tests (`utilities.attributes`, `utilities.core`, `utilities.coroutines`, `utilities.ui`, `platform.device`) adopt before first publish? (11 of 16 packages already have a `Tests/` folder — the "no package has tests yet" framing of this question is superseded.)
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
 - `[SerializeField]` field-naming convention is inconsistent across packages: PascalCase in the ported `scriptableobject.*` family vs. camelCase in the newer `scriptableobject.architecture` package. Not yet resolved — see `AGENTS.md` "Unity and Package Work".
 
