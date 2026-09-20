@@ -4,6 +4,77 @@ Last updated: 2026-09-20
 
 ## Current Session
 
+### 2026-09-20T23:57:53+05:00 — claude-sonnet-5/required-reference-validation
+
+Summary of what was done:
+
+- User asked "what about tests? and license and readme?" as a follow-up on the `[RequireReference]`/`RequiredReferenceValidator` work, and pointed at `github.com/madratzz/unity-starter-template` (a separate, more elaborate personal template repo — VContainer/MessagePipe/Ports-and-Adapters) for reference conventions. Fetched its file tree, root `README.md`, and `Assets/Tests/EditMode/Application/WiringGuardTests.cs` (a wiring-completeness test in the same spirit as `RequiredReferenceValidator`) via `gh api` to see what conventions to borrow — root `LICENSE`, a `README.md` quick-start section, and its `internal` + `InternalsVisibleTo` seam pattern for testing Editor-only code, which this repo's own `utilities.buildautomation` package already uses (confirmed by grep before copying it, rather than assuming the reference repo's pattern applied here unmodified).
+- **Tests added** (repo had none for this PR's changes):
+  - `com.madratzz.utilities.attributes` had **no test infrastructure at all** — created `Tests/EditMode/` + asmdef + `RequiredReferenceValidatorTests.cs` (4 tests: unassigned-is-reported, assigned-is-not-reported, unmarked-field-is-not-reported, nested-GameObject-hierarchy-path-is-correct). Made `RequiredReferenceValidator.ValidateGameObject` `internal` (was `private`) and added `Editor/AssemblyInfo.cs` with `[InternalsVisibleTo("com.madratzz.utilities.attributes.tests")]` so the tests can call it directly against constructed GameObjects instead of needing a real scene/prefab on disk — this exact pattern (internal seam + AssemblyInfo) already exists in `com.madratzz.utilities.buildautomation`, so it's consistent with this repo, not borrowed wholesale from the reference.
+  - `com.madratzz.scriptableobject.eventsystem.core` already had `Tests/EditMode/GameEventTests.cs` (for `GameEvent` itself) but nothing for the three MonoBehaviours I null-guarded last session — added `GameEventMonoTests.cs`: regression tests for the null-guard fix (`LogAssert.Expect` + `Assert.DoesNotThrow`) on all three, plus one sanity test that a correctly-assigned `GameEventRaiser` still raises its event.
+- **License**: added a root `LICENSE` (MIT, same text as every per-package `LICENSE.md`) — the repo had per-package licenses but nothing at the root, which matters now that `IDEA.md` describes this repo as also being a clonable template people use directly, not just a bag of independently-licensed packages.
+- **README**: added a "Quick start" section (prerequisites, clone command, pointer to `Docs/Getting Started.md`), a "Running tests" section, and a "License" section linking the new root `LICENSE`. Did not copy the reference repo's "Verified status" section (test pass counts, 0 warnings) — that would mean either fabricating numbers or actually running the Unity test suite, and no Unity batch invocation is documented for this repo (flagged again as a gap, same as in the earlier FSM-wiring-fix session).
+- **Found and fixed adjacent staleness while touching these files**: `Docs/Getting Started.md` still said Unity `6000.3.21f1` (actual: `6000.3.24f1`) and listed a stale 5-package "no tests" set that included `utilities.attributes` (now has tests) and `utilities.core` (turned out to already have tests — the "5 packages" figure was already wrong before this session, not just made wrong by it) while omitting `utilities.unity.alwaysstartfromscenezero` (which has none). Recomputed the actual count (12 of 16 packages have `Tests/`) and corrected both `Docs/Getting Started.md` and `.agents/CONTEXT.md`'s matching open question. Also removed a stray empty `Packages/com.madratzz.scriptableobject.architecture/` directory left over from an earlier `git rm` (untracked, harmless, but confusing `ls`).
+- **Explicitly did not** do a full sweep of the `Docs/` vault's other stale "unmerged"/GameFlow-as-17th-package references (`Home.md`, `Architecture Overview.md`, `SOAP - Architecture (GameFlow).md`, several `SOAP - *.md` notes) — that's the larger vault-rework follow-up flagged in two earlier sessions' logs, out of scope for a "tests/license/readme" ask. Only touched `Docs/Getting Started.md` since it's literally the tests/prerequisites guide.
+
+Files touched:
+
+- `LICENSE` (new)
+- `README.md`
+- `Packages/com.madratzz.utilities.attributes/Tests/EditMode/{com.madratzz.utilities.attributes.tests.asmdef,RequiredReferenceValidatorTests.cs}` (new), `Editor/AssemblyInfo.cs` (new), `Editor/RequiredReferenceValidator.cs` (private → internal seam), `CHANGELOG.md`
+- `Packages/com.madratzz.scriptableobject.eventsystem.core/Tests/EditMode/GameEventMonoTests.cs` (new), `CHANGELOG.md`
+- `Docs/Getting Started.md`
+- `AGENTS.md` (added a `LICENSE` row to Repository Layout)
+- `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- Referenced the `unity-starter-template` repo for *conventions* (root LICENSE, README quick-start shape, internal-seam testing) and not for its architecture (VContainer/MessagePipe/Ports-and-Adapters) — this repo's SOAP/no-DI-container direction is a settled, separate decision from earlier sessions, not something this ask reopened.
+- Did not fabricate a "tests passing" status line in the README — reported only what's structurally true (which packages have a `Tests/` folder) rather than invent pass counts without having run them.
+
+Issues found:
+
+- None new — the stale test-count figure and empty `architecture/` directory were pre-existing, found while working in adjacent files, not introduced here.
+
+Next steps:
+
+- This is still on `feature/required-reference-validation` (PR #13, open, not yet merged) — these are additional commits on that same branch/PR rather than a new one, since the tests are regression coverage for that PR's own changes.
+- The `Docs/` vault "unmerged"/17th-package sweep remains outstanding (see above) — worth its own task.
+- No documented way to actually run the Unity test suite or get a real pass/fail count in this environment — if that's ever set up, the README's "Running tests" section could gain the kind of verified-status line the reference repo has.
+
+### 2026-09-20T23:43:46+05:00 — claude-sonnet-5/required-reference-validation
+
+Summary of what was done:
+
+- User asked how to improve `GameEvent`s given "reference can be missed" issues, and whether an EventBus would help. Answered with a design comparison (EventBus solves it structurally but trades away this repo's explicit-wiring principle; recommended two lower-risk fixes instead) and, on confirmation, implemented both:
+  1. **Null-guarded the actual crash sites.** `GameEventListener.OnEnable`/`OnDisable`, `GameEventRaiser.InvokeEvent`, and `GameEventRaiserOnEnable.OnEnable` previously threw `NullReferenceException` on an unassigned `GameEvent` field with no guard at all — now they log a `Debug.LogError` and no-op.
+  2. **Added a project-wide required-reference convention**: `RequireReferenceAttribute` (new, in `com.madratzz.utilities.attributes` — zero-dependency, so this adds no new package coupling) marks a `[SerializeField]` as required; `RequiredReferenceValidator` (Editor) reflects over every scene and prefab under `Assets/` for `[RequireReference]` fields left unassigned, via a menu item (**Tools → Validate Required References**) or a CI entry point (`-batchmode -executeMethod CustomEditorUtilities.RequiredReferenceValidator.ValidateProjectCI`, non-zero exit on any miss).
+- Applied `[RequireReference]` to the fields identified as genuinely required (crash/hard-fail without a value): the three `GameEvent` fields above, `ApplicationBase.ApplicationStateMachine`, and `ApplicationFlowController.ApplicationBase`. Deliberately did *not* mark `ApplicationBase`'s other fields (`ApplicationTimeMachine`, `AppPaused`, `AppResumed`, `AppPausedTime`) or `ApplicationFlowController`'s transition/event fields — the code already null-guards those gracefully, so marking them would just be validator noise for legitimately-optional wiring.
+- Added a reference from the GameFlow assembly (`Assets/Runtime/madratzz.scriptableobject.architecture.runtime.asmdef`) to `com.madratzz.utilities.attributes.runtime` so `ApplicationBase`/`ApplicationFlowController` can use the attribute; `eventsystem.core` already depended on `utilities.attributes`, no asmdef change needed there.
+- Explicitly did **not** implement an EventBus or attempt the "wired to a different-but-valid asset" case — flagged in `Docs/Packages/SOAP - Event System.md` as a known, currently-unsolved failure mode (nothing can distinguish "two assets deliberately different" from "two assets that should've been the same one" without a stronger identity/registry mechanism).
+
+Files touched:
+
+- `Packages/com.madratzz.utilities.attributes/Runtime/Attributes/RequireReferenceAttribute.cs` (new), `Editor/RequiredReferenceValidator.cs` (new), `README.md`, `CHANGELOG.md`
+- `Packages/com.madratzz.scriptableobject.eventsystem.core/Runtime/Mono/{GameEventListener,GameEventRaiser,GameEventRaiserOnEnable}.cs`, `README.md`, `CHANGELOG.md`
+- `Assets/Runtime/Application/{ApplicationBase,ApplicationFlowController}.cs`, `madratzz.scriptableobject.architecture.runtime.asmdef`, `README.md`
+- `Docs/Packages/{Utilities - Attributes,SOAP - Event System}.md` (also fixed a stale "unmerged" note on the GameFlow cross-link while in that file — GameFlow merged into `development` earlier this session)
+- `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- Implemented the validator as an attribute (`[RequireReference]`) scanned via reflection, not a central type→field-name registry — the registry approach would force the validator package to reference every package with wiring components (`eventsystem.core`, the GameFlow assembly, …), which is exactly the kind of coupling this fix is supposed to reduce. The attribute approach keeps `utilities.attributes` at zero package dependencies.
+- Only marked fields that currently hard-fail (crash or, for `ApplicationFlowController`, disable the whole component) when unassigned — not every `[SerializeField]` reference in these files. A validator that flags legitimately-optional fields trains people to ignore its output.
+
+Issues found:
+
+- None new.
+
+Next steps:
+
+- Branch is `feature/required-reference-validation`, started fresh from `development` (both `feature/architecture`'s PRs — #6 and #12 — are merged, so `development` now has the full GameFlow package and the `Docs/` vault). Push and open a PR into `development`.
+- Consider running `RequiredReferenceValidator` on `Assets/Prefabs/ApplicationBase.prefab`/`ApplicationFlowController.prefab` once real assets exist to wire in — right now every field on both is still unassigned (`{fileID: 0}`), so the validator would report both `[RequireReference]` fields as missing, which is accurate but not yet actionable until those assets exist.
+
 ### 2026-09-20T23:24:14+05:00 — claude-sonnet-5/merge-development-into-architecture
 
 Summary of what was done:

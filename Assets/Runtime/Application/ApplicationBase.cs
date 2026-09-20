@@ -1,4 +1,5 @@
 using System;
+using CustomUtilities.Attributes;
 using UnityEngine;
 using ProjectCore.Events;
 using ProjectCore.StateMachine;
@@ -32,6 +33,7 @@ namespace ProjectCore.Architecture
         [SerializeField] private DBInt AppPausedTime;
 
         [Header("State Machine")]
+        [RequireReference]
         [SerializeField] private FiniteStateMachine ApplicationStateMachine;
 
         /// <summary>

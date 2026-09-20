@@ -4,7 +4,7 @@
 
 ## 1. Prerequisites
 
-- Unity **6000.3.21f1** (Unity 6.3) — the version recorded in `ProjectSettings/ProjectVersion.txt` on `development`. Use Unity Hub to install this exact version; a newer patch will trigger an upgrade prompt.
+- Unity **6000.3.24f1** (Unity 6.3) — the version recorded in `ProjectSettings/ProjectVersion.txt` on `development`. Use Unity Hub to install this exact version; a newer patch will trigger an upgrade prompt.
 - Git.
 - [Odin Inspector](https://odininspector.com/) only if you need `RuntimeDictionary` types from [[SOAP - Variables Extensions]] — everything else builds without it.
 
@@ -24,9 +24,11 @@ The intended distribution path is a private **Verdaccio** registry (see `IDEA.md
 
 ## 4. Running tests
 
-Most packages ship EditMode tests (11 of 16 have a `Tests/` folder; the exceptions are `utilities.attributes`, `utilities.core`, `utilities.coroutines`, `utilities.ui`, and `platform.device`). Run them from Unity: **Window → General → Test Runner → EditMode → Run All**.
+Most packages ship EditMode tests (12 of 16 have a `Tests/` folder; the exceptions are `platform.device`, `utilities.coroutines`, `utilities.ui`, and `utilities.unity.alwaysstartfromscenezero`). Run them from Unity: **Window → General → Test Runner → EditMode → Run All**.
 
-`scriptableobject.architecture`'s tests (`ApplicationFlowLogicTests.cs`) only exist on the unmerged `feature/architecture` branch.
+The `Assets/` GameFlow layer has its own tests at `Assets/Tests/EditMode/ApplicationFlowLogicTests.cs`.
+
+`com.madratzz.utilities.attributes` also ships `RequiredReferenceValidator`, an Editor tool (not a Test Runner test) that scans every scene and prefab under `Assets/` for unassigned `[RequireReference]` fields — **Tools → Validate Required References**, or `-batchmode -executeMethod CustomEditorUtilities.RequiredReferenceValidator.ValidateProjectCI` for a CI gate. See [[Utilities - Attributes]].
 
 ## 5. Trying a sample
 

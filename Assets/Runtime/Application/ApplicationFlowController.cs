@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CustomUtilities.Attributes;
 using UnityEngine;
 using ProjectCore.Events;
 using ProjectCore.StateMachine;
@@ -19,6 +20,7 @@ namespace ProjectCore.Architecture
     {
         [Header("Application")]
         [Tooltip("The ApplicationBase that owns the FSM this controller fires transitions on. There is no separate state-machine field here on purpose — both components must always target the same FSM instance.")]
+        [RequireReference]
         [SerializeField] private ApplicationBase ApplicationBase;
 
         [Header("Transitions (The Destinations)")]

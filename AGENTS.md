@@ -52,6 +52,7 @@ Do not infer undocumented product requirements, package APIs, registry policies,
 | `AGENTS.md` | Repository-wide operating guide | Keep this guide concise, accurate, harness-neutral, and the single canonical source of policy. |
 | `CLAUDE.md` | Tool-specific entry pointer | Keep as a short pointer to this file; never duplicate policy into it. |
 | `IDEA.md` | High-level project intent | Update only when the product/package direction changes. |
+| `LICENSE` | Root MIT license for the repository/template as a whole | Each package under `Packages/` also carries its own `LICENSE.md` (same terms) so it can be distributed independently; keep both in sync if the license ever changes. |
 
 Never store durable information in Unity-generated directories such as `Library/`, `Temp/`, `Logs/`, or `UserSettings/`.
 
