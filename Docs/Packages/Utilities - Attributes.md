@@ -26,6 +26,7 @@ None — zero-dependency leaf package.
 | `RequireReferenceAttribute` | Marks a `[SerializeField]` reference as required, for `RequiredReferenceValidator` to check. |
 | `InlineEditorDrawer` / `ButtonEditor` | Editor drawers backing the two attributes above. |
 | `RequiredReferenceValidator` | Scans every scene and prefab for unassigned `[RequireReference]` fields. **Tools → Validate Required References**, or `-executeMethod CustomEditorUtilities.RequiredReferenceValidator.ValidateProjectCI` for CI (non-zero exit on any miss). |
+| `SearchableAssetDrawer` / `SearchableAssetDropdown` / `SearchableAssetFinder` | **No attribute needed.** Registered against `ScriptableObject` itself (`useForChildren: true`), so every `ScriptableObject`-typed `[SerializeField]` field, project-wide, automatically renders as a button opening a searchable `AdvancedDropdown` (the "Add Component" widget) instead of the default object picker. No third-party dependency — evaluated as the free alternative to Odin Inspector's `[ValueDropdown]`. |
 
 ## Quick usage
 

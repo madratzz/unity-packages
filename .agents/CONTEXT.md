@@ -1,6 +1,6 @@
 # Active Project Context
 
-Last updated: 2026-09-20
+Last updated: 2026-09-21
 
 ## Project Summary
 
@@ -34,6 +34,7 @@ Last updated: 2026-09-20
 - Version-control policy (feature branches from `development`, PR-only merges, no squash-merge, `main` only via PR from `development`) and version naming (`X.Y.Z` with epoch-minute `Z`) are documented once in `AGENTS.md`; do not duplicate them here.
 - (2026-09-20, user decision) This repo is both a package library and a clonable template: reusable SOAP/utility packages stay under `Packages/` as before; the GameFlow application layer lives in `Assets/` as template/integration glue, not as a package. The formerly-hollow `Packages/com.madratzz.scriptableobject.architecture/` (package.json with no code, after the code moved to `Assets/`) was deleted rather than kept as a misleading stub.
 - (2026-09-20) `com.madratzz.utilities.attributes` gained `[RequireReference]` + `RequiredReferenceValidator` — a project-wide convention for marking `[SerializeField]` references as required and catching unassigned ones across every scene/prefab (**Tools → Validate Required References**, or `-executeMethod ...ValidateProjectCI` for CI). Applied so far to `GameEventListener`/`GameEventRaiser`/`GameEventRaiserOnEnable`'s `GameEvent` field and `ApplicationBase`/`ApplicationFlowController`'s FSM-chain fields. New required-but-unguarded `[SerializeField]` fields elsewhere should adopt it rather than reinventing null-checking.
+- (2026-09-21) `com.madratzz.utilities.attributes` also gained a searchable-dropdown Inspector for **every** `ScriptableObject`-typed `[SerializeField]` field, project-wide — `SearchableAssetDrawer` is registered against `ScriptableObject` itself (`[CustomPropertyDrawer(typeof(ScriptableObject), true)]`), not a marker attribute, deliberately so it's automatic and never needs adding per field/class. Built as the free (no Odin Inspector) alternative evaluated in the prior GameEvent-improvement discussion. First implementation used a `[SearchableAsset]` attribute per field; user asked "can't we make it class level... auto"; replaced with the type-based global registration on the same turn before anything was committed.
 
 ## Active Constraints
 

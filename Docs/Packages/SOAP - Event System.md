@@ -34,7 +34,9 @@ ScriptableObject-based event bus: parameterless `GameEvent` assets with listener
 
 ## ⚠️ The failure mode that actually bites: mismatched, not missing
 
-All three components' `GameEvent` field is `[RequireReference]`-marked ([[Utilities - Attributes]]'s `RequiredReferenceValidator` catches an *unassigned* one across every scene/prefab), and an unassigned field now logs an error instead of throwing. Neither catches the sharper bug: a raiser and listener each pointing at a *different*, both-valid `GameEvent` asset. That's silent — no error, nothing fires — since there's no way to know two distinct assets weren't meant to be distinct. When a `GameEvent`-driven feature "does nothing," check that every raiser and listener for it reference the exact same asset before anything else.
+All three components' `GameEvent` field is `[RequireReference]`-marked ([[Utilities - Attributes]]'s `RequiredReferenceValidator` catches an *unassigned* one across every scene/prefab), and an unassigned field now logs an error instead of throwing. If `com.madratzz.utilities.attributes` is in the project, the field also automatically gets a searchable-dropdown Inspector — no attribute needed, `GameEvent` being a `ScriptableObject` is enough — listing every `GameEvent` asset in the project by name instead of the default object picker, making it easier to find and pick the *right* one rather than dragging in whatever's nearby in the Project window.
+
+Neither catches the sharper bug: a raiser and listener each pointing at a *different*, both-valid `GameEvent` asset. That's still silent — no error, nothing fires — since there's no way to know two distinct assets weren't meant to be distinct; the searchable dropdown reduces how often that happens by accident, it doesn't prevent it. When a `GameEvent`-driven feature "does nothing," check that every raiser and listener for it reference the exact same asset before anything else.
 
 ---
 ← [[Home]]
