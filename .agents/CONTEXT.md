@@ -1,6 +1,6 @@
 # Active Project Context
 
-Last updated: 2026-09-16
+Last updated: 2026-09-20
 
 ## Project Summary
 
@@ -33,7 +33,7 @@ Last updated: 2026-09-16
 
 ## Active Constraints
 
-- The project currently uses Unity `6000.3.21f1` (Unity 6.3) and URP `17.3.0`.
+- The project currently uses Unity `6000.3.24f1` (Unity 6.3) and URP `17.3.0`.
 - Keep AI-agent operational files outside Unity runtime folders and avoid generated folders such as `Library/`, `Temp/`, `Logs/`, and `UserSettings/`.
 - Maintain context changes idempotently: update existing sections carefully, archive before major restructuring, and never overwrite archive files without explicit user direction.
 - Keep active files concise and retain holistic archive summaries and pointers after archival.
@@ -43,6 +43,7 @@ Last updated: 2026-09-16
 - Which package should establish test and publishing conventions first (no embedded package has tests yet)?
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
 - `[SerializeField]` field-naming convention is inconsistent across packages: PascalCase in the ported `scriptableobject.*` family vs. camelCase in the newer `scriptableobject.architecture` package. Not yet resolved — see `AGENTS.md` "Unity and Package Work".
+- The 2026-09-20 editor bump to `6000.3.24f1` added `com.unity.sdk.linux-x86_64` and `com.unity.toolchain.linux-x86_64-linux` to `Packages/manifest.json` as project-wide dependencies. Assumption: these were pulled in by Unity Hub/Editor package resolution during the version bump rather than a deliberate Linux-build-target decision — not confirmed. Open question: should these be scoped/conditional rather than a default dependency for every contributor?
 
 ## Archive Summary
 
