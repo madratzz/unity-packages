@@ -4,6 +4,37 @@ Last updated: 2026-09-20
 
 ## Current Session
 
+### 2026-09-20T23:24:14+05:00 — claude-sonnet-5/merge-development-into-architecture
+
+Summary of what was done:
+
+- Prepared PR #6 (`feature/architecture` → `development`) to be mergeable. It had gone `CONFLICTING`/`DIRTY` because `feature/architecture` forked before `development`'s 2026-09-16 `.agents/` uppercase rename (PR #7) and had kept using the lowercase files (`.agents/context.md`, `.agents/logs.md`) all session.
+- **Found a real data-loss risk, not just a text conflict**: a first dry-run merge silently dropped `.agents/context.md`'s content entirely — git did not detect it as a rename of `.agents/CONTEXT.md` (too much content drift by now) and instead just kept `development`'s `CONTEXT.md` as-is with no conflict marker to catch it. A second attempt (after PR #11 merged, adding more history) did flag it as an explicit `modify/delete` conflict instead — resolved by hand-merging every unique fact from `.agents/context.md` (the `Assets/`-as-template-layer decision, the updated 16-package list, the `[SerializeField]` casing resolution, the `Assets/GameEvents` open question, the Unity-version and test-coverage corrections) into `.agents/CONTEXT.md`, then deleting the lowercase file.
+- Resolved the `.agents/LOGS.md` conflict the same way as the earlier PR #10 conflict: both sides' newest-first entries kept, in their already-correct chronological order (this branch's newer entries first, `development`'s next, converging into the shared older history both branches already agree on).
+- Resolved a `README.md` conflict: kept this branch's updated intro line plus `development`'s "Documentation" pointer section — both additive, no actual disagreement.
+- `AGENTS.md` auto-merged cleanly (git correctly wove this branch's `Assets/`-vs-`Packages/` edits into `development`'s fuller v2 policy structure) — but its "C# field-naming convention is not yet settled" note was stale (referenced `scriptableobject.architecture`'s old camelCase example field, already renamed to PascalCase in PR #11). Updated it to state the convention is resolved.
+- `Packages/packages-lock.json` auto-merged cleanly with no conflict.
+- Did this on a dedicated branch (`chore/merge-development-into-architecture`, off `feature/architecture`) rather than merging directly on `feature/architecture`, so the resolution itself goes through review like any other change.
+
+Files touched:
+
+- `.agents/CONTEXT.md` (merged), `.agents/LOGS.md` (merged), `.agents/context.md` (deleted, content preserved in `CONTEXT.md`)
+- `README.md`, `AGENTS.md`
+
+Decisions made:
+
+- Treat a "successful" auto-merge or silently-resolved rename as something to verify, not trust by default, when two branches used different filenames for the same conceptual file — this session's first dry-run would have silently destroyed real content if committed without checking.
+
+Issues found:
+
+- None new beyond the data-loss risk above, which was caught before anything was committed or pushed.
+
+Next steps:
+
+- Push `chore/merge-development-into-architecture` and open a PR into `feature/architecture`.
+- Once merged, PR #6 (`feature/architecture` → `development`) should be clean and mergeable — verify before merging.
+- The `Docs/Packages/SOAP - Architecture (GameFlow).md` vault note still needs its rework (GameFlow described as the `Assets/` template layer, not package #17) once PR #6 lands on `development` and the vault becomes visible from this lineage.
+
 ### 2026-09-20T23:12:56+05:00 — claude-sonnet-5/gameflow-template-direction
 
 Summary of what was done:
@@ -103,6 +134,104 @@ Next steps:
 
 - Push `fix/gameflow-fsm-wiring` and open a PR **into `feature/architecture`** (not `development`) once GitHub auth is available in this environment — push failed here with no credentials configured, same blocker hit on other branches this session.
 - Once `feature/architecture` itself is ready for `development`, the `Docs/Packages/SOAP - Architecture (GameFlow).md` vault note (on the separate `feature/codebase-obsidian-vault` branch) documents these as "known issues" — that callout should be removed/updated to reflect the fix when the two branches converge.
+
+### 2026-09-20T19:32:11+05:00 — claude-sonnet-5/codebase-obsidian-vault
+
+Summary of what was done:
+
+- User asked for "how to" documentation for the whole codebase, in the form of an Obsidian vault. Created `Docs/` at the repository root (outside `Assets/`, alongside `.agents/`/`.archive/`) as that vault: `Home.md` (entry point + package catalog), `Architecture Overview.md` (SOAP explanation + Mermaid dependency graph across all packages), `Getting Started.md`, `Contributing.md` (summary — `AGENTS.md` stays canonical), `Glossary.md`, and one note per package under `Docs/Packages/` (17 notes: 16 merged packages + the unmerged `scriptableobject.architecture` GameFlow package, marked as unmerged/WIP with its known issues from the 2026-09-20 code review carried over).
+- Design choice: notes link out to the real source (package `README.md`/`CHANGELOG.md` files, `AGENTS.md`) via relative links/wikilinks rather than duplicating their content, to avoid drift — same anti-duplication principle `AGENTS.md`/`CLAUDE.md` already use. `Home.md` instructs opening the *repository root* as the vault, not just `Docs/`, so those cross-links resolve.
+- Verified every `[[wikilink]]` in the vault resolves to an existing note title and every `../../Packages/...` README link resolves to an existing file (scripted check, no broken links).
+- While writing `Docs/Getting Started.md`'s "Running tests" section, found `.agents/CONTEXT.md`'s open question "no embedded package has tests yet" is stale — 11 of 16 packages actually have a `Tests/` folder. Corrected both the vault note and the `.agents/CONTEXT.md` open question.
+- Updated `.agents/CONTEXT.md`'s package list, which still said "eight custom embedded packages" — 16 are now merged (plus the unmerged 17th on `feature/architecture`); added a `Docs/` row to the architecture/structure list.
+- Added a `Docs/` row to `AGENTS.md`'s Repository Layout table.
+- Added a "Documentation" pointer section to the root `README.md` (was previously just a one-line title) linking to `Docs/Home.md`.
+- Created branch `feature/codebase-obsidian-vault` from `development` (not stacked on the still-unmerged `feature/sync-context-editor-bump`, since this is an unrelated task) per the branch-per-task policy.
+
+Files touched:
+
+- `Docs/Home.md`, `Docs/Architecture Overview.md`, `Docs/Getting Started.md`, `Docs/Contributing.md`, `Docs/Glossary.md` (all new)
+- `Docs/Packages/*.md` — 17 new notes (one per package, including the unmerged `scriptableobject.architecture`)
+- `README.md`, `AGENTS.md`, `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- The vault lives at `Docs/` and is scoped to the whole repository root, not a subfolder vault — this lets it link into `Packages/*/README.md` and `AGENTS.md` without copying them.
+- Documented the unmerged `scriptableobject.architecture` package in the vault (clearly marked unmerged) rather than omitting it, since "the whole codebase" reasonably includes in-progress branches a reader would otherwise not know about.
+
+Issues found:
+
+- `.agents/CONTEXT.md`'s package list and "no tests yet" open question were stale relative to the actual repository state (16 packages merged, 11 with tests) — likely because `CONTEXT.md` wasn't updated as packages were ported across multiple past sessions. Corrected in this pass; worth checking for further drift the next time `.agents/CONTEXT.md` is touched.
+
+Next steps:
+
+- Push `feature/codebase-obsidian-vault` and open its PR once GitHub auth is available in this environment (`git push` failed here with no GitHub credentials configured — the same blocker hit on `feature/sync-context-editor-bump` earlier today).
+- Consider whether `scriptableobject.architecture`'s known issues (duplicate FSM references, implicit `Resources.Load` fallback) should be fixed before that branch's PR, since the vault now documents them as known, unfixed issues.
+
+### 2026-09-20T19:14:52+05:00 — claude-sonnet-5/sync-context-editor-bump
+
+Summary of what was done:
+
+- A `/code-review` on the working tree flagged pending, uncommitted changes to `Packages/manifest.json`, `Packages/packages-lock.json`, and `ProjectSettings/ProjectVersion.txt` (Unity editor `6000.3.21f1` → `6000.3.24f1`, `com.unity.collab-proxy` `2.12.4`→`2.13.6`, `com.unity.timeline` `1.8.12`→`1.8.13`, plus new `com.unity.sdk.linux-x86_64` and `com.unity.toolchain.linux-x86_64-linux` dependencies at `1.1.0`) as undocumented: `.agents/CONTEXT.md` still stated the old editor version and no `.agents/LOGS.md` entry existed for the bump.
+- Received a separate user request to bootstrap a generic "AI Agent Context System Setup" spec. Discovery found this repository's existing `.agents/`/`.archive/` system already matches that spec (same `AGENTS.md` policy content, same archive structure) except for filename casing (`CONTEXT.md` vs. spec's `context.md`, etc.) — a decision already made and recorded on 2026-09-16 (see prior entry). Per the spec's own "report before major restructure" rule and `AGENTS.md`'s Start-of-Work Procedure, reported the conflict; user chose to keep the existing uppercase system as-is rather than create a colliding/duplicate lowercase set, and asked to fix the known staleness instead.
+- Created branch `feature/sync-context-editor-bump` from `development` (the pending manifest/version-file changes were already sitting uncommitted on `development`; branched with them carried over per the repository's feature-branch-per-task policy).
+- Updated `.agents/CONTEXT.md`: corrected the Unity editor version in "Active Constraints" to `6000.3.24f1`, and added an open question about whether the new Linux SDK/toolchain packages were a deliberate project-wide dependency decision or an artifact of Editor package resolution during the version bump (not confirmed — recorded as an assumption, not a fact).
+
+Files touched:
+
+- `Packages/manifest.json`, `Packages/packages-lock.json`, `ProjectSettings/ProjectVersion.txt` (pre-existing uncommitted changes, not authored in this session)
+- `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- Keep the existing uppercase `.agents`/`.archive` filenames and structure; do not create a parallel lowercase set from the generic setup spec.
+- Bundle the editor/package-bump documentation update into the same commit as the dependency-record change it describes, per `AGENTS.md`'s documentation policy.
+
+Issues found:
+
+- Rationale for the new `com.unity.sdk.linux-x86_64` / `com.unity.toolchain.linux-x86_64-linux` project-wide dependencies is unknown — flagged as an open question in `.agents/CONTEXT.md` rather than asserted as a deliberate decision.
+
+Next steps:
+
+- Confirm with whoever performed the editor upgrade whether the Linux SDK/toolchain packages are an intentional project-wide dependency; if not, consider scoping or removing them.
+- Open a PR from `feature/sync-context-editor-bump` into `development` per branch policy.
+
+### 2026-09-16T22:34:50+05:00 — claude-sonnet-5/agent-context-system-v2
+
+Summary of what was done:
+
+- Executed a user-supplied "AI Agent Context System Setup" spec against the already-established `.agents/`/`.archive/` system (in use since 2026-08-15 with substantial real history). Discovery found the existing system incompatible with the new spec on two points: lowercase active filenames (`context.md`, etc.) vs. required uppercase, and `DD-MM-YY` archive-date convention vs. required `YYYY-MM-DD` — both previously recorded as deliberate decisions in `.agents/MEMORY.md`. Per the spec's own "report before major restructure" rule, asked the user; they chose the uppercase/`YYYY-MM-DD` spec convention.
+- Created branch `feature/agent-context-system-v2` from `development` (not from `feature/architecture`, which carries unrelated, unmerged GameFlow-port work) per the spec's branch-per-task policy.
+- Renamed active files to uppercase via `git mv`: `context.md`→`CONTEXT.md`, `memory.md`→`MEMORY.md`, `learnings.md`→`LEARNINGS.md`, `logs.md`→`LOGS.md`, `agents/default-agent.md`→`agents/DEFAULT-AGENT.md`. Updated all cross-links in `AGENTS.md`, `.agents/README.md`, `.agents/INDEX.md`, and `.agents/agents/DEFAULT-AGENT.md`. Left historical "Files touched" references to the old lowercase names inside existing `LOGS.md` entries as-is (accurate record of what was literally touched at the time).
+- Added `Schema version: 1` to every README/INDEX file under `.agents/` and `.archive/`.
+- Rewrote root `AGENTS.md` to fold in the full policy set from the pasted spec: a "Version Control, Branching, and Pull Requests" section (feature branches from `development`, PR-only merges, no squash-merge, `main` only via PR from `development`), a "Version Naming" section (`X.Y.Z` with `Z` = epoch-minutes), an expanded documentation-policy paragraph (doc update or LOGS.md doc-review note required per task, same commit), multi-agent shared-state editing rules, and expanded sensitive-data placeholders — while preserving all existing project-specific content (SOAP/DI guidance, Unity conventions, repository layout).
+- Added root `CLAUDE.md` as a short pointer to `AGENTS.md` (did not exist before).
+- Updated `.agents/MEMORY.md` naming-conventions and stable-facts sections to record the new uppercase/`YYYY-MM-DD` convention, the branch/PR/version-naming facts, and a note that the prior convention is superseded (no archive files existed yet, so no historical archive filenames needed migration).
+- Updated `.agents/CONTEXT.md` (decisions, architecture list, open questions) and `.agents/LEARNINGS.md` to record an inconsistency found while drafting the Unity-naming guidance: `[SerializeField]` fields are PascalCase in the ported `scriptableobject.*` family but camelCase in the newer `scriptableobject.architecture` package — did not adopt the spec's example naming rule as fact since it doesn't match this repo's actual code.
+
+Files touched:
+
+- `AGENTS.md`, `CLAUDE.md` (new)
+- `.agents/README.md`, `.agents/INDEX.md`, `.agents/CONTEXT.md`, `.agents/MEMORY.md`, `.agents/LEARNINGS.md`, `.agents/LOGS.md`
+- `.agents/agents/DEFAULT-AGENT.md` (renamed from `default-agent.md`)
+- `.agents/context.md`, `.agents/memory.md`, `.agents/learnings.md`, `.agents/logs.md` (renamed to uppercase)
+- `.archive/README.md`, `.archive/INDEX.md`, `.archive/logs/INDEX.md`, `.archive/memory/INDEX.md`, `.archive/learnings/INDEX.md`, `.archive/context/INDEX.md`, `.archive/agents/INDEX.md` (Schema version added)
+
+Decisions made:
+
+- Adopt uppercase active/archive filenames and `YYYY-MM-DD` archive-date convention going forward (user-approved, superseding the 2026-08-15 lowercase/`DD-MM-YY` convention).
+- `AGENTS.md` remains the single canonical policy source; `CLAUDE.md` stays a pointer only, per the spec's own anti-duplication instruction.
+- Did not archive anything in this session — no active file exceeded its size/age threshold, and the only content change to existing entries was additive.
+
+Issues found:
+
+- Existing system was materially more mature (dozens of real log entries, settled conventions) than the spec's "brand-new setup" framing assumed; a blind literal execution would have silently overwritten a documented, deliberate decision — flagged instead of auto-restructuring.
+- `[SerializeField]` naming is not actually consistent project-wide (see Learnings); recorded as an open question rather than asserting the spec's example convention as project fact.
+
+Next steps:
+
+- Commit this work as small logical commits (rename+links, then policy/CLAUDE.md, then this log/context/memory/learnings update — bundled here per the doc-policy "same commit as the change" rule) and open a PR from `feature/agent-context-system-v2` into `development`.
+- Decide the `[SerializeField]` casing convention project-wide and record it in `AGENTS.md`/`MEMORY.md` once decided.
 
 ### 2026-08-17 13:45 PST
 
