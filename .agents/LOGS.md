@@ -37,6 +37,34 @@ Next steps:
 - Push `feature/codebase-obsidian-vault` and open its PR once GitHub auth is available in this environment (`git push` failed here with no GitHub credentials configured — the same blocker hit on `feature/sync-context-editor-bump` earlier today).
 - Consider whether `scriptableobject.architecture`'s known issues (duplicate FSM references, implicit `Resources.Load` fallback) should be fixed before that branch's PR, since the vault now documents them as known, unfixed issues.
 
+### 2026-09-20T19:14:52+05:00 — claude-sonnet-5/sync-context-editor-bump
+
+Summary of what was done:
+
+- A `/code-review` on the working tree flagged pending, uncommitted changes to `Packages/manifest.json`, `Packages/packages-lock.json`, and `ProjectSettings/ProjectVersion.txt` (Unity editor `6000.3.21f1` → `6000.3.24f1`, `com.unity.collab-proxy` `2.12.4`→`2.13.6`, `com.unity.timeline` `1.8.12`→`1.8.13`, plus new `com.unity.sdk.linux-x86_64` and `com.unity.toolchain.linux-x86_64-linux` dependencies at `1.1.0`) as undocumented: `.agents/CONTEXT.md` still stated the old editor version and no `.agents/LOGS.md` entry existed for the bump.
+- Received a separate user request to bootstrap a generic "AI Agent Context System Setup" spec. Discovery found this repository's existing `.agents/`/`.archive/` system already matches that spec (same `AGENTS.md` policy content, same archive structure) except for filename casing (`CONTEXT.md` vs. spec's `context.md`, etc.) — a decision already made and recorded on 2026-09-16 (see prior entry). Per the spec's own "report before major restructure" rule and `AGENTS.md`'s Start-of-Work Procedure, reported the conflict; user chose to keep the existing uppercase system as-is rather than create a colliding/duplicate lowercase set, and asked to fix the known staleness instead.
+- Created branch `feature/sync-context-editor-bump` from `development` (the pending manifest/version-file changes were already sitting uncommitted on `development`; branched with them carried over per the repository's feature-branch-per-task policy).
+- Updated `.agents/CONTEXT.md`: corrected the Unity editor version in "Active Constraints" to `6000.3.24f1`, and added an open question about whether the new Linux SDK/toolchain packages were a deliberate project-wide dependency decision or an artifact of Editor package resolution during the version bump (not confirmed — recorded as an assumption, not a fact).
+
+Files touched:
+
+- `Packages/manifest.json`, `Packages/packages-lock.json`, `ProjectSettings/ProjectVersion.txt` (pre-existing uncommitted changes, not authored in this session)
+- `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- Keep the existing uppercase `.agents`/`.archive` filenames and structure; do not create a parallel lowercase set from the generic setup spec.
+- Bundle the editor/package-bump documentation update into the same commit as the dependency-record change it describes, per `AGENTS.md`'s documentation policy.
+
+Issues found:
+
+- Rationale for the new `com.unity.sdk.linux-x86_64` / `com.unity.toolchain.linux-x86_64-linux` project-wide dependencies is unknown — flagged as an open question in `.agents/CONTEXT.md` rather than asserted as a deliberate decision.
+
+Next steps:
+
+- Confirm with whoever performed the editor upgrade whether the Linux SDK/toolchain packages are an intentional project-wide dependency; if not, consider scoping or removing them.
+- Open a PR from `feature/sync-context-editor-bump` into `development` per branch policy.
+
 ### 2026-09-16T22:34:50+05:00 — claude-sonnet-5/agent-context-system-v2
 
 Summary of what was done:
