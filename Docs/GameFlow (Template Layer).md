@@ -15,7 +15,7 @@ Top-level GameFlow orchestrator: wires FSM transitions to a pure-function `(Flow
 - [[SOAP - Time Machine]]
 - [[SOAP - Variables]]
 - [[SOAP - Variables Database]]
-- [[Utilities - Attributes]] *(for `[RequireReference]` — see below)*
+- [[Utilities - Attributes]] *(for `[RequireReference]` and the automatic searchable-dropdown Inspector — see below)*
 
 ## Used by
 
@@ -50,9 +50,11 @@ To extend the decision table, subclass `ApplicationFlowLogic`, add entries in th
 
 `ApplicationBase.ApplicationStateMachine` and `ApplicationFlowController.ApplicationBase` are marked `[RequireReference]` ([[Utilities - Attributes]]) — run **Tools → Validate Required References** to catch either left unassigned across every scene and prefab, instead of finding out at runtime. This doesn't catch *mismatched* wiring (e.g. two different, both-valid `FiniteStateMachine` assets) — see [[SOAP - Event System]]'s note on the same limitation for `GameEvent`s.
 
+Every `ScriptableObject`-typed field here — including the optional `AppPausedTime` (`DBInt`), `ApplicationTimeMachine`, `AppPaused`/`AppResumed` — automatically gets a searchable-dropdown Inspector too, with no attribute needed: [[Utilities - Attributes]]'s `SearchableAssetDrawer` is registered against `ScriptableObject` itself, so it applies project-wide.
+
 ## Requirements
 
-`scriptableobject.*` family: `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. `utilities.attributes` (for `[RequireReference]`). No third-party dependencies.
+`scriptableobject.*` family: `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. `utilities.attributes` (for `[RequireReference]` and the searchable-dropdown Inspector). No third-party dependencies.
 
 ---
 ← [[Home]]

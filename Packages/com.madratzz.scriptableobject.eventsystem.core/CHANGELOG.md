@@ -16,6 +16,7 @@ The initial release collects all pre-release changes into a single entry; versio
 
 ### Changed
 - Dependency moved from the retired `com.madratzz.utilities.extensions` to `com.madratzz.utilities.attributes`
+- All three `GameEvent` fields now get a searchable-dropdown Inspector automatically when `com.madratzz.utilities.attributes` is in the project — its `SearchableAssetDrawer` is registered against `ScriptableObject` itself, so this needs no attribute or other change here; noted for visibility since it changes the Inspector for these fields.
 
 ### Fixed
 - Removed unused `madratzz.scriptableobjectvariables.runtime` reference from runtime asmdef

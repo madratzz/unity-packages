@@ -58,9 +58,11 @@ Then on the `ApplicationFlowController` GameObject, enable **UseCustomLogic** an
 
 `ApplicationBase.ApplicationStateMachine` and `ApplicationFlowController.ApplicationBase` are marked `[RequireReference]` (from `com.madratzz.utilities.attributes`) — run **Tools → Validate Required References** to scan every scene and prefab for either one left unassigned, instead of finding out at runtime. `ApplicationFlowController` still fails loudly (`Debug.LogError` + disables itself) if either check the validator can't cover (e.g. a null reference set at runtime).
 
+`ApplicationBase.AppPausedTime` (a `DBInt`, and every other `ScriptableObject`-typed field here — `ApplicationStateMachine`, `ApplicationTimeMachine`, `AppPaused`, `AppResumed`) gets a searchable-dropdown Inspector automatically from `com.madratzz.utilities.attributes` — no attribute needed, it applies to every `ScriptableObject` field project-wide. `AppPausedTime` stays optional (the pause-timestamp write is skipped if unassigned), so unlike `ApplicationStateMachine` it isn't `[RequireReference]`.
+
 ## Requirements
 
-The `scriptableobject.*` package family (already embedded under `Packages/`): `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. `com.madratzz.utilities.attributes` (for `[RequireReference]`). No third-party dependencies.
+The `scriptableobject.*` package family (already embedded under `Packages/`): `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. `com.madratzz.utilities.attributes` (for `[RequireReference]` and the searchable-dropdown Inspector). No third-party dependencies.
 
 ## License
 
