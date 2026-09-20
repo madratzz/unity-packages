@@ -14,7 +14,7 @@ Persistent variants of [[SOAP - Variables]] backed by `PlayerPrefs` — auto-sav
 ## Used by
 
 - [[SOAP - Event Variables]]
-- [[SOAP - Architecture (GameFlow)]] *(unmerged — uses `DBInt` for pause-timestamp persistence)*
+- [[GameFlow (Template Layer)]] *(uses `DBInt` for pause-timestamp persistence)*
 
 ## Key types
 

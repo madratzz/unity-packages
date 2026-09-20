@@ -15,7 +15,7 @@ ScriptableObject-based event bus: parameterless `GameEvent` assets with listener
 - [[SOAP - Event System Extensions]]
 - [[SOAP - Event Variables]]
 - [[SOAP - Time Machine]]
-- [[SOAP - Architecture (GameFlow)]] *(via [[SOAP - Event System Extensions]])*
+- [[GameFlow (Template Layer)]] *(via [[SOAP - Event System Extensions]])*
 
 ## Key types
 

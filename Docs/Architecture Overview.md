@@ -8,7 +8,7 @@ This repository's packages implement **ScriptableObject Architecture (SOAP)**: s
 
 `AGENTS.md`'s "Change Discipline" states the rule this repo enforces on every package: *"Cross-system wiring should be explicit — ScriptableObject references... or constructor injection — never implicit lookups."* Dependency Injection (VContainer) is allowed for genuine services but is not the default; SOAP wiring is preferred wherever it's sufficient.
 
-**Known exception:** the unmerged [[SOAP - Architecture (GameFlow)]] package has one implicit-lookup violation (`Resources.Load<FiniteStateMachine>("StateMachine")` as an unwired fallback) — flagged there as a known issue, not a pattern to copy.
+[[GameFlow (Template Layer)]] used to violate this with an implicit `Resources.Load<FiniteStateMachine>("StateMachine")` fallback — removed in favor of explicit wiring plus a `[RequireReference]`-backed validator (see that note's "Catching missing wiring" section) that catches an unassigned reference without resorting to a runtime lookup.
 
 ## Package layers
 
@@ -49,12 +49,13 @@ graph BT
         eventvars --> varsdb
     end
 
-    subgraph "Layer 4 — GameFlow (unmerged)"
-        gameflow[scriptableobject.architecture] --> evtext
+    subgraph "Layer 4 — Assets/ template layer, not a package"
+        gameflow[GameFlow] --> evtext
         gameflow --> smcore
         gameflow --> timemachine
         gameflow --> vars
         gameflow --> varsdb
+        gameflow --> attrs
     end
 ```
 
@@ -64,13 +65,12 @@ graph BT
 
 - **Leaf packages stay dependency-free on purpose.** `utilities.attributes` and `utilities.core` exist specifically so higher packages have something to depend on without dragging in unrelated functionality — see [[Utilities - Attributes]] and [[Utilities - Core]].
 - **Legacy singletons are contained, not removed.** `Singleton<T>` / `SingletonPersistent<T>` in [[Utilities - Core]] exist only for interop with `CoroutineHandler` ([[Utilities - Coroutines]]). New code should not reach through them — see that note's "Legacy" section.
-- **GameFlow is the composition root.** [[SOAP - Architecture (GameFlow)]] is the only package that depends on five others at once; everything below it is reusable in isolation, but it is the layer that actually wires a game's boot flow together.
+- **GameFlow is the composition root.** [[GameFlow (Template Layer)]] is the only thing in this graph that depends on six packages at once — and it's deliberately not a package itself; everything below it is reusable in isolation, but it is the layer that actually wires a game's boot flow together.
 
 ## Open architectural questions
 
 Carried from `.agents/CONTEXT.md` (see that file for the current, authoritative list):
 
-- `[SerializeField]` field casing is inconsistent: PascalCase in the ported `scriptableobject.*` family, camelCase in `scriptableobject.architecture`. Not yet resolved project-wide.
 - No package has a settled test/publishing convention yet for the intended Verdaccio registry distribution (see [[Contributing]]).
 
 ← [[Home]]

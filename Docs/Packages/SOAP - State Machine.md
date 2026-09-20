@@ -12,7 +12,7 @@ None declared.
 
 ## Used by
 
-- [[SOAP - Architecture (GameFlow)]] *(unmerged)*
+- [[GameFlow (Template Layer)]]
 
 ## Key types
 
@@ -31,7 +31,7 @@ It's a ScriptableObject and cannot host coroutines on its own — the caller mus
 CoroutineHandler.StartStaticCoroutine(fsm.Tick());
 ```
 
-The unmerged [[SOAP - Architecture (GameFlow)]] package has a known issue where two components can each hold an unlinked `FiniteStateMachine` reference and only one actually ticks it — see that note.
+[[GameFlow (Template Layer)]] used to have a bug here — two components each holding an unlinked `FiniteStateMachine` reference, with only one actually ticking it — fixed by having one component read the FSM from the other rather than duplicating the reference. `ApplicationBase.ApplicationStateMachine` is now the single source of truth, marked `[RequireReference]` so an unassigned one is caught by [[Utilities - Attributes]]'s validator.
 
 ## Lifecycle order
 

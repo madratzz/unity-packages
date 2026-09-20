@@ -13,7 +13,7 @@ Typed generic extensions to [[SOAP - Event System]]: parameterised events for pr
 
 ## Used by
 
-- [[SOAP - Architecture (GameFlow)]] *(unmerged)*
+- [[GameFlow (Template Layer)]]
 
 ## Key types
 

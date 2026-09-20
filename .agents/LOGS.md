@@ -1,8 +1,42 @@
 # Active Logs
 
-Last updated: 2026-09-20
+Last updated: 2026-09-21
 
 ## Current Session
+
+### 2026-09-21T00:08:32+05:00 — claude-sonnet-5/gameflow-template-vault-rework
+
+Summary of what was done:
+
+- User asked to finish the `Docs/` vault rework that had been flagged as outstanding across three separate prior sessions' logs: GameFlow merged into `development` (PR #6/#12) and moved from a package into the `Assets/` template layer, but the vault still described it as an unmerged 17th package in several places.
+- **Moved** `Docs/Packages/SOAP - Architecture (GameFlow).md` → `Docs/GameFlow (Template Layer).md` (out of `Docs/Packages/`, since it isn't a package) and rewrote it from scratch: dropped the "unmerged" status callout and the whole "Known issues" section (duplicate FSM refs, `Resources.Load` fallback, README bug — all fixed in earlier sessions), pointed its README link at `Assets/Runtime/README.md` instead of a `feature/architecture`-branch GitHub URL, added `[[Utilities - Attributes]]` to its dependencies and a "Catching missing wiring" section documenting `[RequireReference]`, and updated the usage snippet's field names/wiring steps to match current reality.
+- Renamed every `[[SOAP - Architecture (GameFlow)]]` wikilink across the vault to `[[GameFlow (Template Layer)]]` (bulk `sed`, since Obsidian wikilinks resolve by filename and both old and new titles pointed at what's conceptually the same note) — hit 9 other files.
+- Removed the "*(unmerged)*"/"*(unmerged — ...)*" annotations from every "Used by" list entry referencing it (`SOAP - Time Machine`, `SOAP - State Machine`, `SOAP - Variables`, `SOAP - Variables Database`, `SOAP - Event System Extensions`), and rewrote `SOAP - State Machine.md`'s "known issue" paragraph to describe the bug as fixed (single source of truth + `[RequireReference]`) rather than present.
+- `Docs/Home.md`: removed GameFlow from the 16-package SOAP-family table (it was never actually a 17th package by the time this session started, just still labeled like one) and added a new "Template layer (`Assets/`)" section with its own one-row table, matching the `Packages/` vs. `Assets/` split `IDEA.md` already documents. Updated the intro paragraph and the `Utilities - Attributes` row to mention `[RequireReference]`.
+- `Docs/Architecture Overview.md`: removed the stale "Known exception" callout about the `Resources.Load` violation (replaced with a past-tense note on how it was fixed), relabeled the Mermaid diagram's `Layer 4` subgraph from `"GameFlow (unmerged)"` to `"Assets/ template layer, not a package"` and its node from `scriptableobject.architecture` to `GameFlow` (adding the `gameflow --> attrs` edge it gained from depending on `utilities.attributes` now), reworded the "GameFlow is the composition root" bullet to stop calling it a package, and removed the now-resolved `[SerializeField]`-casing open question (PascalCase was adopted project-wide two sessions ago).
+- `Docs/Getting Started.md`: reworded the "no Samples~ folder" line to explain *why* (not a package) instead of calling it unmerged.
+- Fixed the one remaining stale cross-reference in `.agents/CONTEXT.md` itself (a note saying the vault "still describes it as a 17th package — needs a follow-up pass"), since that follow-up is what this session did.
+- Verified with scripted checks (not by inspection alone, given how much moved): every `[[wikilink]]` in the vault resolves to an existing note title, and every relative markdown link (`](path)`) resolves to an existing file — including the new note's link to `Assets/Runtime/README.md`.
+
+Files touched:
+
+- `Docs/GameFlow (Template Layer).md` (new, replaces `Docs/Packages/SOAP - Architecture (GameFlow).md`, deleted)
+- `Docs/Home.md`, `Docs/Architecture Overview.md`, `Docs/Getting Started.md`
+- `Docs/Packages/SOAP - {Time Machine,State Machine,Variables,Variables Database,Event System Extensions}.md`
+- `.agents/CONTEXT.md`, `.agents/LOGS.md`
+
+Decisions made:
+
+- Kept the note's content aligned with what's actually true today rather than doing a minimal find-replace of "unmerged" → "" — several sentences needed rewriting (past tense for fixed bugs, updated field names, new dependency) or the note would read as accurate on a skim but contain leftover false claims.
+- Did not touch `.agents/LOGS.md`'s own historical entries even though several say "unmerged" — those are an accurate record of what was true when they were written, not live facts to keep current.
+
+Issues found:
+
+- None new. This entire session was closing a gap flagged (but deliberately not fixed) in three prior sessions' "Next steps."
+
+Next steps:
+
+- None outstanding for the vault specifically. `Assets/Prefabs/ApplicationBase.prefab`/`ApplicationFlowController.prefab` still have no assets wired (from earlier sessions) — `RequiredReferenceValidator` will report both `[RequireReference]` fields as missing until that's done, which is accurate, not a bug.
 
 ### 2026-09-20T23:57:53+05:00 — claude-sonnet-5/required-reference-validation
 
