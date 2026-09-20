@@ -1,6 +1,6 @@
-# Architecture
+# GameFlow (Template Integration Layer)
 
-Top-level GameFlow orchestrator: wires FSM transitions to a pure-function `(FlowContext, UICloseReasons) → FlowIntent` strategy table. Depends only on the rest of the `scriptableobject.*` package family — no DI container, no third-party deps.
+Top-level GameFlow orchestrator: wires FSM transitions to a pure-function `(FlowContext, UICloseReasons) → FlowIntent` strategy table. This is this repository's `Assets/` template layer, not a standalone package — it depends on the `com.madratzz.scriptableobject.*` packages under `Packages/` and demonstrates them wired into a working boot flow. See `IDEA.md` for the `Packages/` vs. `Assets/` split.
 
 ## Overview
 
@@ -12,7 +12,7 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 
 | Type | Description |
 |---|---|
-| `ApplicationBase` | MonoBehaviour: owns the FSM + TimeMachine coroutines + app lifecycle events (pause/resume + `appPausedTime` DBInt timestamp). Place on the persistent application GameObject. |
+| `ApplicationBase` | MonoBehaviour: owns the FSM + TimeMachine coroutines + app lifecycle events (pause/resume + `AppPausedTime` DBInt timestamp). Place on the persistent application GameObject. |
 | `ApplicationFlowController` | MonoBehaviour: routes GameEvent triggers to FSM transitions via the decision table. Reads its FSM from a wired `ApplicationBase` reference rather than holding its own — place on the boot scene's persistent controller. |
 | `ApplicationFlowLogic` | Default `IFlowLogic` — strategies `Boot + Game → GoToGame`, `LevelFail + Game → GoToGame`. Subclass to extend. |
 | `IFlowLogic` | Pure-function decision contract. |
@@ -23,7 +23,8 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 ## Usage
 
 ```csharp
-// 1. Add ApplicationBase + ApplicationFlowController to your boot scene.
+// 1. Add ApplicationBase + ApplicationFlowController to your boot scene
+//    (see Assets/Prefabs/ApplicationBase.prefab and ApplicationFlowController.prefab).
 // 2. Wire SerializeFields:
 //    - ApplicationBase.ApplicationStateMachine: your FiniteStateMachine asset
 //      (this is the only FSM reference in the system — the controller reads
@@ -55,11 +56,7 @@ Then on the `ApplicationFlowController` GameObject, enable **UseCustomLogic** an
 
 ## Requirements
 
-The `scriptableobject.*` package family: `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. **No third-party deps.**
-
-## Installation
-
-Install via the Unity Package Manager pointing to your Verdaccio registry.
+The `scriptableobject.*` package family (already embedded under `Packages/`): `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. No third-party dependencies.
 
 ## License
 
