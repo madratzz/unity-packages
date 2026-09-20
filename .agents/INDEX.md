@@ -1,16 +1,18 @@
 # Agent Context Index
 
-Last updated: 2026-08-17
+Schema version: 1
+
+Last updated: 2026-09-16
 
 ## Active Files
 
 | File | Purpose | Last Updated | Notes |
 |---|---|---:|---|
-| [context.md](context.md) | Current holistic project context | 2026-08-15 | Active summary |
-| [memory.md](memory.md) | Persistent project memory | 2026-08-15 | Stable facts |
-| [learnings.md](learnings.md) | Lessons and discoveries | 2026-08-15 | Recent learnings |
-| [logs.md](logs.md) | Recent working logs | 2026-08-15 | Current session logs |
-| [agents/default-agent.md](agents/default-agent.md) | Default agent operating file | 2026-08-15 | Agent-specific rules |
+| [CONTEXT.md](CONTEXT.md) | Current holistic project context | 2026-09-16 | Active summary |
+| [MEMORY.md](MEMORY.md) | Persistent project memory | 2026-09-16 | Stable facts |
+| [LEARNINGS.md](LEARNINGS.md) | Lessons and discoveries | 2026-09-16 | Recent learnings |
+| [LOGS.md](LOGS.md) | Recent working logs | 2026-09-16 | Current session logs |
+| [agents/DEFAULT-AGENT.md](agents/DEFAULT-AGENT.md) | Default agent operating file | 2026-09-16 | Agent-specific rules |
 
 ## Archive Links
 

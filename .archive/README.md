@@ -1,5 +1,7 @@
 # Archive
 
+Schema version: 1
+
 This folder stores older AI-agent context, logs, memory, learnings, and agent-specific files.
 
 Active files live in [`../.agents/`](../.agents/).
