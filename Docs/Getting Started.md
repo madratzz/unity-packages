@@ -38,7 +38,7 @@ Two packages ship Unity Package Manager samples (Package Manager window → sele
 |---|---|---|
 | [[SOAP - Time Machine]] | `TimeMachine Sample Assets` | A pre-configured `TimeMachine` + `e_TimeMachineTick` event asset. |
 
-[[SOAP - Architecture (GameFlow)]] has no `Samples~/` folder — its README's usage snippet is the closest thing to a worked example, and it's unmerged.
+[[GameFlow (Template Layer)]] isn't a package, so it has no `Samples~/` folder — its `Assets/Prefabs/` (unwired) plus its README's usage snippet are the closest thing to a worked example so far.
 
 ## 6. Making a change
 

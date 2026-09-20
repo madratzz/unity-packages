@@ -14,7 +14,7 @@ ScriptableObject variables for int/float/bool/string with typed get/set interfac
 
 - [[SOAP - Variables Database]]
 - [[SOAP - Event Variables]]
-- [[SOAP - Architecture (GameFlow)]] *(unmerged)*
+- [[GameFlow (Template Layer)]]
 
 ## Key types
 

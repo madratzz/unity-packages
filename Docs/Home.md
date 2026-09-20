@@ -1,6 +1,6 @@
 # unity-packages Wiki
 
-This is an [Obsidian](https://obsidian.md) vault documenting `unity-packages` — a collection of reusable Unity game-development packages, built on a ScriptableObject Architecture (SOAP) pattern.
+This is an [Obsidian](https://obsidian.md) vault documenting `unity-packages` — a collection of reusable Unity game-development packages built on a ScriptableObject Architecture (SOAP) pattern, and a clonable template project (the `Assets/` layer) that wires them into a working game scaffold. See `IDEA.md` for the `Packages/` vs. `Assets/` split.
 
 **Open the repository root (not just this `Docs/` folder) as the Obsidian vault.** Notes here link out to the canonical source — package `README.md`/`CHANGELOG.md` files, `AGENTS.md`, `.agents/CONTEXT.md` — instead of duplicating it, so those links only resolve if the whole repo is the vault.
 
@@ -13,13 +13,13 @@ This is an [Obsidian](https://obsidian.md) vault documenting `unity-packages` �
 
 ## Package catalog
 
-Sixteen packages are merged on `development`. One (`scriptableobject.architecture`, the GameFlow orchestrator) exists only on the unmerged `feature/architecture` branch — see its note for status and known issues.
+Sixteen reusable packages live under `Packages/com.madratzz.*`. The [[GameFlow (Template Layer)]] application code isn't one of them — see the Template layer section below.
 
 ### Utilities — zero/low-dependency leaves
 
 | Note | Package | What it does |
 |---|---|---|
-| [[Utilities - Attributes]] | `com.madratzz.utilities.attributes` | `[InlineEditor]` / `[Button]` inspector attributes. Zero-dependency. |
+| [[Utilities - Attributes]] | `com.madratzz.utilities.attributes` | `[InlineEditor]` / `[Button]` / `[RequireReference]` inspector attributes + a required-reference validator. Zero-dependency. |
 | [[Utilities - Core]] | `com.madratzz.utilities.core` | Legacy `Singleton<T>`, serializable dictionary, engine/DateTime extensions. Zero-dependency. |
 | [[Utilities - Coroutines]] | `com.madratzz.utilities.coroutines` | Static coroutine runner for non-MonoBehaviour code (`CoroutineHandler`, `TimeCounter`). |
 | [[Utilities - UI]] | `com.madratzz.utilities.ui` | uGUI/TextMeshPro extensions (alpha, RectTransform, ScrollRect snapping). |
@@ -40,6 +40,13 @@ Sixteen packages are merged on `development`. One (`scriptableobject.architectur
 | [[SOAP - Event Variables]] | `com.madratzz.scriptableobject.event.variables` | Variables that auto-raise a `GameEvent` on change. |
 | [[SOAP - State Machine]] | `com.madratzz.scriptableobject.statemachine.core` | Coroutine-driven FSM with declarative `Transition` assets. |
 | [[SOAP - Time Machine]] | `com.madratzz.scriptableobject.time.machine` | SO interval timer that fires a `GameEvent` every tick. |
-| [[SOAP - Architecture (GameFlow)]] | `com.madratzz.scriptableobject.architecture` | **⚠️ Unmerged.** Top-level GameFlow orchestrator wiring the FSM to a decision table. |
 
 See [[Architecture Overview]] for how these packages depend on each other.
+
+## Template layer (`Assets/`)
+
+Not a package — the `Assets/` integration layer that wires the packages above into a working, clonable game scaffold.
+
+| Note | Location | What it does |
+|---|---|---|
+| [[GameFlow (Template Layer)]] | `Assets/Runtime`, `Assets/Tests`, `Assets/Prefabs`, `Assets/Scenes` | Top-level GameFlow orchestrator: wires FSM transitions to a decision table via `ApplicationBase`/`ApplicationFlowController`. |

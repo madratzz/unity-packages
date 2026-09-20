@@ -14,7 +14,7 @@ ScriptableObject timer that fires a `GameEvent` on a fixed interval, enabling ti
 
 ## Used by
 
-- [[SOAP - Architecture (GameFlow)]] *(unmerged — drives the app-level per-second tick loop)*
+- [[GameFlow (Template Layer)]] *(drives the app-level per-second tick loop)*
 
 ## Key types
 

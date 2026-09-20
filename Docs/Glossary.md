@@ -12,7 +12,7 @@ Provided by [[SOAP - State Machine]]. States and transitions are ScriptableObjec
 The core SO event type from [[SOAP - Event System]] — a parameterless, asset-based signal any number of listeners can subscribe to and any number of raisers can invoke.
 
 **GameFlow**
-The application-level orchestration layer implemented by [[SOAP - Architecture (GameFlow)]] — translates UI close events into FSM transitions via a `(FlowContext, UICloseReasons) → FlowIntent` decision table.
+The application-level orchestration layer implemented by [[GameFlow (Template Layer)]] — translates UI close events into FSM transitions via a `(FlowContext, UICloseReasons) → FlowIntent` decision table.
 
 **DB variable**
 A ScriptableObject variable from [[SOAP - Variables Database]] that auto-persists to `PlayerPrefs` on every `SetValue`/`ApplyChange` call — no manual save step.
