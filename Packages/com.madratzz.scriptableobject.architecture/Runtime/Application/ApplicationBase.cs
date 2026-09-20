@@ -34,18 +34,21 @@ namespace ProjectCore.Architecture
         [Header("State Machine")]
         [SerializeField] private FiniteStateMachine applicationStateMachine;
 
-        private FiniteStateMachine _applicationStateMachine;
+        /// <summary>
+        /// The FSM this application drives. <see cref="ApplicationFlowController"/>
+        /// reads this instead of holding its own duplicate reference, so there is
+        /// exactly one place an FSM asset is wired for a given application.
+        /// </summary>
+        public FiniteStateMachine StateMachine => applicationStateMachine;
+
         private Coroutine _stateMachineRoutine;
         private Coroutine _timeMachineRoutine;
         private bool _appPaused;
 
         private void Awake()
         {
-            // Fall back to a Resources-loaded FSM if the SerializeField wasn't
-            // wired in the Inspector — useful for project-wide singletons.
-            _applicationStateMachine = applicationStateMachine;
-            if (_applicationStateMachine == null)
-                _applicationStateMachine = Resources.Load<FiniteStateMachine>("StateMachine");
+            if (applicationStateMachine == null)
+                Debug.LogWarning("[ApplicationBase] applicationStateMachine is not assigned — the FSM will not run.", this);
         }
 
         private void Start()
@@ -61,8 +64,8 @@ namespace ProjectCore.Architecture
             if (applicationTimeMachine != null)
                 _timeMachineRoutine = StartCoroutine(applicationTimeMachine.Tick());
 
-            if (_applicationStateMachine != null)
-                _stateMachineRoutine = StartCoroutine(_applicationStateMachine.Tick());
+            if (applicationStateMachine != null)
+                _stateMachineRoutine = StartCoroutine(applicationStateMachine.Tick());
         }
 
         private void OnApplicationFocus(bool focus)

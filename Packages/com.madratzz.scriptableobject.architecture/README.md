@@ -13,7 +13,7 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 | Type | Description |
 |---|---|
 | `ApplicationBase` | MonoBehaviour: owns the FSM + TimeMachine coroutines + app lifecycle events (pause/resume + `appPausedTime` DBInt timestamp). Place on the persistent application GameObject. |
-| `ApplicationFlowController` | MonoBehaviour: routes GameEvent triggers to FSM transitions via the decision table. Place on the boot scene's persistent controller. |
+| `ApplicationFlowController` | MonoBehaviour: routes GameEvent triggers to FSM transitions via the decision table. Reads its FSM from a wired `ApplicationBase` reference rather than holding its own — place on the boot scene's persistent controller. |
 | `ApplicationFlowLogic` | Default `IFlowLogic` — strategies `Boot + Game → GoToGame`, `LevelFail + Game → GoToGame`. Subclass to extend. |
 | `IFlowLogic` | Pure-function decision contract. |
 | `FlowContext` | Enum — current application screen context. |
@@ -25,7 +25,11 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 ```csharp
 // 1. Add ApplicationBase + ApplicationFlowController to your boot scene.
 // 2. Wire SerializeFields:
-//    - applicationStateMachine: your FiniteStateMachine asset (or Resources/StateMachine)
+//    - ApplicationBase.applicationStateMachine: your FiniteStateMachine asset
+//      (this is the only FSM reference in the system — the controller reads
+//      it from ApplicationBase, it does not have its own FSM field)
+//    - ApplicationFlowController.applicationBase: reference to that same
+//      ApplicationBase
 //    - applicationTimeMachine: optional TimeMachine asset for the per-second tick loop
 //    - appPaused / appResumed: GameEvent assets fired on app lifecycle
 //    - appPausedTime: DBInt asset for the pause timestamp
@@ -42,7 +46,7 @@ public class MyFlowLogic : ApplicationFlowLogic
     {
         Add(FlowContext.MainMenu, UICloseReasons.Game, FlowIntent.GoToGame);
         Add(FlowContext.MainMenu, UICloseReasons.Settings, FlowIntent.OpenSettings);
-        Add(FlowContext.Settings, UICloseReasons.Home, FlowIntent.GoToMainMenu);
+        Add(FlowContext.Settings, UICloseReasons.ResumeGame, FlowIntent.ResumePrevious);
     }
 }
 ```

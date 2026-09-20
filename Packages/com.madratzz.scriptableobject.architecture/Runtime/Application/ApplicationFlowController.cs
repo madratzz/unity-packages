@@ -17,8 +17,9 @@ namespace ProjectCore.Architecture
     /// </summary>
     public class ApplicationFlowController : MonoBehaviour
     {
-        [Header("State Machine")]
-        [SerializeField] private FiniteStateMachine applicationStateMachine;
+        [Header("Application")]
+        [Tooltip("The ApplicationBase that owns the FSM this controller fires transitions on. There is no separate state-machine field here on purpose — both components must always target the same FSM instance.")]
+        [SerializeField] private ApplicationBase applicationBase;
 
         [Header("Transitions (The Destinations)")]
         [SerializeField] private Transition gameStateTransition;
@@ -41,10 +42,10 @@ namespace ProjectCore.Architecture
 
         private void Awake()
         {
-            _stateMachine = applicationStateMachine;
+            _stateMachine = applicationBase != null ? applicationBase.StateMachine : null;
             if (_stateMachine == null)
             {
-                Debug.LogError("[ApplicationFlowController] applicationStateMachine is not assigned.");
+                Debug.LogError("[ApplicationFlowController] No FSM available — either applicationBase is not assigned, or its own applicationStateMachine is not assigned.", this);
                 enabled = false;
                 return;
             }

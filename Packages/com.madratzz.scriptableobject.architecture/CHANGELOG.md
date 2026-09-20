@@ -25,6 +25,10 @@ The initial release collects all pre-release changes into a single entry; versio
 - `ApplicationBase` and `ApplicationFlowController` no longer require VContainer — `[Inject] Construct(...)` removed; SerializeField wiring is the only path. Keeps the package DI-free.
 - `ApplicationFlowController.PerformTransition` no longer checks for `UIViewTransition` — that type belongs to a `ProjectCore.UI` subsystem not in this package. The check was dead code without the supporting types.
 - `Camera.main` lookup in `ApplicationFlowController.Awake` removed (was paired with the removed `UIViewTransition` branch).
+- **Duplicate, unlinked FSM references removed**: `ApplicationFlowController` no longer has its own `FiniteStateMachine` `[SerializeField]` — it now reads `ApplicationBase.StateMachine` through a new `[SerializeField] applicationBase` reference. Previously the two components could be wired to different FSM assets (or one left unassigned) with no error, silently breaking transitions.
+- `ApplicationBase.Awake()` no longer falls back to `Resources.Load<FiniteStateMachine>("StateMachine")` — that implicit magic-string lookup violated this repo's explicit-wiring rule and could silently resolve to the wrong asset. An unassigned `applicationStateMachine` now logs a warning instead.
+- README's "extend the decision table" example called `FlowIntent.GoToMainMenu`, which doesn't exist on the enum — replaced with `FlowContext.Settings, UICloseReasons.ResumeGame, FlowIntent.ResumePrevious`, matching the actual `ApplicationFlowLogicTests` example.
+- Removed a redundant self-referencing `using ProjectCore.Architecture;` in `IFlowLogic.cs` (the file is itself declared inside that namespace).
 
 ### Removed
 - No samples, no prefabs, no scene assets — the package ships framework primitives only. The asteroids-demo project is the working integration example.

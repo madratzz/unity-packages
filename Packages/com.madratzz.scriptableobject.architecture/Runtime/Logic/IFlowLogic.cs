@@ -1,5 +1,3 @@
-using ProjectCore.Architecture;
-
 namespace ProjectCore.Architecture
 {
     /// <summary>
