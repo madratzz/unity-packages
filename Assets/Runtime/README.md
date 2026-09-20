@@ -54,9 +54,13 @@ public class MyFlowLogic : ApplicationFlowLogic
 
 Then on the `ApplicationFlowController` GameObject, enable **UseCustomLogic** and add a `MyFlowLogic` component.
 
+## Catching missing wiring
+
+`ApplicationBase.ApplicationStateMachine` and `ApplicationFlowController.ApplicationBase` are marked `[RequireReference]` (from `com.madratzz.utilities.attributes`) — run **Tools → Validate Required References** to scan every scene and prefab for either one left unassigned, instead of finding out at runtime. `ApplicationFlowController` still fails loudly (`Debug.LogError` + disables itself) if either check the validator can't cover (e.g. a null reference set at runtime).
+
 ## Requirements
 
-The `scriptableobject.*` package family (already embedded under `Packages/`): `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. No third-party dependencies.
+The `scriptableobject.*` package family (already embedded under `Packages/`): `eventsystem.extensions`, `statemachine.core`, `time.machine`, `variables`, `variables.database`. `com.madratzz.utilities.attributes` (for `[RequireReference]`). No third-party dependencies.
 
 ## License
 

@@ -14,3 +14,4 @@ The initial release collects all pre-release changes into a single entry; versio
 - `InlineEditorDrawer` — property drawer backing `InlineEditorAttribute`
 - `ButtonEditor` — inspector button rendering for `[Button]` methods
 - `EditorHelperMethods` — shared editor GUI helpers used by the drawers
+- `RequireReferenceAttribute` + `RequiredReferenceValidator` — marker attribute for required `[SerializeField]` references, and an Editor scanner (menu item + `-executeMethod` CI entry point) that reports every scene/prefab field carrying it that's unassigned. Added in response to real bugs found in this project where an unassigned or mismatched `GameEvent`/`FiniteStateMachine` reference silently broke a feature with no error.

@@ -23,7 +23,9 @@ None — zero-dependency leaf package.
 |---|---|
 | `InlineEditorAttribute` | Renders a referenced object (or the target class) inline in the inspector. |
 | `ButtonAttribute` | Adds a clickable inspector button that invokes the decorated method. |
+| `RequireReferenceAttribute` | Marks a `[SerializeField]` reference as required, for `RequiredReferenceValidator` to check. |
 | `InlineEditorDrawer` / `ButtonEditor` | Editor drawers backing the two attributes above. |
+| `RequiredReferenceValidator` | Scans every scene and prefab for unassigned `[RequireReference]` fields. **Tools → Validate Required References**, or `-executeMethod CustomEditorUtilities.RequiredReferenceValidator.ValidateProjectCI` for CI (non-zero exit on any miss). |
 
 ## Quick usage
 

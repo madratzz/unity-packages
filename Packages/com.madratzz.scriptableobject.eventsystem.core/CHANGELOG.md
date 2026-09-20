@@ -20,3 +20,4 @@ The initial release collects all pre-release changes into a single entry; versio
 ### Fixed
 - Removed unused `madratzz.scriptableobjectvariables.runtime` reference from runtime asmdef
 - Corrected asmdef `name` from `madratzz.scriptableobjecteventsystem.runtime` to `madratzz.scriptableobject.eventsystem.runtime` (missing dot)
+- `GameEventListener.OnEnable`/`OnDisable`, `GameEventRaiser.InvokeEvent`, and `GameEventRaiserOnEnable.OnEnable` no longer throw `NullReferenceException` when their `GameEvent` field is unassigned — they now log a `Debug.LogError` and no-op instead. All three fields are marked `[RequireReference]` (from `com.madratzz.utilities.attributes`) so `RequiredReferenceValidator` catches an unassigned one before it ever runs.

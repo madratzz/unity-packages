@@ -33,6 +33,7 @@ Last updated: 2026-09-20
 - Context files must never include credentials or other sensitive values; use placeholders if redaction is required.
 - Version-control policy (feature branches from `development`, PR-only merges, no squash-merge, `main` only via PR from `development`) and version naming (`X.Y.Z` with epoch-minute `Z`) are documented once in `AGENTS.md`; do not duplicate them here.
 - (2026-09-20, user decision) This repo is both a package library and a clonable template: reusable SOAP/utility packages stay under `Packages/` as before; the GameFlow application layer lives in `Assets/` as template/integration glue, not as a package. The formerly-hollow `Packages/com.madratzz.scriptableobject.architecture/` (package.json with no code, after the code moved to `Assets/`) was deleted rather than kept as a misleading stub.
+- (2026-09-20) `com.madratzz.utilities.attributes` gained `[RequireReference]` + `RequiredReferenceValidator` — a project-wide convention for marking `[SerializeField]` references as required and catching unassigned ones across every scene/prefab (**Tools → Validate Required References**, or `-executeMethod ...ValidateProjectCI` for CI). Applied so far to `GameEventListener`/`GameEventRaiser`/`GameEventRaiserOnEnable`'s `GameEvent` field and `ApplicationBase`/`ApplicationFlowController`'s FSM-chain fields. New required-but-unguarded `[SerializeField]` fields elsewhere should adopt it rather than reinventing null-checking.
 
 ## Active Constraints
 

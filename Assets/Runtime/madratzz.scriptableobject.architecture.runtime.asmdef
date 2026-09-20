@@ -2,6 +2,7 @@
     "name": "madratzz.scriptableobject.architecture.runtime",
     "rootNamespace": "ProjectCore.Architecture",
     "references": [
+        "com.madratzz.utilities.attributes.runtime",
         "madratzz.scriptableobject.eventsystem.core.runtime",
         "madratzz.scriptableobject.eventsystem.extensions.runtime",
         "madratzz.scriptableobject.statemachine.core.runtime",

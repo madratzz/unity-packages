@@ -21,6 +21,10 @@ A `GameEvent` asset acts as a shared signal that any number of `GameEventListene
 2. Add a `GameEventListener` to the receiver GameObject and assign the event asset and a `UnityEvent` response.
 3. Call `myEvent.Invoke()` in code, or add a `GameEventRaiser` to the sender GameObject.
 
+## Wiring mistakes
+
+The most common bug with SO-based events isn't a crash, it's silence: a raiser and listener pointing at *different* `GameEvent` assets fire and listen correctly, just to nothing. An unassigned `GameEvent` field now at least logs a clear error instead of throwing or doing nothing — and every `GameEvent` field on these three components is marked `[RequireReference]` (from `com.madratzz.utilities.attributes`), so running that package's `RequiredReferenceValidator` (**Tools → Validate Required References**) catches an unassigned one across every scene and prefab in the project. It can't catch the "wired to the wrong asset" case — there's no way to know two different assets weren't meant to be different — so double-check raiser/listener pairs point at the same asset when debugging a "nothing happened" bug.
+
 ## Installation
 
 Install via the Unity Package Manager pointing to your Verdaccio registry.
