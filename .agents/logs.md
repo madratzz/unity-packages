@@ -4,6 +4,40 @@ Last updated: 2026-09-20
 
 ## Current Session
 
+### 2026-09-20T23:12:56+05:00 — claude-sonnet-5/gameflow-template-direction
+
+Summary of what was done:
+
+- Resolved the open question (from the prior FSM-wiring-fix session) of whether moving `com.madratzz.scriptableobject.architecture`'s code from `Packages/` into `Assets/` was permanent. User decision: yes, deliberately — this repo is both a package library (`Packages/com.madratzz.*`, unchanged, still Verdaccio-distributable) and a clonable SOAP-based project template (`Assets/`), and the GameFlow application layer is the template's integration code, not a 17th reusable package. Confirmed scope explicitly with the user: only the GameFlow layer moves to `Assets/`; the other 16 packages stay under `Packages/` as-is.
+- Deleted `Packages/com.madratzz.scriptableobject.architecture/` (`package.json`, `README.md`, `CHANGELOG.md`, `LICENSE.md` + metas) — it had no code left (Runtime/Tests already moved to `Assets/` in the prior session) and was actively misleading as a "package" with nothing installable in it.
+- Migrated its README content (adapted: dropped the UPM/Verdaccio installation section, reframed the intro) to `Assets/Runtime/README.md` so the usage/wiring documentation isn't lost.
+- Updated `IDEA.md`, `README.md`, and `AGENTS.md` (Project Snapshot + Repository Layout's `Assets/` row) to document the `Packages/` (reusable, distributable) vs. `Assets/` (template/integration layer, cloned with the repo) split as a deliberate, permanent architecture — so a future agent doesn't try to "fix" this back into `Packages/` again.
+- Updated `.agents/context.md`: Project Summary, Current Goals, Architecture/Structure (added `Assets/`'s new role and the still-current 16-package `Packages/` list), and Important Decisions. Also corrected two pieces of staleness found while editing this file: the Unity version (still said `6000.3.21f1`; actual is `6000.3.24f1` per the already-merged editor-bump commit on this branch) and the "no embedded package has tests yet" open question (11 of 16 packages already have a `Tests/` folder).
+- Created branch `feature/gameflow-template-direction` from `feature/architecture` (this branch already has `fix/gameflow-fsm-wiring`'s commits merged via PR #8) per the branch-per-task policy.
+
+Files touched:
+
+- `IDEA.md`, `README.md`, `AGENTS.md`
+- `.agents/context.md`, `.agents/logs.md`
+- `Packages/com.madratzz.scriptableobject.architecture/*` (deleted)
+- `Packages/packages-lock.json` (removed the now-dangling `com.madratzz.scriptableobject.architecture` embedded-dependency entry left over from the deletion)
+- `Assets/Runtime/README.md` (new, migrated content)
+
+Decisions made:
+
+- `Assets/` code is template/integration glue only — a new reusable, standalone system still belongs in its own package under `Packages/`, not `Assets/`. Recorded in `AGENTS.md`'s Repository Layout table so this isn't re-litigated per task.
+- Deleted the hollow package rather than keeping it as a stub or redirect — a `package.json` with no code is actively misleading to anyone resolving packages, and the repo's docs now explain the split clearly enough that a redirect isn't needed.
+
+Issues found:
+
+- None new; this session resolved an issue flagged in the prior one (`.agents/logs.md`'s 2026-09-20T22:04:02+05:00 entry).
+
+Next steps:
+
+- This branch (`feature/architecture` lineage) still doesn't have the `Docs/` Obsidian vault (that only exists on `development`, merged via PR #10). Once `feature/architecture`/PR #6 merges into `development`, the vault's `Docs/Packages/SOAP - Architecture (GameFlow).md` note should be reworked — it currently describes GameFlow as package #17; it should instead describe it as the `Assets/` template layer, likely moved out of `Docs/Packages/` into its own top-level note.
+- Push `feature/gameflow-template-direction` and open its PR into `feature/architecture`.
+- Wire actual ScriptableObject assets (FSM, TimeMachine, GameEvents, Transitions) into `Assets/Prefabs/ApplicationBase.prefab`/`ApplicationFlowController.prefab` so `BootstrapScene` can actually boot (still outstanding from the prior session).
+
 ### 2026-09-20T22:04:02+05:00 — claude-sonnet-5/gameflow-fsm-wiring
 
 Summary of what was done:
