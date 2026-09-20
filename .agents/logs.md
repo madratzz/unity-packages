@@ -1,8 +1,43 @@
 # Active Logs
 
-Last updated: 2026-08-15
+Last updated: 2026-09-20
 
 ## Current Session
+
+### 2026-09-20T21:30:14+05:00 — claude-sonnet-5/gameflow-fsm-wiring
+
+Summary of what was done:
+
+- Fixed two correctness bugs and one documentation bug found by an earlier code review of `com.madratzz.scriptableobject.architecture` (the unreleased GameFlow port from `feat(architecture): port GameFlow framework from asteroids-demo`, commit `0f94d96`):
+  - **Duplicate, unlinked FSM references**: `ApplicationBase` and `ApplicationFlowController` each held an independent `[SerializeField] FiniteStateMachine` with nothing enforcing they pointed at the same asset — if they diverged (or one was left unassigned while the other was set), transitions were silently queued on an FSM that never ticked. Fixed by removing `ApplicationFlowController`'s own FSM field entirely and having it read `ApplicationBase.StateMachine` (a new public accessor) through an explicit `[SerializeField] applicationBase` reference instead — there is now exactly one FSM field in the whole system, structurally preventing divergence.
+  - **Implicit `Resources.Load` fallback**: `ApplicationBase.Awake()` fell back to `Resources.Load<FiniteStateMachine>("StateMachine")` when unwired — a magic-string lookup that violates this repo's explicit-wiring rule (`AGENTS.md` "Change Discipline" #3). Removed; an unwired `applicationStateMachine` now logs a warning instead of silently resolving (or failing to resolve) via `Resources`.
+  - **README example bug**: the "extend the decision table" usage example called `FlowIntent.GoToMainMenu`, which doesn't exist on the enum. Replaced with `FlowContext.Settings, UICloseReasons.ResumeGame, FlowIntent.ResumePrevious`, matching the working example already covered by `ApplicationFlowLogicTests.SubclassCanExtendStrategyTable`.
+  - Also removed a redundant self-referencing `using ProjectCore.Architecture;` in `IFlowLogic.cs` (minor, from the same review).
+- Branched `fix/gameflow-fsm-wiring` from `feature/architecture` (not `development` — this package doesn't exist there yet) since the buggy code only exists on that unmerged branch.
+- Updated the package's `README.md` (wiring instructions + decision-table example) and `CHANGELOG.md` (`### Fixed`) in the same commit as the code change.
+
+Files touched:
+
+- `Packages/com.madratzz.scriptableobject.architecture/Runtime/Application/ApplicationBase.cs`
+- `Packages/com.madratzz.scriptableobject.architecture/Runtime/Application/ApplicationFlowController.cs`
+- `Packages/com.madratzz.scriptableobject.architecture/Runtime/Logic/IFlowLogic.cs`
+- `Packages/com.madratzz.scriptableobject.architecture/README.md`, `CHANGELOG.md`
+- `.agents/logs.md`
+
+Decisions made:
+
+- Fixed the duplicate-FSM-reference bug by removing the redundant field (structural fix) rather than adding a runtime consistency check between two fields — matches this repo's stated preference for explicit, singular wiring over defensive validation of avoidable duplication.
+- Did not rename this branch's `.agents/` files to the uppercase convention adopted on `development` on 2026-09-16 — this branch predates that decision and diverged before it landed; renaming here would mix an unrelated, disruptive change into a bug-fix commit. Left as a note for whoever rebases/merges `feature/architecture`.
+
+Issues found:
+
+- Could not run this package's EditMode tests (no Unity batch-mode invocation is documented for this repo, and none was attempted here) — verified instead by grep that no other file in the repo references the removed `ApplicationFlowController.applicationStateMachine` field or the removed `FlowIntent.GoToMainMenu`, and that `ApplicationFlowLogicTests.cs` (the package's only existing tests) doesn't touch the MonoBehaviours I changed, so it's unaffected.
+- `.agents/logs.md`'s "Last updated" header was already stale relative to its own entries before this change (said 2026-08-15 while entries went up to 2026-08-17); the GameFlow port commit itself (`0f94d96`) appears not to have added a log entry. Not backfilled here — out of scope for this fix and not something I have firsthand knowledge of.
+
+Next steps:
+
+- Push `fix/gameflow-fsm-wiring` and open a PR **into `feature/architecture`** (not `development`) once GitHub auth is available in this environment — push failed here with no credentials configured, same blocker hit on other branches this session.
+- Once `feature/architecture` itself is ready for `development`, the `Docs/Packages/SOAP - Architecture (GameFlow).md` vault note (on the separate `feature/codebase-obsidian-vault` branch) documents these as "known issues" — that callout should be removed/updated to reflect the fix when the two branches converge.
 
 ### 2026-08-17 13:45 PST
 
