@@ -78,7 +78,10 @@ namespace CustomEditorUtilities
                 .Distinct();
         }
 
-        private static List<string> ValidateGameObject(GameObject root, string assetPath)
+        // Internal seam for EditMode tests (see AssemblyInfo.cs) — exercises the
+        // reflection-based scan directly against a constructed GameObject instead
+        // of needing a real scene or prefab asset on disk.
+        internal static List<string> ValidateGameObject(GameObject root, string assetPath)
         {
             var issues = new List<string>();
 

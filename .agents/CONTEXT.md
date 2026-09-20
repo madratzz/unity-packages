@@ -44,7 +44,7 @@ Last updated: 2026-09-20
 
 ## Current Open Questions
 
-- What Verdaccio publishing conventions should the 5 packages still without EditMode tests (`utilities.attributes`, `utilities.core`, `utilities.coroutines`, `utilities.ui`, `platform.device`) adopt before first publish? (11 of 16 packages already have a `Tests/` folder — the "no package has tests yet" framing of this question is superseded.)
+- What Verdaccio publishing conventions should the 4 packages still without EditMode tests (`platform.device`, `utilities.coroutines`, `utilities.ui`, `utilities.unity.alwaysstartfromscenezero`) adopt before first publish? (12 of 16 packages already have a `Tests/` folder, up from 11 — `utilities.attributes` gained tests alongside `RequiredReferenceValidator`.)
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
 - The 2026-09-20 editor bump to `6000.3.24f1` added `com.unity.sdk.linux-x86_64` and `com.unity.toolchain.linux-x86_64-linux` to `Packages/manifest.json` as project-wide dependencies. Assumption: these were pulled in by Unity Hub/Editor package resolution during the version bump rather than a deliberate Linux-build-target decision — not confirmed. Open question: should these be scoped/conditional rather than a default dependency for every contributor?
 - Should `Assets/GameEvents/` (currently empty) hold hand-authored `GameEvent` assets checked into the repo, or should the template ship with none and expect consumers to create their own?
