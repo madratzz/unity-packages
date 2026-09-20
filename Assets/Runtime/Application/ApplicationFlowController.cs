@@ -19,44 +19,52 @@ namespace ProjectCore.Architecture
     {
         [Header("Application")]
         [Tooltip("The ApplicationBase that owns the FSM this controller fires transitions on. There is no separate state-machine field here on purpose — both components must always target the same FSM instance.")]
-        [SerializeField] private ApplicationBase applicationBase;
+        [SerializeField] private ApplicationBase ApplicationBase;
 
         [Header("Transitions (The Destinations)")]
-        [SerializeField] private Transition gameStateTransition;
-        [SerializeField] private Transition levelFailTransition;
-        [SerializeField] private Transition settingsTransition;
+        [SerializeField] private Transition GameStateTransition;
+        [SerializeField] private Transition LevelFailTransition;
+        [SerializeField] private Transition SettingsTransition;
 
         [Header("Events (The Triggers)")]
-        [SerializeField] private GameEvent gotoGame;
-        [SerializeField] private GameEvent gotoLevelFail;
+        [SerializeField] private GameEvent GotoGame;
+        [SerializeField] private GameEvent GotoLevelFail;
 
         [Header("View Closed Events")]
-        [SerializeField] private GameEventWithInt levelFailViewClosed;
+        [SerializeField] private GameEventWithInt LevelFailViewClosed;
 
         [Tooltip("Replace with a richer IFlowLogic to override the default Boot/LevelFail→GoToGame strategy.")]
-        [SerializeField] private bool useCustomLogic;
+        [SerializeField] private bool UseCustomLogic;
 
         private IFlowLogic _logicBrain;
         private FiniteStateMachine _stateMachine;
         private Dictionary<FlowIntent, Action> _commandMap;
 
+        private void OnValidate()
+        {
+            if (!name.Equals(nameof(ApplicationFlowController)))
+            {
+                name = nameof(ApplicationFlowController);
+            }
+        }
+        
         private void Awake()
         {
-            _stateMachine = applicationBase != null ? applicationBase.StateMachine : null;
+            _stateMachine = ApplicationBase != null ? ApplicationBase.StateMachine : null;
             if (_stateMachine == null)
             {
-                Debug.LogError("[ApplicationFlowController] No FSM available — either applicationBase is not assigned, or its own applicationStateMachine is not assigned.", this);
+                Debug.LogError("[ApplicationFlowController] No FSM available — either ApplicationBase is not assigned, or its own ApplicationStateMachine is not assigned.", this);
                 enabled = false;
                 return;
             }
 
-            _logicBrain = useCustomLogic
+            _logicBrain = UseCustomLogic
                 ? gameObject.GetComponent<IFlowLogic>()
                 : new ApplicationFlowLogic();
 
             if (_logicBrain == null)
             {
-                Debug.LogError("[ApplicationFlowController] No IFlowLogic implementation found. Enable useCustomLogic with a component on this GameObject, or leave it off to use the default ApplicationFlowLogic.");
+                Debug.LogError("[ApplicationFlowController] No IFlowLogic implementation found. Enable UseCustomLogic with a component on this GameObject, or leave it off to use the default ApplicationFlowLogic.");
                 enabled = false;
                 return;
             }
@@ -85,15 +93,15 @@ namespace ProjectCore.Architecture
             _commandMap = new Dictionary<FlowIntent, Action>
             {
                 // Navigation
-                { FlowIntent.GoToGame,        () => PerformTransition(gameStateTransition) },
-                { FlowIntent.GoToLevelFail,   () => PerformTransition(levelFailTransition) },
-                { FlowIntent.OpenSettings,    () => PerformTransition(settingsTransition) },
+                { FlowIntent.GoToGame,        () => PerformTransition(GameStateTransition) },
+                { FlowIntent.GoToLevelFail,   () => PerformTransition(LevelFailTransition) },
+                { FlowIntent.OpenSettings,    () => PerformTransition(SettingsTransition) },
 
                 // Logic actions
                 { FlowIntent.ResumePrevious,  () => _stateMachine.ShouldResumePreviousState() },
 
                 // Defaults
-                { FlowIntent.DefaultToGame,   () => PerformTransition(gameStateTransition) }
+                { FlowIntent.DefaultToGame,   () => PerformTransition(GameStateTransition) }
             };
         }
 
@@ -135,16 +143,16 @@ namespace ProjectCore.Architecture
 
         private void SubscribeEvents()
         {
-            if (gotoGame)        gotoGame.Handler       += OnGotoGame;
-            if (gotoLevelFail)   gotoLevelFail.Handler  += OnGotoLevelFail;
-            if (levelFailViewClosed) levelFailViewClosed.Handler += OnLevelFailViewClose;
+            if (GotoGame)        GotoGame.Handler       += OnGotoGame;
+            if (GotoLevelFail)   GotoLevelFail.Handler  += OnGotoLevelFail;
+            if (LevelFailViewClosed) LevelFailViewClosed.Handler += OnLevelFailViewClose;
         }
 
         private void UnsubscribeEvents()
         {
-            if (gotoGame)        gotoGame.Handler       -= OnGotoGame;
-            if (gotoLevelFail)   gotoLevelFail.Handler  -= OnGotoLevelFail;
-            if (levelFailViewClosed) levelFailViewClosed.Handler -= OnLevelFailViewClose;
+            if (GotoGame)        GotoGame.Handler       -= OnGotoGame;
+            if (GotoLevelFail)   GotoLevelFail.Handler  -= OnGotoLevelFail;
+            if (LevelFailViewClosed) LevelFailViewClosed.Handler -= OnLevelFailViewClose;
         }
     }
 }

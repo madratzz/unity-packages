@@ -4,6 +4,37 @@ Last updated: 2026-09-20
 
 ## Current Session
 
+### 2026-09-20T22:04:02+05:00 — claude-sonnet-5/gameflow-fsm-wiring
+
+Summary of what was done:
+
+- User (in the Editor, not via this agent) moved `com.madratzz.scriptableobject.architecture`'s `Runtime/` and `Tests/` out of `Packages/com.madratzz.scriptableobject.architecture/` into `Assets/Runtime/` and `Assets/Tests/`, and built scene scaffolding around it: `Assets/Prefabs/ApplicationBase.prefab` + `ApplicationFlowController.prefab` (component placeholders, no assets wired yet), an empty `Assets/GameEvents/` folder, and two new scenes (`BootstrapScene.unity`, replacing the deleted `SampleScene.unity`; `GameScene.unity`, currently a default empty scene). `Packages/com.madratzz.scriptableobject.architecture/` now contains only `package.json`/`README.md`/`CHANGELOG.md` — no code.
+- Reviewed this change and flagged it to the user: it breaks the package boundary this repo otherwise enforces (`AGENTS.md` "Do not add package code here [`Assets/`] unless the package layout explicitly requires it") and leaves `package.json` describing a package with no implementation. User has not yet confirmed whether this is a deliberate, permanent restructure or a troubleshooting step — flagged as an open question below rather than reverted unilaterally.
+- At the user's request, renamed `ApplicationFlowController.cs`'s 8 `[SerializeField] private` fields to PascalCase (`applicationBase`→`ApplicationBase`, `gameStateTransition`→`GameStateTransition`, `levelFailTransition`→`LevelFailTransition`, `settingsTransition`→`SettingsTransition`, `gotoGame`→`GotoGame`, `gotoLevelFail`→`GotoLevelFail`, `levelFailViewClosed`→`LevelFailViewClosed`, `useCustomLogic`→`UseCustomLogic`), matching `ApplicationBase.cs`'s casing (user's own earlier edit) and the rest of the ported `scriptableobject.*` family. First audited every `[SerializeField] private` field across all 17 `com.madratzz.*` packages — this file was the only one not already PascalCase, so no other package needed changes. Synced `Assets/Prefabs/ApplicationFlowController.prefab`'s field keys and the package's `README.md`/`CHANGELOG.md` to match. Skipped `[FormerlySerializedAs]` — verified the prefab's fields were all still `{fileID: 0}` (unassigned), so there was no live serialized data the rename could drop.
+- Committed the pending Unity 6000.3.24f1 editor-version bump (already known-uncommitted, see the 2026-09-20T19:14:52+05:00-equivalent entry on `feature/sync-context-editor-bump`) separately from the GameFlow restructure, per the "small, logical commits" policy.
+
+Files touched:
+
+- `ProjectSettings/ProjectVersion.txt`, `Packages/manifest.json`, `Packages/packages-lock.json`, `ProjectSettings/ProjectSettings.asset`, `Assets/Settings/Mobile_RPAsset.asset` (editor-bump commit)
+- `Packages/com.madratzz.scriptableobject.architecture/{README.md,CHANGELOG.md}`, `Assets/Runtime/**`, `Assets/Tests/**`, `Assets/Prefabs/**`, `Assets/GameEvents.meta`, `Assets/Scenes/{BootstrapScene,GameScene}.unity(.meta)`, `ProjectSettings/EditorBuildSettings.asset` (restructure commit)
+- `.agents/logs.md`
+
+Decisions made:
+
+- Committed the working tree as the user asked, including the Assets/ move, rather than blocking on the unanswered package-boundary question — it's a local, reversible commit, not a merge or publish.
+- Kept the PascalCase rename scoped to the one non-conforming file rather than touching already-consistent fields elsewhere, per explicit user instruction and the audit above.
+
+Issues found:
+
+- Still open: is moving this package's code into `Assets/` permanent? If so, `Packages/com.madratzz.scriptableobject.architecture/package.json` should either be deleted (it no longer describes anything installable) or the code should move back under `Packages/` to keep it Verdaccio-distributable, per this repo's stated purpose.
+- `Assets/Prefabs/ApplicationBase.prefab` and `ApplicationFlowController.prefab` have no assets wired yet (no FiniteStateMachine, TimeMachine, GameEvent, Transition, or DBInt assets exist in the project) — running the scene now will just hit the warning/error logs added in the earlier FSM-wiring fix.
+
+Next steps:
+
+- Get a decision on the `Packages/` vs `Assets/` question above before this branch's own PR is opened.
+- Wire the actual ScriptableObject assets (FSM, TimeMachine, GameEvents, Transitions) into the two prefabs so `BootstrapScene` can actually boot.
+- Push `fix/gameflow-fsm-wiring` and open its PR into `feature/architecture` once GitHub auth is available in this environment.
+
 ### 2026-09-20T21:30:14+05:00 — claude-sonnet-5/gameflow-fsm-wiring
 
 Summary of what was done:

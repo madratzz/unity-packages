@@ -20,34 +20,42 @@ namespace ProjectCore.Architecture
     public class ApplicationBase : MonoBehaviour
     {
         [Header("Frame Rate")]
-        [SerializeField] private int iOSTargetFrameRate = 60;
-        [SerializeField] private int androidTargetFrameRate = 60;
+        [SerializeField] private int IOSTargetFrameRate = 60;
+        [SerializeField] private int AndroidTargetFrameRate = 60;
 
         [Header("Time Machine")]
-        [SerializeField] private TimeMachine.TimeMachine applicationTimeMachine;
+        [SerializeField] private TimeMachine.TimeMachine ApplicationTimeMachine;
 
         [Header("App Lifecycle Events")]
-        [SerializeField] private GameEvent appPaused;
-        [SerializeField] private GameEvent appResumed;
-        [SerializeField] private DBInt appPausedTime;
+        [SerializeField] private GameEvent AppPaused;
+        [SerializeField] private GameEvent AppResumed;
+        [SerializeField] private DBInt AppPausedTime;
 
         [Header("State Machine")]
-        [SerializeField] private FiniteStateMachine applicationStateMachine;
+        [SerializeField] private FiniteStateMachine ApplicationStateMachine;
 
         /// <summary>
         /// The FSM this application drives. <see cref="ApplicationFlowController"/>
         /// reads this instead of holding its own duplicate reference, so there is
         /// exactly one place an FSM asset is wired for a given application.
         /// </summary>
-        public FiniteStateMachine StateMachine => applicationStateMachine;
+        public FiniteStateMachine StateMachine => ApplicationStateMachine;
 
         private Coroutine _stateMachineRoutine;
         private Coroutine _timeMachineRoutine;
         private bool _appPaused;
 
+        private void OnValidate()
+        {
+            if (!name.Equals(nameof(ApplicationBase)))
+            {
+                name = nameof(ApplicationBase);
+            }
+        }
+
         private void Awake()
         {
-            if (applicationStateMachine == null)
+            if (ApplicationStateMachine == null)
                 Debug.LogWarning("[ApplicationBase] applicationStateMachine is not assigned — the FSM will not run.", this);
         }
 
@@ -55,17 +63,17 @@ namespace ProjectCore.Architecture
         {
             Application.targetFrameRate = Application.platform switch
             {
-                RuntimePlatform.Android    => androidTargetFrameRate,
-                RuntimePlatform.IPhonePlayer => iOSTargetFrameRate,
+                RuntimePlatform.Android    => AndroidTargetFrameRate,
+                RuntimePlatform.IPhonePlayer => IOSTargetFrameRate,
                 _                          => Application.targetFrameRate
             };
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
-            if (applicationTimeMachine != null)
-                _timeMachineRoutine = StartCoroutine(applicationTimeMachine.Tick());
+            if (ApplicationTimeMachine != null)
+                _timeMachineRoutine = StartCoroutine(ApplicationTimeMachine.Tick());
 
-            if (applicationStateMachine != null)
-                _stateMachineRoutine = StartCoroutine(applicationStateMachine.Tick());
+            if (ApplicationStateMachine != null)
+                _stateMachineRoutine = StartCoroutine(ApplicationStateMachine.Tick());
         }
 
         private void OnApplicationFocus(bool focus)
@@ -90,16 +98,16 @@ namespace ProjectCore.Architecture
             if (_appPaused) return;
             _appPaused = true;
 
-            if (appPausedTime != null)
-                appPausedTime.SetValue((int)DateTimeOffset.Now.ToUnixTimeSeconds());
-            appPaused?.Invoke();
+            if (AppPausedTime != null)
+                AppPausedTime.SetValue((int)DateTimeOffset.Now.ToUnixTimeSeconds());
+            AppPaused?.Invoke();
         }
 
         private void ApplicationResumed()
         {
             if (!_appPaused) return;
             _appPaused = false;
-            appResumed?.Invoke();
+            AppResumed?.Invoke();
         }
     }
 }

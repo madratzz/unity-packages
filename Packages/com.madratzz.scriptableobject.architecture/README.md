@@ -25,14 +25,14 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 ```csharp
 // 1. Add ApplicationBase + ApplicationFlowController to your boot scene.
 // 2. Wire SerializeFields:
-//    - ApplicationBase.applicationStateMachine: your FiniteStateMachine asset
+//    - ApplicationBase.ApplicationStateMachine: your FiniteStateMachine asset
 //      (this is the only FSM reference in the system — the controller reads
 //      it from ApplicationBase, it does not have its own FSM field)
-//    - ApplicationFlowController.applicationBase: reference to that same
+//    - ApplicationFlowController.ApplicationBase: reference to that same
 //      ApplicationBase
-//    - applicationTimeMachine: optional TimeMachine asset for the per-second tick loop
-//    - appPaused / appResumed: GameEvent assets fired on app lifecycle
-//    - appPausedTime: DBInt asset for the pause timestamp
+//    - ApplicationTimeMachine: optional TimeMachine asset for the per-second tick loop
+//    - AppPaused / AppResumed: GameEvent assets fired on app lifecycle
+//    - AppPausedTime: DBInt asset for the pause timestamp
 //    - transitions + GameEvents on the controller
 // 3. Hook ApplicationFlowController.Boot() to a startup event (e.g. GameEventRaiserOnEnable).
 ```
@@ -51,7 +51,7 @@ public class MyFlowLogic : ApplicationFlowLogic
 }
 ```
 
-Then on the `ApplicationFlowController` GameObject, enable **useCustomLogic** and add a `MyFlowLogic` component.
+Then on the `ApplicationFlowController` GameObject, enable **UseCustomLogic** and add a `MyFlowLogic` component.
 
 ## Requirements
 
