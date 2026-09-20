@@ -33,8 +33,8 @@ Do not infer undocumented product requirements, package APIs, registry policies,
 
 ## Project Snapshot
 
-- `unity-packages` is a Unity project for reusable personal Unity game-development packages.
-- The intended distribution mechanism is a Verdaccio package registry.
+- `unity-packages` is a Unity project for reusable personal Unity game-development packages, and — via its `Assets/` layer — a clonable SOAP-based project template built on top of them. See `IDEA.md`.
+- The intended distribution mechanism for `Packages/com.madratzz.*` is a Verdaccio package registry. `Assets/` is not distributed as a package; it's the template/integration layer, cloned with the repo.
 - The current Unity editor version is recorded in `ProjectSettings/ProjectVersion.txt`; at the time this guide was added it was Unity `6000.3.21f1`.
 - Unity package dependencies are defined by `Packages/manifest.json`.
 - The project currently has an early-stage source baseline; establish package and assembly boundaries deliberately before adding reusable code.
@@ -43,7 +43,7 @@ Do not infer undocumented product requirements, package APIs, registry policies,
 
 | Path | Role | Agent Guidance |
 |---|---|---|
-| `Assets/` | Unity assets and project content | Do not add package code here unless the package layout explicitly requires it. |
+| `Assets/` | Template/integration layer: scenes, prefabs, and the GameFlow application code (`Assets/Runtime`, `Assets/Tests`) that wires the `Packages/com.madratzz.*` family into a working project | Code here should be template/integration glue only (e.g. `ApplicationBase`/`ApplicationFlowController` wiring packages together) — a new reusable, standalone system belongs in its own package under `Packages/`, not here. |
 | `Packages/` | Unity Package Manager configuration | Treat `manifest.json` and `packages-lock.json` as dependency records; make dependency changes deliberately. |
 | `ProjectSettings/` | Unity configuration | Preserve Unity serialization and only change settings required by the task. |
 | `.agents/` | Active, concise project context | Read at startup and update after meaningful, authorized work. |
@@ -74,7 +74,7 @@ When implementing a package or runtime feature:
 - Add or update Unity Test Framework Edit Mode tests for deterministic logic; use Play Mode tests only for engine/scene integration that requires them.
 - Avoid per-frame allocations, implicit scene lookups, and implementation details that prevent isolated testing.
 - Validate on the lowest-cost relevant path first, then run Unity or device-specific validation when the requested change requires it.
-- **C# field-naming convention is not yet settled.** The ported `scriptableobject.*` packages use PascalCase for `[SerializeField]` fields (e.g. `[SerializeField] private float TickInterval;`); the newer `scriptableobject.architecture` package uses camelCase (e.g. `[SerializeField] private int androidTargetFrameRate;`). Do not assume either is "the" convention — match the surrounding file/package until the project explicitly picks one (tracked as an open question in `.agents/CONTEXT.md`).
+- **C# field-naming convention: `[SerializeField] private` fields use PascalCase** (e.g. `[SerializeField] private float TickInterval;`), consistently across the `scriptableobject.*` family and the `Assets/` GameFlow layer (resolved 2026-09-20; the GameFlow layer's fields were the last holdout and have been renamed to match).
 
 This repository does not currently document a canonical Unity executable path or CI command. Discover available tooling before running a build; do not invent build commands.
 

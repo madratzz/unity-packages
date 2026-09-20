@@ -4,6 +4,137 @@ Last updated: 2026-09-20
 
 ## Current Session
 
+### 2026-09-20T23:24:14+05:00 — claude-sonnet-5/merge-development-into-architecture
+
+Summary of what was done:
+
+- Prepared PR #6 (`feature/architecture` → `development`) to be mergeable. It had gone `CONFLICTING`/`DIRTY` because `feature/architecture` forked before `development`'s 2026-09-16 `.agents/` uppercase rename (PR #7) and had kept using the lowercase files (`.agents/context.md`, `.agents/logs.md`) all session.
+- **Found a real data-loss risk, not just a text conflict**: a first dry-run merge silently dropped `.agents/context.md`'s content entirely — git did not detect it as a rename of `.agents/CONTEXT.md` (too much content drift by now) and instead just kept `development`'s `CONTEXT.md` as-is with no conflict marker to catch it. A second attempt (after PR #11 merged, adding more history) did flag it as an explicit `modify/delete` conflict instead — resolved by hand-merging every unique fact from `.agents/context.md` (the `Assets/`-as-template-layer decision, the updated 16-package list, the `[SerializeField]` casing resolution, the `Assets/GameEvents` open question, the Unity-version and test-coverage corrections) into `.agents/CONTEXT.md`, then deleting the lowercase file.
+- Resolved the `.agents/LOGS.md` conflict the same way as the earlier PR #10 conflict: both sides' newest-first entries kept, in their already-correct chronological order (this branch's newer entries first, `development`'s next, converging into the shared older history both branches already agree on).
+- Resolved a `README.md` conflict: kept this branch's updated intro line plus `development`'s "Documentation" pointer section — both additive, no actual disagreement.
+- `AGENTS.md` auto-merged cleanly (git correctly wove this branch's `Assets/`-vs-`Packages/` edits into `development`'s fuller v2 policy structure) — but its "C# field-naming convention is not yet settled" note was stale (referenced `scriptableobject.architecture`'s old camelCase example field, already renamed to PascalCase in PR #11). Updated it to state the convention is resolved.
+- `Packages/packages-lock.json` auto-merged cleanly with no conflict.
+- Did this on a dedicated branch (`chore/merge-development-into-architecture`, off `feature/architecture`) rather than merging directly on `feature/architecture`, so the resolution itself goes through review like any other change.
+
+Files touched:
+
+- `.agents/CONTEXT.md` (merged), `.agents/LOGS.md` (merged), `.agents/context.md` (deleted, content preserved in `CONTEXT.md`)
+- `README.md`, `AGENTS.md`
+
+Decisions made:
+
+- Treat a "successful" auto-merge or silently-resolved rename as something to verify, not trust by default, when two branches used different filenames for the same conceptual file — this session's first dry-run would have silently destroyed real content if committed without checking.
+
+Issues found:
+
+- None new beyond the data-loss risk above, which was caught before anything was committed or pushed.
+
+Next steps:
+
+- Push `chore/merge-development-into-architecture` and open a PR into `feature/architecture`.
+- Once merged, PR #6 (`feature/architecture` → `development`) should be clean and mergeable — verify before merging.
+- The `Docs/Packages/SOAP - Architecture (GameFlow).md` vault note still needs its rework (GameFlow described as the `Assets/` template layer, not package #17) once PR #6 lands on `development` and the vault becomes visible from this lineage.
+
+### 2026-09-20T23:12:56+05:00 — claude-sonnet-5/gameflow-template-direction
+
+Summary of what was done:
+
+- Resolved the open question (from the prior FSM-wiring-fix session) of whether moving `com.madratzz.scriptableobject.architecture`'s code from `Packages/` into `Assets/` was permanent. User decision: yes, deliberately — this repo is both a package library (`Packages/com.madratzz.*`, unchanged, still Verdaccio-distributable) and a clonable SOAP-based project template (`Assets/`), and the GameFlow application layer is the template's integration code, not a 17th reusable package. Confirmed scope explicitly with the user: only the GameFlow layer moves to `Assets/`; the other 16 packages stay under `Packages/` as-is.
+- Deleted `Packages/com.madratzz.scriptableobject.architecture/` (`package.json`, `README.md`, `CHANGELOG.md`, `LICENSE.md` + metas) — it had no code left (Runtime/Tests already moved to `Assets/` in the prior session) and was actively misleading as a "package" with nothing installable in it.
+- Migrated its README content (adapted: dropped the UPM/Verdaccio installation section, reframed the intro) to `Assets/Runtime/README.md` so the usage/wiring documentation isn't lost.
+- Updated `IDEA.md`, `README.md`, and `AGENTS.md` (Project Snapshot + Repository Layout's `Assets/` row) to document the `Packages/` (reusable, distributable) vs. `Assets/` (template/integration layer, cloned with the repo) split as a deliberate, permanent architecture — so a future agent doesn't try to "fix" this back into `Packages/` again.
+- Updated `.agents/context.md`: Project Summary, Current Goals, Architecture/Structure (added `Assets/`'s new role and the still-current 16-package `Packages/` list), and Important Decisions. Also corrected two pieces of staleness found while editing this file: the Unity version (still said `6000.3.21f1`; actual is `6000.3.24f1` per the already-merged editor-bump commit on this branch) and the "no embedded package has tests yet" open question (11 of 16 packages already have a `Tests/` folder).
+- Created branch `feature/gameflow-template-direction` from `feature/architecture` (this branch already has `fix/gameflow-fsm-wiring`'s commits merged via PR #8) per the branch-per-task policy.
+
+Files touched:
+
+- `IDEA.md`, `README.md`, `AGENTS.md`
+- `.agents/context.md`, `.agents/logs.md`
+- `Packages/com.madratzz.scriptableobject.architecture/*` (deleted)
+- `Packages/packages-lock.json` (removed the now-dangling `com.madratzz.scriptableobject.architecture` embedded-dependency entry left over from the deletion)
+- `Assets/Runtime/README.md` (new, migrated content)
+
+Decisions made:
+
+- `Assets/` code is template/integration glue only — a new reusable, standalone system still belongs in its own package under `Packages/`, not `Assets/`. Recorded in `AGENTS.md`'s Repository Layout table so this isn't re-litigated per task.
+- Deleted the hollow package rather than keeping it as a stub or redirect — a `package.json` with no code is actively misleading to anyone resolving packages, and the repo's docs now explain the split clearly enough that a redirect isn't needed.
+
+Issues found:
+
+- None new; this session resolved an issue flagged in the prior one (`.agents/logs.md`'s 2026-09-20T22:04:02+05:00 entry).
+
+Next steps:
+
+- This branch (`feature/architecture` lineage) still doesn't have the `Docs/` Obsidian vault (that only exists on `development`, merged via PR #10). Once `feature/architecture`/PR #6 merges into `development`, the vault's `Docs/Packages/SOAP - Architecture (GameFlow).md` note should be reworked — it currently describes GameFlow as package #17; it should instead describe it as the `Assets/` template layer, likely moved out of `Docs/Packages/` into its own top-level note.
+- Push `feature/gameflow-template-direction` and open its PR into `feature/architecture`.
+- Wire actual ScriptableObject assets (FSM, TimeMachine, GameEvents, Transitions) into `Assets/Prefabs/ApplicationBase.prefab`/`ApplicationFlowController.prefab` so `BootstrapScene` can actually boot (still outstanding from the prior session).
+
+### 2026-09-20T22:04:02+05:00 — claude-sonnet-5/gameflow-fsm-wiring
+
+Summary of what was done:
+
+- User (in the Editor, not via this agent) moved `com.madratzz.scriptableobject.architecture`'s `Runtime/` and `Tests/` out of `Packages/com.madratzz.scriptableobject.architecture/` into `Assets/Runtime/` and `Assets/Tests/`, and built scene scaffolding around it: `Assets/Prefabs/ApplicationBase.prefab` + `ApplicationFlowController.prefab` (component placeholders, no assets wired yet), an empty `Assets/GameEvents/` folder, and two new scenes (`BootstrapScene.unity`, replacing the deleted `SampleScene.unity`; `GameScene.unity`, currently a default empty scene). `Packages/com.madratzz.scriptableobject.architecture/` now contains only `package.json`/`README.md`/`CHANGELOG.md` — no code.
+- Reviewed this change and flagged it to the user: it breaks the package boundary this repo otherwise enforces (`AGENTS.md` "Do not add package code here [`Assets/`] unless the package layout explicitly requires it") and leaves `package.json` describing a package with no implementation. User has not yet confirmed whether this is a deliberate, permanent restructure or a troubleshooting step — flagged as an open question below rather than reverted unilaterally.
+- At the user's request, renamed `ApplicationFlowController.cs`'s 8 `[SerializeField] private` fields to PascalCase (`applicationBase`→`ApplicationBase`, `gameStateTransition`→`GameStateTransition`, `levelFailTransition`→`LevelFailTransition`, `settingsTransition`→`SettingsTransition`, `gotoGame`→`GotoGame`, `gotoLevelFail`→`GotoLevelFail`, `levelFailViewClosed`→`LevelFailViewClosed`, `useCustomLogic`→`UseCustomLogic`), matching `ApplicationBase.cs`'s casing (user's own earlier edit) and the rest of the ported `scriptableobject.*` family. First audited every `[SerializeField] private` field across all 17 `com.madratzz.*` packages — this file was the only one not already PascalCase, so no other package needed changes. Synced `Assets/Prefabs/ApplicationFlowController.prefab`'s field keys and the package's `README.md`/`CHANGELOG.md` to match. Skipped `[FormerlySerializedAs]` — verified the prefab's fields were all still `{fileID: 0}` (unassigned), so there was no live serialized data the rename could drop.
+- Committed the pending Unity 6000.3.24f1 editor-version bump (already known-uncommitted, see the 2026-09-20T19:14:52+05:00-equivalent entry on `feature/sync-context-editor-bump`) separately from the GameFlow restructure, per the "small, logical commits" policy.
+
+Files touched:
+
+- `ProjectSettings/ProjectVersion.txt`, `Packages/manifest.json`, `Packages/packages-lock.json`, `ProjectSettings/ProjectSettings.asset`, `Assets/Settings/Mobile_RPAsset.asset` (editor-bump commit)
+- `Packages/com.madratzz.scriptableobject.architecture/{README.md,CHANGELOG.md}`, `Assets/Runtime/**`, `Assets/Tests/**`, `Assets/Prefabs/**`, `Assets/GameEvents.meta`, `Assets/Scenes/{BootstrapScene,GameScene}.unity(.meta)`, `ProjectSettings/EditorBuildSettings.asset` (restructure commit)
+- `.agents/logs.md`
+
+Decisions made:
+
+- Committed the working tree as the user asked, including the Assets/ move, rather than blocking on the unanswered package-boundary question — it's a local, reversible commit, not a merge or publish.
+- Kept the PascalCase rename scoped to the one non-conforming file rather than touching already-consistent fields elsewhere, per explicit user instruction and the audit above.
+
+Issues found:
+
+- Still open: is moving this package's code into `Assets/` permanent? If so, `Packages/com.madratzz.scriptableobject.architecture/package.json` should either be deleted (it no longer describes anything installable) or the code should move back under `Packages/` to keep it Verdaccio-distributable, per this repo's stated purpose.
+- `Assets/Prefabs/ApplicationBase.prefab` and `ApplicationFlowController.prefab` have no assets wired yet (no FiniteStateMachine, TimeMachine, GameEvent, Transition, or DBInt assets exist in the project) — running the scene now will just hit the warning/error logs added in the earlier FSM-wiring fix.
+
+Next steps:
+
+- Get a decision on the `Packages/` vs `Assets/` question above before this branch's own PR is opened.
+- Wire the actual ScriptableObject assets (FSM, TimeMachine, GameEvents, Transitions) into the two prefabs so `BootstrapScene` can actually boot.
+- Push `fix/gameflow-fsm-wiring` and open its PR into `feature/architecture` once GitHub auth is available in this environment.
+
+### 2026-09-20T21:30:14+05:00 — claude-sonnet-5/gameflow-fsm-wiring
+
+Summary of what was done:
+
+- Fixed two correctness bugs and one documentation bug found by an earlier code review of `com.madratzz.scriptableobject.architecture` (the unreleased GameFlow port from `feat(architecture): port GameFlow framework from asteroids-demo`, commit `0f94d96`):
+  - **Duplicate, unlinked FSM references**: `ApplicationBase` and `ApplicationFlowController` each held an independent `[SerializeField] FiniteStateMachine` with nothing enforcing they pointed at the same asset — if they diverged (or one was left unassigned while the other was set), transitions were silently queued on an FSM that never ticked. Fixed by removing `ApplicationFlowController`'s own FSM field entirely and having it read `ApplicationBase.StateMachine` (a new public accessor) through an explicit `[SerializeField] applicationBase` reference instead — there is now exactly one FSM field in the whole system, structurally preventing divergence.
+  - **Implicit `Resources.Load` fallback**: `ApplicationBase.Awake()` fell back to `Resources.Load<FiniteStateMachine>("StateMachine")` when unwired — a magic-string lookup that violates this repo's explicit-wiring rule (`AGENTS.md` "Change Discipline" #3). Removed; an unwired `applicationStateMachine` now logs a warning instead of silently resolving (or failing to resolve) via `Resources`.
+  - **README example bug**: the "extend the decision table" usage example called `FlowIntent.GoToMainMenu`, which doesn't exist on the enum. Replaced with `FlowContext.Settings, UICloseReasons.ResumeGame, FlowIntent.ResumePrevious`, matching the working example already covered by `ApplicationFlowLogicTests.SubclassCanExtendStrategyTable`.
+  - Also removed a redundant self-referencing `using ProjectCore.Architecture;` in `IFlowLogic.cs` (minor, from the same review).
+- Branched `fix/gameflow-fsm-wiring` from `feature/architecture` (not `development` — this package doesn't exist there yet) since the buggy code only exists on that unmerged branch.
+- Updated the package's `README.md` (wiring instructions + decision-table example) and `CHANGELOG.md` (`### Fixed`) in the same commit as the code change.
+
+Files touched:
+
+- `Packages/com.madratzz.scriptableobject.architecture/Runtime/Application/ApplicationBase.cs`
+- `Packages/com.madratzz.scriptableobject.architecture/Runtime/Application/ApplicationFlowController.cs`
+- `Packages/com.madratzz.scriptableobject.architecture/Runtime/Logic/IFlowLogic.cs`
+- `Packages/com.madratzz.scriptableobject.architecture/README.md`, `CHANGELOG.md`
+- `.agents/logs.md`
+
+Decisions made:
+
+- Fixed the duplicate-FSM-reference bug by removing the redundant field (structural fix) rather than adding a runtime consistency check between two fields — matches this repo's stated preference for explicit, singular wiring over defensive validation of avoidable duplication.
+- Did not rename this branch's `.agents/` files to the uppercase convention adopted on `development` on 2026-09-16 — this branch predates that decision and diverged before it landed; renaming here would mix an unrelated, disruptive change into a bug-fix commit. Left as a note for whoever rebases/merges `feature/architecture`.
+
+Issues found:
+
+- Could not run this package's EditMode tests (no Unity batch-mode invocation is documented for this repo, and none was attempted here) — verified instead by grep that no other file in the repo references the removed `ApplicationFlowController.applicationStateMachine` field or the removed `FlowIntent.GoToMainMenu`, and that `ApplicationFlowLogicTests.cs` (the package's only existing tests) doesn't touch the MonoBehaviours I changed, so it's unaffected.
+- `.agents/logs.md`'s "Last updated" header was already stale relative to its own entries before this change (said 2026-08-15 while entries went up to 2026-08-17); the GameFlow port commit itself (`0f94d96`) appears not to have added a log entry. Not backfilled here — out of scope for this fix and not something I have firsthand knowledge of.
+
+Next steps:
+
+- Push `fix/gameflow-fsm-wiring` and open a PR **into `feature/architecture`** (not `development`) once GitHub auth is available in this environment — push failed here with no credentials configured, same blocker hit on other branches this session.
+- Once `feature/architecture` itself is ready for `development`, the `Docs/Packages/SOAP - Architecture (GameFlow).md` vault note (on the separate `feature/codebase-obsidian-vault` branch) documents these as "known issues" — that callout should be removed/updated to reflect the fix when the two branches converge.
+
 ### 2026-09-20T19:32:11+05:00 — claude-sonnet-5/codebase-obsidian-vault
 
 Summary of what was done:
