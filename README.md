@@ -1,4 +1,4 @@
-# unity-packages
+# unity-so-starter-template
 A collection of reusable Unity ScriptableObject Architecture (SOAP) packages, and a clonable template project that wires them into a working game scaffold. See `IDEA.md` for the intended role of `Packages/` vs. `Assets/`.
 
 ## Quick start
@@ -6,8 +6,8 @@ A collection of reusable Unity ScriptableObject Architecture (SOAP) packages, an
 **Prerequisites:** Unity **6000.3.24f1** (see `ProjectSettings/ProjectVersion.txt`) and Git.
 
 ```bash
-git clone https://github.com/madratzz/unity-packages.git
-cd unity-packages
+git clone https://github.com/madratzz/unity-so-starter-template.git
+cd unity-so-starter-template
 git checkout development
 ```
 
