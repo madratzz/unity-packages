@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+// Disambiguate: `using System` + `using UnityEngine` make bare `Object` a CS0104
+// ambiguity between System.Object and UnityEngine.Object.
+using Object = UnityEngine.Object;
 
 namespace CustomEditorUtilities
 {

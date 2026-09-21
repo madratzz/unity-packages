@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+// Disambiguate: `using System` + `using UnityEngine` make bare `Object` a CS0104
+// ambiguity between System.Object and UnityEngine.Object.
+using Object = UnityEngine.Object;
 
 namespace CustomEditorUtilities
 {

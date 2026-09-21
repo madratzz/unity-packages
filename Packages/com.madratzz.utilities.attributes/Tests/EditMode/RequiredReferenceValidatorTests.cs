@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using CustomEditorUtilities;
 using CustomUtilities.Attributes;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Madratzz.Tests.UtilitiesAttributes
 {
@@ -51,6 +53,10 @@ namespace Madratzz.Tests.UtilitiesAttributes
             GameObject go = SpawnGameObject();
             go.AddComponent<RequiredRefHolder>();
 
+            // The validator reports by logging an error, which the Test Framework treats as an
+            // unexpected log unless it is expected up front.
+            LogAssert.Expect(LogType.Error, new Regex(@"Test :: RequiredRefHolder\.Dependency is required but unassigned"));
+
             List<string> issues = RequiredReferenceValidator.ValidateGameObject(go, "test-asset-path");
 
             Assert.AreEqual(1, issues.Count);
@@ -87,6 +93,8 @@ namespace Madratzz.Tests.UtilitiesAttributes
             GameObject child = SpawnGameObject("Child");
             child.transform.SetParent(parent.transform);
             child.AddComponent<RequiredRefHolder>();
+
+            LogAssert.Expect(LogType.Error, new Regex(@"Parent/Child :: RequiredRefHolder\.Dependency is required but unassigned"));
 
             List<string> issues = RequiredReferenceValidator.ValidateGameObject(parent, "test-asset-path");
 
