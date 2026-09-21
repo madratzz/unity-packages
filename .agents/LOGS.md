@@ -1,8 +1,46 @@
 # Active Logs
 
-Last updated: 2026-09-21
+Last updated: 2026-09-22
 
 ## Current Session
+
+### 2026-09-22T01:34:41+05:00 — deepseek-v4.1-flash/editmode-test-failures
+
+Summary of what was done:
+
+- **Merged `main` into `development`** (commit `1eab38f`). Resolved `Packages/manifest.json` (kept `development`'s side — `main`'s only edits, `com.unity.timeline` 1.8.13 and `com.unity.collab-proxy` 2.13.6, were already present there) and `README.md` (kept `development`'s packages + GameFlow content, retitled to `unity-so-starter-template` with the clone URL and `cd` updated). `ProjectSettings.asset` auto-merged. `main` is now an ancestor of `development`; both are pushed.
+- **Fixed CS0104 compile errors** in `SearchableAssetFinder.cs` / `SearchableAssetDropdown.cs` — `using System` plus `using UnityEngine` made a bare `Object` ambiguous between `System.Object` and `UnityEngine.Object`. Fixed with an explicit `using Object = UnityEngine.Object;` alias rather than dropping either namespace.
+- **Repaired a UPM download failure**: `com.unity.sysroot.base` failed to download (`Cannot connect to 'download.packages.unity.com'`, ECONNRESET) so it never landed in `Library/PackageCache`, which broke the dependent Linux toolchain packages' `Editor/` scripts and failed the whole compile. Host was genuinely flaky (~1 in 6 connections reset) and UPM does not retry, so forced a re-resolve by toggling `manifest.json` content in a loop; the package then downloaded and the build went green.
+- **Upgraded the Unity CLI and the Pipeline package.** CLI was already latest at `1.0.0-beta.10` (confirmed against both the Homebrew cask and Unity's own beta CDN manifest). Pipeline went `0.6.0-exp.1` → `0.7.0-exp.1`.
+- **Diagnosed and fixed all six failing EditMode tests** (see the three commits on this branch). Every root cause was verified against the running Editor with `eval_file` probes rather than inferred; details in the commit message for `b36f96a`. Full suite is now **124/124 passing**.
+
+Files touched:
+
+- `Packages/manifest.json`, `Packages/packages-lock.json`
+- `Packages/com.madratzz.utilities.attributes/Editor/{SearchableAssetFinder,SearchableAssetDropdown}.cs`
+- `Packages/com.madratzz.utilities.attributes/Tests/EditMode/{RequiredReferenceValidatorTests,SearchableAssetFinderTests}.cs`, `.../Tests/EditMode/com.madratzz.utilities.attributes.tests.asmdef`
+- `Packages/com.madratzz.utilities.attributes/Tests/Fixtures/` (new: `com.madratzz.utilities.attributes.fixtures.asmdef` + `SearchableAssetFinderTestAsset.cs`)
+- `Packages/com.madratzz.scriptableobject.eventsystem.core/Tests/EditMode/GameEventMonoTests.cs`
+- `.agents/LOGS.md`, `.agents/LEARNINGS.md`
+
+Decisions made:
+
+- Kept `development`'s `README.md` content and retitled it, rather than keeping `main`'s empty-template README — the branch reality (16 packages, GameFlow layer, editor 6000.3.24f1) contradicted the template README.
+- Re-downloaded the missing `com.unity.sysroot.base` instead of removing the Linux toolchain packages, which would have papered over a transient network fault.
+- Installed Pipeline `0.7.0-exp.1` by explicit version because `unity pipeline upgrade` misreports `alreadyLatest`; see LEARNINGS.md.
+- Put the `SearchableAssetFinder` test fixture in its own **non-test** Editor assembly rather than adding a reference to another `com.madratzz.*` package (which would couple two independent packages) or using a built-in type (no suitable one exists; see LEARNINGS.md).
+- Invoked `OnEnable` by reflection in `GameEventMonoTests` rather than adding `[ExecuteAlways]` to the components — that would raise their GameEvents inside the Editor.
+
+Issues found:
+
+- `unity pipeline upgrade` returns `alreadyLatest: true` while a newer version is published. Workaround: `unity pipeline list-versions`, then `unity pipeline install --package-version <v>`.
+- `ProjectSettings/ProjectSettings.asset` has an **unrelated** Unity-generated modification on disk (adds `Android: SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY` to `scriptingDefineSymbols`, presumably written when a package registered its version defines). Left unstaged and uncommitted per `AGENTS.md`'s "do not stage unrelated modifications"; flagging for a deliberate decision.
+- `AGENTS.md`, `IDEA.md`, `Docs/Home.md` and `.agents/CONTEXT.md` still call the project `unity-packages` after the rename to `unity-so-starter-template` — pre-existing staleness, not touched here.
+
+Next steps:
+
+- Decide what to do with the stray `ProjectSettings.asset` define change.
+- Optionally fold the stale `unity-packages` naming into a docs pass.
 
 ### 2026-09-21T00:22:08+05:00 — claude-sonnet-5/searchable-asset-dropdown
 
