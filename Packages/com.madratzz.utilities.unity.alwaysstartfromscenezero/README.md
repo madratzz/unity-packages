@@ -14,6 +14,10 @@ When the toggle is active, entering Play Mode always loads the scene at build in
 
 This is an Editor-only package — there is no runtime assembly and no impact on builds.
 
+The toggle is safe to leave enabled while running tests. Entering Play Mode to run Unity Test
+Framework Play Mode tests is detected and the scene-0 load is skipped for that session, so the
+test runner keeps the scene it set up. No manual toggling is needed before a test run.
+
 ## Installation
 
 Install via the Unity Package Manager pointing to your Verdaccio registry.
