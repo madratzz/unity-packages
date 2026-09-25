@@ -22,6 +22,8 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 
 ## Usage
 
+Both prefabs ship pre-wired to the assets described under **Shipped screen flow** below, so the list here is what to change when you point them at your own assets rather than a set-up checklist.
+
 ```csharp
 // 1. Add ApplicationBase + ApplicationFlowController to your boot scene
 //    (see Assets/Prefabs/ApplicationBase.prefab and ApplicationFlowController.prefab).
@@ -38,21 +40,40 @@ All wiring is `[SerializeField]` — no VContainer, no Zenject. The default deci
 // 3. Hook ApplicationFlowController.Boot() to a startup event (e.g. GameEventRaiserOnEnable).
 ```
 
-To extend the decision table:
+To extend the decision table, subclass and call `Add` — it writes through an indexer, so it both adds new pairs and overrides shipped ones:
 
 ```csharp
 public class MyFlowLogic : ApplicationFlowLogic
 {
     public MyFlowLogic()
     {
-        Add(FlowContext.MainMenu, UICloseReasons.Game, FlowIntent.GoToGame);
-        Add(FlowContext.MainMenu, UICloseReasons.Settings, FlowIntent.OpenSettings);
-        Add(FlowContext.Settings, UICloseReasons.ResumeGame, FlowIntent.ResumePrevious);
+        Add(FlowContext.LevelFail, UICloseReasons.Revive,    FlowIntent.GoToGame);   // new
+        Add(FlowContext.MainMenu,  UICloseReasons.Game,      FlowIntent.OpenStore);  // override
     }
 }
 ```
 
 Then on the `ApplicationFlowController` GameObject, enable **UseCustomLogic** and add a `MyFlowLogic` component.
+
+## Shipped screen flow
+
+The template ships assets for four screens — **MainMenu, Gameplay, Settings, Store** — under `Assets/StateMachine`, `Assets/GameEvents` and `Assets/Variables`, and both prefabs come pre-wired to them. The FSM boots into `MainMenuState`.
+
+`SettingsState` and `StoreState` set `PausesPreviousState`, so they overlay whatever is running: closing one with `UICloseReasons.ResumeGame` resolves to `ResumePrevious` and drops back underneath, while `UICloseReasons.Home` routes to the menu.
+
+| Context | Close reason | Intent |
+|---|---|---|
+| `Boot` | `Game` / `Home` | `GoToGame` / `GoToMainMenu` |
+| `MainMenu` | `Game` / `Settings` / `Store` | `GoToGame` / `OpenSettings` / `OpenStore` |
+| `Gameplay` | `Home` / `Settings` / `Store` | `GoToMainMenu` / `OpenSettings` / `OpenStore` |
+| `Settings`, `Store` | `ResumeGame` / `Home` | `ResumePrevious` / `GoToMainMenu` |
+| `LevelFail` | `Game` / `Store` / `Home` | `GoToGame` / `OpenStore` / `GoToMainMenu` |
+
+Anything unlisted falls through to `DefaultToGame`.
+
+A view reports its dismissal by raising the matching `e_*ViewClosed` `GameEventWithInt` with a `UICloseReasons` value as the payload; the `e_Goto*` plain `GameEvent`s are direct commands that skip the table. `ApplicationFlowController.Boot()` still asks for `(Boot, Game)`, so it jumps straight to gameplay — the FSM's `BootState` is what puts the menu first. Change `Boot()` to `(Boot, Home)` if you want the boot hook itself to land on the menu.
+
+There is deliberately **no** `LevelFailState` or `ToLevelFail` transition: `LevelFail` predates these four screens and its `LevelFailTransition` field is left unassigned until you author that screen.
 
 ## Catching missing wiring
 

@@ -44,7 +44,23 @@ Nothing — this is the top of the dependency graph (see [[Architecture Overview
 //    (e.g. GameEventRaiserOnEnable).
 ```
 
-To extend the decision table, subclass `ApplicationFlowLogic`, add entries in the constructor, then enable **UseCustomLogic** on the controller and attach your subclass.
+To extend the decision table, subclass `ApplicationFlowLogic`, add entries in the constructor, then enable **UseCustomLogic** on the controller and attach your subclass. `Add` writes through an indexer, so it overrides a shipped entry as readily as it adds a new one.
+
+## Shipped screen flow
+
+The template ships wired assets for four screens — **MainMenu, Gameplay, Settings, Store**:
+
+| Folder | Contents |
+|---|---|
+| `Assets/StateMachine` | `ApplicationStateMachine` (boots into `MainMenuState`), `States/` and `Transitions/` for the four screens |
+| `Assets/GameEvents` | `e_Goto*` command events, `e_*ViewClosed` (`GameEventWithInt`, payload is a `UICloseReasons`), `e_AppPaused` / `e_AppResumed` |
+| `Assets/Variables` | `Settings/` (`v_MusicVolume`, `v_SfxVolume`, `v_VibrationEnabled`), `Store/` (`v_Coins`, `v_Gems`), `Gameplay/` (`v_Score`, `v_CurrentLevel`, `v_HighScore`), `Application/` (`v_AppPausedTime`) |
+
+`SettingsState` and `StoreState` set `PausesPreviousState`, making them overlays — closing with `ResumeGame` resolves to `ResumePrevious` and returns underneath; `Home` routes to the menu. Both prefabs are pre-wired to these assets. The full (context, reason) → intent table is in [`Assets/Runtime/README.md`](../Assets/Runtime/README.md).
+
+Persistent variables (`DB*`) carry a PlayerPrefs `Key` and set `ResetToDefaultOnPlay: 0` so a saved value wins on load; session variables (`v_Score`) reset each play.
+
+No `LevelFailState` ships — `LevelFail` predates these screens, so `LevelFailTransition` stays unassigned until that screen is authored.
 
 ## Catching missing wiring
 

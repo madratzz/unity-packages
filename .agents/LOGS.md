@@ -1,8 +1,45 @@
 # Active Logs
 
-Last updated: 2026-09-22
+Last updated: 2026-09-25
 
 ## Current Session
+
+### 2026-09-25T19:15:00+05:00 — claude-opus-5/screen-flow-states-and-assets
+
+Summary of what was done:
+
+- **Shipped the MainMenu / Gameplay / Settings / Store screen flow** as wired assets plus the code needed to route to it. User asked for "all required states, SO Variables and GameEvents"; two forks were put to them first, since `Store` did not exist in the code at all and the repo documents no product spec. They chose full code wiring, and the conventional starter variable set.
+- **Code** (`Assets/Runtime`): `FlowContext` gained `Store = 5`, `Gameplay = 6`; `FlowIntent` gained `GoToMainMenu = 104`, `OpenStore = 105`; `UICloseReasons` gained `Store = 7`. `ApplicationFlowController` gained `MainMenuTransition` / `StoreTransition`, `GotoMainMenu` / `GotoStore`, and `MainMenuViewClosed` / `SettingsViewClosed` / `StoreViewClosed`, with command-map entries, handlers and subscribe/unsubscribe. `ApplicationFlowLogic` gained 13 strategy entries.
+- **Assets**: `Assets/StateMachine` (`ApplicationStateMachine` booting into `MainMenuState`, 4 `State`s, 4 `Transition`s), `Assets/GameEvents` (6 `GameEvent` + 4 `GameEventWithInt`), `Assets/Variables` (Settings / Store / Gameplay / Application). All hand-authored as Unity YAML with fresh `.meta` GUIDs, matching the format of the existing `time.machine` example assets.
+- **Both prefabs pre-wired** — `ApplicationBase.prefab` (FSM, AppPaused/AppResumed, AppPausedTime) and `ApplicationFlowController.prefab` (all 5 transitions, 4 command events, 4 view-closed events, plus its cross-prefab `ApplicationBase` reference). Every referenced GUID was resolved back to a real asset before committing.
+
+Files touched:
+
+- `Assets/Runtime/Logic/{FlowContext,FlowIntent,UICloseReasons,ApplicationFlowLogic}.cs`
+- `Assets/Runtime/Application/ApplicationFlowController.cs`
+- `Assets/Tests/EditMode/ApplicationFlowLogicTests.cs`
+- `Assets/Prefabs/{ApplicationBase,ApplicationFlowController}.prefab`
+- `Assets/StateMachine/**`, `Assets/GameEvents/**`, `Assets/Variables/**` (new)
+- `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`, `.agents/*`
+
+Decisions made:
+
+- **FSM `BootState` = `MainMenuState`**, and `ApplicationFlowController.Boot()` was left asking for `(Boot, Game)`. Changing `Boot()` would have altered existing behaviour and its test; instead `(Boot, Home) → GoToMainMenu` was added to the table so a caller can opt in. Documented in both READMEs.
+- **`SettingsState` and `StoreState` set `PausesPreviousState`**, making them overlays so `ResumeGame → ResumePrevious` is meaningful; `MainMenu` and `Gameplay` do not.
+- **Persistent variables use `ResetToDefaultOnPlay: 0`** so the PlayerPrefs value wins on load — `ResetToDefaultOnPlay: 1` would overwrite saved progress on every `OnEnable`. Session-only `v_Score` keeps `1`.
+- **No `LevelFailState` / `ToLevelFail`** was invented: `LevelFail` predates these four screens and was not part of the request, so `LevelFailTransition` stays unassigned.
+- **Fixed a now-false-positive test.** `SubclassCanExtendStrategyTable` asserted `Settings + ResumeGame → ResumePrevious`, which the base table now defines itself — it would have passed even with `Add()` broken. Re-pointed at `(Gameplay, Revive)`, which the base deliberately leaves out, with an explicit precondition assertion guarding that. Added `SubclassCanOverrideAnExistingStrategy` and a 13-case `TestCase` matrix.
+
+Verification:
+
+- `Assets/Runtime` **compiles clean** — the whole assembly was built outside the Editor with Unity's bundled Roslyn (`Data/DotNetSdkRoslyn/csc.dll`) against `netstandard.dll`, `UnityEngine.dll` and the seven package DLLs in `Library/ScriptAssemblies`. Only CS0649 warnings (`[SerializeField]` never assigned in code), which are expected and pre-existing.
+- **The decision table was executed, not just compiled**: a console harness linked against the real logic sources checked all 15 shipped routes plus both fallbacks — 17/17 as expected, including the `(Gameplay, Revive) → DefaultToGame` precondition the subclass test depends on.
+- **Not verified**: the EditMode test assembly was not compiled outside Unity (`com.unity.ext.nunit` ships only a net40 build, which will not mix with the netstandard-compiled package DLLs in an ad-hoc reference set), and no asset was imported — this project's Editor holds `Temp/UnityLockfile` and the Unity CLI cannot reach it while another project's Editor owns the Pipeline port. **Import and run the EditMode suite before merging.**
+
+Next steps:
+
+- Open the project so Unity imports the new assets, then run the EditMode suite.
+- Author a LevelFail screen (state + transition) if that flow is still wanted.
 
 ### 2026-09-22T01:34:41+05:00 — deepseek-v4.1-flash/editmode-test-failures
 

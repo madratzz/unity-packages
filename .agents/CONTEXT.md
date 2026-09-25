@@ -1,6 +1,6 @@
 # Active Project Context
 
-Last updated: 2026-09-21
+Last updated: 2026-09-25
 
 ## Project Summary
 
@@ -18,7 +18,7 @@ Last updated: 2026-09-21
 - `AGENTS.md` — repository-wide operating guide for AI agents and automation harnesses (canonical policy source, including version-control/branch/PR policy and version naming).
 - `CLAUDE.md` — short pointer to `AGENTS.md` for Claude Code; never duplicates policy.
 - `IDEA.md` — high-level project intent; defines the `Packages/` (reusable, Verdaccio-distributed) vs. `Assets/` (clonable template/integration layer) split.
-- `Assets/` — the project template layer: `Assets/Runtime` + `Assets/Tests` hold the GameFlow application code (`ApplicationBase`, `ApplicationFlowController`, decision-table logic — see `Assets/Runtime/README.md`) that wires the package family together; `Assets/Prefabs` and `Assets/Scenes` (`BootstrapScene`, `GameScene`) are the scaffolding; `Assets/GameEvents` holds the `GameEvent` assets the flow raises/listens to (currently empty, not yet populated). This code was previously a standalone package (`com.madratzz.scriptableobject.architecture`) under `Packages/`; moved into `Assets/` deliberately (2026-09-20) as the template's integration layer rather than a reusable package — it is not a 17th package.
+- `Assets/` — the project template layer: `Assets/Runtime` + `Assets/Tests` hold the GameFlow application code (`ApplicationBase`, `ApplicationFlowController`, decision-table logic — see `Assets/Runtime/README.md`) that wires the package family together; `Assets/Prefabs` and `Assets/Scenes` (`BootstrapScene`, `GameScene`) are the scaffolding; `Assets/GameEvents` holds the `GameEvent` assets the flow raises/listens to, and `Assets/StateMachine` (FSM + `States/` + `Transitions/`) and `Assets/Variables` (Settings/Store/Gameplay/Application) hold the rest of the shipped MainMenu/Gameplay/Settings/Store screen flow, with both prefabs pre-wired (2026-09-25). This code was previously a standalone package (`com.madratzz.scriptableobject.architecture`) under `Packages/`; moved into `Assets/` deliberately (2026-09-20) as the template's integration layer rather than a reusable package — it is not a 17th package.
 - `Packages/` — Unity Package Manager manifest and lockfile; the manifest includes URP, Input System, AI Navigation, Test Framework, and Unity AI packages. Sixteen custom embedded packages live under `Packages/` (up from the initial eight): the `com.madratzz.utilities.*` family (`attributes`, `core`, `coroutines`, `ui`, `addressables`, `buildautomation`, `unity.alwaysstartfromscenezero`), `com.madratzz.platform.device`, and the `com.madratzz.scriptableobject.*` (SOAP) family (`variables`, `variables.database`, `variables.extensions`, `eventsystem.core`, `eventsystem.extensions`, `event.variables`, `statemachine.core`, `time.machine`). Utility packages use `com.madratzz.*` assembly names; scriptableobject packages use `madratzz.scriptableobject.*`; namespaces remain the archived `ProjectCore.*` / `CustomUtilities.*` / `ExtensionMethods` mix (cleanup deferred). Full catalog and dependency graph: `Docs/Home.md` / `Docs/Architecture Overview.md` — GameFlow's vault note moved to `Docs/GameFlow (Template Layer).md` (out of `Docs/Packages/`) and no longer describes itself as a 17th package (2026-09-21).
 - `ProjectSettings/` — Unity project configuration.
 - `.agents/` — concise, active context for agents.
@@ -48,7 +48,7 @@ Last updated: 2026-09-21
 - What Verdaccio publishing conventions should the 4 packages still without EditMode tests (`platform.device`, `utilities.coroutines`, `utilities.ui`, `utilities.unity.alwaysstartfromscenezero`) adopt before first publish? (12 of 16 packages already have a `Tests/` folder, up from 11 — `utilities.attributes` gained tests alongside `RequiredReferenceValidator`.)
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
 - The 2026-09-20 editor bump to `6000.3.24f1` added `com.unity.sdk.linux-x86_64` and `com.unity.toolchain.linux-x86_64-linux` to `Packages/manifest.json` as project-wide dependencies. Assumption: these were pulled in by Unity Hub/Editor package resolution during the version bump rather than a deliberate Linux-build-target decision — not confirmed. Open question: should these be scoped/conditional rather than a default dependency for every contributor?
-- Should `Assets/GameEvents/` (currently empty) hold hand-authored `GameEvent` assets checked into the repo, or should the template ship with none and expect consumers to create their own?
+- ~~Should `Assets/GameEvents/` hold hand-authored `GameEvent` assets checked into the repo?~~ **Answered 2026-09-25 (user request):** yes — the template ships wired assets. `Assets/GameEvents`, `Assets/StateMachine` and `Assets/Variables` now hold the MainMenu/Gameplay/Settings/Store screen flow, and both prefabs are pre-wired to them.
 
 ## Archive Summary
 

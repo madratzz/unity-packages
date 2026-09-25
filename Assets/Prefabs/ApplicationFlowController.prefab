@@ -44,11 +44,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a51a70b5ad7ab423f84e6a62625fb801, type: 3}
   m_Name: 
   m_EditorClassIdentifier: madratzz.scriptableobject.architecture.runtime::ProjectCore.Architecture.ApplicationFlowController
-  ApplicationBase: {fileID: 0}
-  GameStateTransition: {fileID: 0}
+  ApplicationBase: {fileID: 3849046853359695722, guid: e55425740a3b4e9af93d9e867990765f, type: 3}
+  GameStateTransition: {fileID: 11400000, guid: 1974e27cf06648249a0f6766493b5641, type: 2}
   LevelFailTransition: {fileID: 0}
-  SettingsTransition: {fileID: 0}
-  GotoGame: {fileID: 0}
-  GotoLevelFail: {fileID: 0}
-  LevelFailViewClosed: {fileID: 0}
+  SettingsTransition: {fileID: 11400000, guid: 19cc755561bc425d9e272ea61d2ec9be, type: 2}
+  MainMenuTransition: {fileID: 11400000, guid: 874a1402679243969c4541793a139ac1, type: 2}
+  StoreTransition: {fileID: 11400000, guid: 754946c8418f4c43ba3f274cdc0bc9fa, type: 2}
+  GotoGame: {fileID: 11400000, guid: 93b03f7d96ab46d6a1e0576235761cb1, type: 2}
+  GotoLevelFail: {fileID: 11400000, guid: d4a34eed90c14adb9a67932467d15d0c, type: 2}
+  GotoMainMenu: {fileID: 11400000, guid: c64db629ca73461d8e5a31d46ce647dd, type: 2}
+  GotoStore: {fileID: 11400000, guid: 8cd5beca57de44e4ba6bc9f9a1dc1629, type: 2}
+  LevelFailViewClosed: {fileID: 11400000, guid: 319c8d82ddbd4c2893c92998f9f55b38, type: 2}
+  MainMenuViewClosed: {fileID: 11400000, guid: 842e9b4ab20d4b779008b2e852208245, type: 2}
+  SettingsViewClosed: {fileID: 11400000, guid: 26019137ee1c42fa9f8c82bd9825fe83, type: 2}
+  StoreViewClosed: {fileID: 11400000, guid: 3dd79349aaef49d8938a344aefe247c4, type: 2}
   UseCustomLogic: 0
