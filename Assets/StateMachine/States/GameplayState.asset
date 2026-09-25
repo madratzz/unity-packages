@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9b1a56965933b44697d4df1878d1f4b, type: 3}
+  m_Script: {fileID: 11500000, guid: 9df3b564c221f0b4890f70a2e23655e7, type: 3}
   m_Name: GameplayState
   m_EditorClassIdentifier: madratzz.scriptableobject.statemachine.core.runtime::ProjectCore.StateMachine.State
   PausesPreviousState: 0
-  ViewPrefab: {fileID: 1795370333439758193, guid: 0cee7cf1ab75fb94eba0682a3a4a8796, type: 3}
+  ViewPrefab: {fileID: 1133314004765872242, guid: 2b8748232d2a2eb49b3af54c3bc3e916, type: 3}
   PersistAcrossScenes: 1
+  SceneName: GameScene

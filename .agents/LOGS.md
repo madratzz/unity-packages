@@ -4,6 +4,49 @@ Last updated: 2026-09-26
 
 ## Current Session
 
+### 2026-09-26T01:30:00+05:00 — claude-opus-5/gamestate-scene-and-hud
+
+Summary of what was done:
+
+- **Gameplay is now a scene + HUD, not a full-screen menu.** Added `GameState : UIViewState` (`Assets/Runtime/UI`) which loads `GameScene` **additively** before showing its view and unloads it on `Exit`. `GameplayState.asset` was converted to this type in place (GUID preserved), with `SceneName = GameScene`.
+- **Replaced `GameplayView` with `GameHudView`** — a transparent HUD (top stat bar with SCORE/COINS placeholders, compact buttons bottom-right) rather than an opaque full-screen panel, so the game scene shows through.
+- **Made `GameScene` loadable**: added it to Build Settings (index 1; `BootstrapScene` stays at 0 so `alwaysstartfromscenezero` still boots correctly) and stripped its `Main Camera` — the boot scene's camera/AudioListener are the persistent pair, and a second set renders twice and logs "there are 2 audio listeners in the scene".
+- **Fixed a pre-existing FSM bug this exposed** (see below).
+
+Files touched:
+
+- New: `Assets/Runtime/UI/GameState.cs`, `Assets/UI/GameHudView.prefab` (replaces `GameplayView.prefab`)
+- Modified: `Assets/Editor/ProjectBootstrap/ViewPrefabBuilder.cs` (HUD builder, per-state script targeting, Build Settings + camera steps), `Assets/StateMachine/States/GameplayState.asset`, `Assets/Scenes/GameScene.unity`, `ProjectSettings/EditorBuildSettings.asset`, `Packages/com.madratzz.scriptableobject.statemachine.core/{Runtime/StateMachine/FiniteStateMachine.cs,Tests/EditMode/FiniteStateMachineTests.cs,CHANGELOG.md}`, `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`
+
+Decisions made:
+
+- **Additive load, never single.** `ApplicationBase` and `ApplicationFlowController` live in the boot scene and are *not* `DontDestroyOnLoad`, so a single-mode load would destroy the FSM owner mid-transition and strand the whole flow. `GameState` also refuses to unload the last remaining scene.
+- **Scene loads before the HUD is created** so the HUD is instantiated last and draws on top; on exit the HUD is destroyed *before* the scene, so it can never reference destroyed scene objects.
+- `GameState` guards on `Application.CanStreamedLevelBeLoaded` and logs a pointed error rather than silently showing a HUD over an empty boot scene when the scene is missing from Build Settings.
+
+Bug found and fixed (pre-existing, in `statemachine.core`):
+
+- **`FiniteStateMachine` never reset its runtime state, so only the first Play worked.** A ScriptableObject is an asset: its `[NonSerialized]` fields survive exiting play mode in the Editor. A leftover `CurrentState` made the next `Tick()` skip the boot block entirely (`if (CurrentState == null)`), so the boot state was never re-entered and nothing it does — loading a scene, showing a view — ever happened. Symptom: press Play, works; Stop; press Play again, blank screen; until a script recompile happened to clear it. Latent until now only because the states did nothing visible.
+- Fixed with an `OnDisable` reset plus a public `ResetRuntimeState()`, and three regression tests. **141/141 EditMode passing.**
+
+Verification:
+
+- Drove **two consecutive play sessions** (the case that used to fail) with polling between every step. Both identical: boot → `MainMenuState` + `MainMenuView`; Play → `GameplayState`, `scenes=[BootstrapScene GameScene]`, `GameHudView` shown; Home → back to `MainMenuState` with `GameScene` unloaded. Settings over gameplay keeps `GameScene` loaded and hides the HUD.
+- EditMode suite **141/141**, zero console errors.
+
+Gotchas found:
+
+- **Do not probe the live Editor with fixed sleeps right after `editor_play`.** Entering play triggers a domain reload during which `eval_file` returns empty, which reads as "the object does not exist". An earlier run reported `views=[]` at boot purely for this reason and looked like a regression. Poll for the expected condition instead.
+- `perl -0pi` without correct encoding flags double-encodes UTF-8 (an em dash became `C3 A2 C2 80 C2 94`). Prefer the Edit tool for prose, and check with `grep -P '\xc3\xa2\xc2\x80'` after any perl pass over Markdown.
+- In an FSM `Tick()` iterator, one `MoveNext()` only reaches the first `yield return CurrentState.Init(...)`; `Execute` needs a further step. The test file's `Advance(it, 2)` helper exists for this — a new test that used a bare `MoveNext()` failed on `ExecuteCount` until corrected.
+
+Next steps:
+
+- Replace placeholder prefabs with real screens (import TMP first).
+- Bind the HUD's SCORE/COINS labels to `v_Score` / `v_Coins` instead of static text.
+- Author a LevelFail screen if wanted; `LevelFailTransition` is still unassigned.
+
+
 ### 2026-09-26T00:55:00+05:00 — claude-opus-5/screen-flow-ui-views
 
 Summary of what was done:

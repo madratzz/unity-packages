@@ -19,6 +19,9 @@ The initial release collects all pre-release changes into a single entry; versio
 - `PausedStates` is a `readonly` field initialised inline (equivalent behavior, clearer intent)
 
 ### Fixed
+- `FiniteStateMachine` now clears its runtime state in `OnDisable`, and exposes `ResetRuntimeState()` to do so on demand. A ScriptableObject is an asset, so its non-serialized fields survive exiting play mode in the Editor: a leftover `CurrentState` made the **next** `Tick()` skip the boot block entirely, so the boot state was never re-entered and nothing it does (loading a scene, showing a view) ever happened. The symptom was a first Play that worked and every subsequent Play booting into nothing, until a script recompile cleared it.
+
+### Fixed
 - `Tick()` re-runs `Init`/`Execute` after every transition (not just the boot path) — the archived code transitioned to the new state but never called `Init` on it, so transition targets ran `Tick` without ever being initialized
 - `Tick()` null-guards `CurrentState` before calling `Tick()` on it — the resume-pop path could leave a null state if the stack contained a destroyed state
 - `Tick()` null-guards the popped state on resume — `Stack.Pop` can return null if the popped state was destroyed

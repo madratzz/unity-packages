@@ -64,7 +64,18 @@ The template ships a **working** four-screen flow — **MainMenu, Gameplay, Sett
 | Type | Role |
 |---|---|
 | `UIViewState` | A `State` that owns one screen. Instantiates its `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
+| `GameState` | `UIViewState` + a scene. Loads `GameScene` **additively** before showing its view, and unloads it on `Exit`. `GameplayState` uses this. |
 | `UIView` | Sits on the screen prefab. Exposes `Show`/`Hide`, and `Close(int reason)` which raises its `ClosedEvent` with a `UICloseReasons` value. |
+
+### Gameplay: scene + HUD
+
+`GameplayState` is a `GameState`, so entering it loads `Assets/Scenes/GameScene.unity` additively and puts `GameHudView` over it — a transparent HUD (top stat bar, compact buttons bottom-right), not a full-screen menu, so the game shows through.
+
+The load is **additive, never single**: `ApplicationBase` and `ApplicationFlowController` live in the boot scene and are not `DontDestroyOnLoad`, so a single-mode load would destroy the FSM owner mid-transition and strand the flow. `GameScene` must therefore stay in Build Settings (it is at index 1; `BootstrapScene` stays at 0 so the *always start from scene zero* utility still boots correctly).
+
+`GameScene` has no camera or `AudioListener` of its own — the boot scene's are the persistent pair. A second set would render twice and log *"there are 2 audio listeners in the scene"*.
+
+Opening Settings or Store over gameplay hides the HUD but leaves `GameScene` loaded and running underneath; closing returns to it untouched.
 
 A view never decides where to go next — it only reports *why* it closed. The controller turns that `(context, reason)` pair into the next transition, so screens stay ignorant of each other.
 

@@ -42,7 +42,7 @@ namespace ProjectBootstrap
             BuildView("MainMenuView", new Color(0.13f, 0.17f, 0.25f), "MAIN MENU", "e_MainMenuViewClosed",
                 ("Play", Game), ("Settings", Settings), ("Store", Store));
 
-            BuildView("GameplayView", new Color(0.11f, 0.22f, 0.15f), "GAMEPLAY", "e_GameplayViewClosed",
+            BuildHud("GameHudView", "e_GameplayViewClosed",
                 ("Settings", Settings), ("Store", Store), ("Home", Home));
 
             BuildView("SettingsView", new Color(0.24f, 0.19f, 0.10f), "SETTINGS  (overlay)", "e_SettingsViewClosed",
@@ -52,6 +52,8 @@ namespace ProjectBootstrap
                 ("Back", ResumeGame), ("Home", Home));
 
             ConvertStates();
+            EnsureGameSceneInBuild();
+            StripGameSceneCamera();
             EnsureEventSystem();
 
             AssetDatabase.SaveAssets();
@@ -129,24 +131,121 @@ namespace ProjectBootstrap
             Debug.Log($"[ViewPrefabBuilder] Built {viewName}.prefab");
         }
 
+        /// <summary>
+        /// A HUD, not a menu: the root stays transparent so the game scene shows
+        /// through, with a thin stat bar pinned to the top and small buttons in
+        /// the bottom-right. A full-screen opaque panel here would hide the game.
+        /// </summary>
+        static void BuildHud(string viewName, string closedEventName, params (string Label, int Reason)[] buttons)
+        {
+            var root = new GameObject(viewName, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var canvas = root.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 0;
+
+            var scaler = root.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
+
+            var view = root.AddComponent<UIView>();
+
+            // Top stat bar.
+            var bar = NewRect("StatBar", root.transform);
+            bar.anchorMin = new Vector2(0f, 1f);
+            bar.anchorMax = new Vector2(1f, 1f);
+            bar.pivot = new Vector2(0.5f, 1f);
+            bar.offsetMin = new Vector2(0, -150);
+            bar.offsetMax = new Vector2(0, 0);
+            bar.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.45f);
+
+            var score = NewRect("ScoreLabel", bar);
+            score.anchorMin = new Vector2(0f, 0f);
+            score.anchorMax = new Vector2(0.5f, 1f);
+            score.offsetMin = new Vector2(40, 0);
+            score.offsetMax = Vector2.zero;
+            var scoreText = score.gameObject.AddComponent<Text>();
+            StyleText(scoreText, "SCORE  0", 40, FontStyle.Bold);
+            scoreText.alignment = TextAnchor.MiddleLeft;
+
+            var coins = NewRect("CoinsLabel", bar);
+            coins.anchorMin = new Vector2(0.5f, 0f);
+            coins.anchorMax = new Vector2(1f, 1f);
+            coins.offsetMin = Vector2.zero;
+            coins.offsetMax = new Vector2(-40, 0);
+            var coinsText = coins.gameObject.AddComponent<Text>();
+            StyleText(coinsText, "COINS  0", 40, FontStyle.Bold);
+            coinsText.alignment = TextAnchor.MiddleRight;
+
+            // Compact buttons, bottom-right.
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                var (label, reason) = buttons[i];
+                var btnRect = NewRect(label + "Button", root.transform);
+                btnRect.anchorMin = btnRect.anchorMax = new Vector2(1f, 0f);
+                btnRect.pivot = new Vector2(1f, 0f);
+                btnRect.sizeDelta = new Vector2(320, 100);
+                btnRect.anchoredPosition = new Vector2(-40, 40 + i * 120);
+
+                btnRect.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.9f, 0.92f, 0.9f);
+                var button = btnRect.gameObject.AddComponent<Button>();
+
+                var labelRect = NewRect("Text", btnRect);
+                Stretch(labelRect);
+                var labelText = labelRect.gameObject.AddComponent<Text>();
+                StyleText(labelText, label, 36, FontStyle.Normal);
+                labelText.color = new Color(0.08f, 0.08f, 0.1f);
+
+                UnityAction<int> call = view.Close;
+                UnityEventTools.AddIntPersistentListener(button.onClick, call, reason);
+            }
+
+            AssignClosedEvent(view, closedEventName, viewName);
+
+            PrefabUtility.SaveAsPrefabAsset(root, $"{UIDir}/{viewName}.prefab");
+            Object.DestroyImmediate(root);
+            Debug.Log($"[ViewPrefabBuilder] Built {viewName}.prefab (HUD)");
+        }
+
+        static void AssignClosedEvent(UIView view, string closedEventName, string viewName)
+        {
+            var closedEvent = LoadAsset<GameEventWithInt>($"{EventsDir}/{closedEventName}.asset");
+            if (closedEvent == null)
+            {
+                Debug.LogError($"[ViewPrefabBuilder] Missing {closedEventName}; {viewName} will not report dismissals.");
+                return;
+            }
+
+            var so = new SerializedObject(view);
+            so.FindProperty("ClosedEvent").objectReferenceValue = closedEvent;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         static void ConvertStates()
         {
-            var script = AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Runtime/UI/UIViewState.cs");
-            if (script == null) { Debug.LogError("[ViewPrefabBuilder] UIViewState.cs not found."); return; }
-
-            foreach (var (stateName, viewName) in new[]
+            var viewState = AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Runtime/UI/UIViewState.cs");
+            var gameState = AssetDatabase.LoadAssetAtPath<MonoScript>("Assets/Runtime/UI/GameState.cs");
+            if (viewState == null || gameState == null)
             {
-                ("MainMenuState", "MainMenuView"), ("GameplayState", "GameplayView"),
-                ("SettingsState", "SettingsView"), ("StoreState", "StoreView"),
+                Debug.LogError("[ViewPrefabBuilder] UIViewState.cs / GameState.cs not found.");
+                return;
+            }
+
+            foreach (var (stateName, viewName, isGameState) in new[]
+            {
+                ("MainMenuState", "MainMenuView", false), ("GameplayState", "GameHudView", true),
+                ("SettingsState", "SettingsView", false), ("StoreState", "StoreView", false),
             })
             {
+                var script = isGameState ? gameState : viewState;
                 var path = $"{StatesDir}/{stateName}.asset";
                 var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
                 if (asset == null) { Debug.LogError($"[ViewPrefabBuilder] Missing {path}"); continue; }
 
                 // Retarget m_Script in place so the asset's GUID survives — every
                 // Transition and the FSM's BootState already point at it.
-                if (asset.GetType() != typeof(UIViewState))
+                var wanted = isGameState ? typeof(GameState) : typeof(UIViewState);
+                if (asset.GetType() != wanted)
                 {
                     var so = new SerializedObject(asset);
                     so.FindProperty("m_Script").objectReferenceValue = script;
@@ -174,9 +273,66 @@ namespace ProjectBootstrap
                 viewProp.objectReferenceValue = prefab.GetComponent<UIView>();
                 var persist = reloaded.FindProperty("PersistAcrossScenes");
                 if (persist != null) persist.boolValue = true;
+                if (isGameState)
+                {
+                    var sceneProp = reloaded.FindProperty("SceneName");
+                    if (sceneProp != null) sceneProp.stringValue = "GameScene";
+                }
                 reloaded.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(typed);
-                Debug.Log($"[ViewPrefabBuilder] {stateName} -> UIViewState -> {viewName}");
+                Debug.Log($"[ViewPrefabBuilder] {stateName} -> {wanted.Name} -> {viewName}");
+            }
+        }
+
+        /// <summary>
+        /// GameState loads by name, and Application.CanStreamedLevelBeLoaded only
+        /// returns true for scenes listed in Build Settings.
+        /// </summary>
+        static void EnsureGameSceneInBuild()
+        {
+            const string gameScene = "Assets/Scenes/GameScene.unity";
+
+            var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            if (scenes.Exists(s => s.path == gameScene))
+            {
+                Debug.Log("[ViewPrefabBuilder] GameScene already in Build Settings.");
+                return;
+            }
+
+            // Appended, not inserted: BootstrapScene must stay at index 0 so the
+            // alwaysstartfromscenezero utility still boots the right scene.
+            scenes.Add(new EditorBuildSettingsScene(gameScene, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
+            Debug.Log("[ViewPrefabBuilder] Added GameScene to Build Settings (index 1).");
+        }
+
+        /// <summary>
+        /// GameScene is loaded additively on top of the boot scene, which already
+        /// has a camera and an AudioListener. A second pair would render twice and
+        /// log "there are 2 audio listeners in the scene".
+        /// </summary>
+        static void StripGameSceneCamera()
+        {
+            const string gameScenePath = "Assets/Scenes/GameScene.unity";
+            var scene = EditorSceneManager.OpenScene(gameScenePath, OpenSceneMode.Single);
+
+            var removed = false;
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                if (root.GetComponent<Camera>() == null && root.GetComponent<AudioListener>() == null) continue;
+                Debug.Log($"[ViewPrefabBuilder] Removing '{root.name}' from GameScene — the boot scene's camera is the persistent one.");
+                Object.DestroyImmediate(root);
+                removed = true;
+            }
+
+            if (removed)
+            {
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+            }
+            else
+            {
+                Debug.Log("[ViewPrefabBuilder] GameScene already has no camera.");
             }
         }
 

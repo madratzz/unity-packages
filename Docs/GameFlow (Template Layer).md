@@ -31,6 +31,7 @@ Nothing — this is the top of the dependency graph (see [[Architecture Overview
 | `IFlowLogic` | Pure-function decision contract. |
 | `FlowContext` / `FlowIntent` / `UICloseReasons` | Enums for screen context, navigation intent, and UI-close reason. |
 | `UIViewState` | A `State` that owns one screen, instantiating and destroying its view across the FSM lifecycle. |
+| `GameState` | `UIViewState` that also loads/unloads the game scene additively. |
 | `UIView` | Sits on a screen prefab; reports dismissal via `Close(int reason)`. |
 
 ## Usage
@@ -59,6 +60,7 @@ Two types carry it (`Assets/Runtime/UI`):
 | Type | Role |
 |---|---|
 | `UIViewState` | A `State` owning one screen: instantiates `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
+| `GameState` | `UIViewState` + a scene — loads `GameScene` additively before showing its HUD, unloads on `Exit`. `GameplayState` uses this. |
 | `UIView` | On the screen prefab. `Show`/`Hide`, plus `Close(int reason)` raising `ClosedEvent` with a `UICloseReasons` value. |
 
 A view never decides what comes next — it reports why it closed, and the controller resolves the transition. Because overlays pause rather than destroy, opening Settings over Gameplay leaves the gameplay screen alive and hidden, and closing it restores it intact.
@@ -72,7 +74,7 @@ Asset layout:
 | Folder | Contents |
 |---|---|
 | `Assets/StateMachine` | `ApplicationStateMachine` (boots into `MainMenuState`), `States/` (now `UIViewState`s) and `Transitions/` for the four screens |
-| `Assets/UI` | `MainMenuView`, `GameplayView`, `SettingsView`, `StoreView` prefabs |
+| `Assets/UI` | `MainMenuView`, `GameHudView`, `SettingsView`, `StoreView` prefabs |
 | `Assets/GameEvents` | `e_Goto*` command events, `e_*ViewClosed` (`GameEventWithInt`, payload is a `UICloseReasons`), `e_AppPaused` / `e_AppResumed` |
 | `Assets/Variables` | `Settings/` (`v_MusicVolume`, `v_SfxVolume`, `v_VibrationEnabled`), `Store/` (`v_Coins`, `v_Gems`), `Gameplay/` (`v_Score`, `v_CurrentLevel`, `v_HighScore`), `Application/` (`v_AppPausedTime`) |
 
