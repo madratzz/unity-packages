@@ -34,12 +34,15 @@ Verification:
 
 - `Assets/Runtime` **compiles clean** — the whole assembly was built outside the Editor with Unity's bundled Roslyn (`Data/DotNetSdkRoslyn/csc.dll`) against `netstandard.dll`, `UnityEngine.dll` and the seven package DLLs in `Library/ScriptAssemblies`. Only CS0649 warnings (`[SerializeField]` never assigned in code), which are expected and pre-existing.
 - **The decision table was executed, not just compiled**: a console harness linked against the real logic sources checked all 15 shipped routes plus both fallbacks — 17/17 as expected, including the `(Gameplay, Revive) → DefaultToGame` precondition the subclass test depends on.
-- **Not verified**: the EditMode test assembly was not compiled outside Unity (`com.unity.ext.nunit` ships only a net40 build, which will not mix with the netstandard-compiled package DLLs in an ad-hoc reference set), and no asset was imported — this project's Editor holds `Temp/UnityLockfile` and the Unity CLI cannot reach it while another project's Editor owns the Pipeline port. **Import and run the EditMode suite before merging.**
+- **In-Editor verification followed on 2026-09-26** (after closing the Editor that held `Temp/UnityLockfile`), and the earlier "not verified" caveat is retracted:
+  - **EditMode suite: 138/138 passing, 0 failed, 0 skipped** via `unity test . --mode EditMode` — 124 pre-existing plus the 14 added here. All 18 `ApplicationFlowLogicTests` cases ran, including every one of the 13 `TestCase` routes and both subclass tests.
+  - **Unity accepted all 40 hand-authored asset and `.meta` files byte-for-byte** — `git status Assets/` was clean after the import, so the script GUIDs, `.meta` format and every cross-reference were correct and needed no rewriting. No import errors or missing-script warnings in the Editor log.
+- **Batchmode aborts when any package cannot resolve**, which is unrelated to this change but will bite any CI run here: the first attempt exited 1 during resolution on `com.unity.ai.assistant` and `com.unity.toolchain.linux-x86_64-linux` (ECONNRESET against `download.packages.unity.com`; `packages.unity.com` itself answered 200, and three direct `curl` downloads of the tarball timed out). A GUI Editor tolerates the same gaps. A retry got through because the first run had meanwhile cached `com.unity.pipeline` and `com.unity.sdk.linux-x86_64`.
 
 Next steps:
 
-- Open the project so Unity imports the new assets, then run the EditMode suite.
-- Author a LevelFail screen (state + transition) if that flow is still wanted.
+- Author a LevelFail screen (state + transition) if that flow is still wanted — `LevelFailTransition` stays unassigned until then.
+- Get `com.unity.ai.assistant` and `com.unity.toolchain.linux-x86_64-linux` cached (or dropped from the manifest): until they resolve, every batchmode/CI run here is a coin-flip on the CDN. This is concrete evidence for the standing open question about whether the Linux toolchain packages belong as default dependencies.
 
 ### 2026-09-22T01:34:41+05:00 — deepseek-v4.1-flash/editmode-test-failures
 
