@@ -8,7 +8,7 @@ Extended SO variable types: generic arrays, shared Vector2/Vector3 values, and s
 
 ## Depends on
 
-None declared in `package.json`, though it follows the same asset pattern as [[SOAP - Variables]].
+Nothing — this package is standalone. It shares the `ProjectCore.Variables` namespace with [[SOAP - Variables]] and follows the same asset pattern, but uses none of its types; its assembly definitions carry no cross-package references, so it installs on its own.
 
 ## Used by
 

@@ -1,9 +1,7 @@
 {
     "name": "madratzz.scriptableobject.variables.extensions.runtime",
     "rootNamespace": "ProjectCore",
-    "references": [
-        "madratzz.scriptableobject.variables.runtime"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

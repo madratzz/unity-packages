@@ -1,8 +1,41 @@
 # Active Logs
 
-Last updated: 2026-09-22
+Last updated: 2026-09-25
 
 ## Current Session
+
+### 2026-09-25T18:24:30+05:00 — claude-opus-5/variables-extensions-undeclared-dependency
+
+Summary of what was done:
+
+- **Swept the project for compiler errors and package issues.** Result: **no current compiler errors.** The ~60 `error CS0246` lines still sitting in `~/AppData/Local/Unity/Editor/Editor.log` (all in `com.unity.addressables`, for `IBundleWriteData` / `IBuildTask` / `InjectContext` / `BundleDetails` / `UnityEditor.Build.Pipeline`) are **stale** — they are the 2026-09-22 session's `com.unity.scriptablebuildpipeline` download failure, already repaired. Confirmed stale three ways: the last error is at log line 40761 of 68235 with clean recompiles after it, `Library/PackageCache/com.unity.scriptablebuildpipeline@36e3b5898ee2` is now present, and all 126 assemblies in `Library/ScriptAssemblies` (including `Unity.Addressables.Editor.dll` and every `com.madratzz.*`) carry the same 18:08 build timestamp.
+- **Found and fixed one real package defect**: `com.madratzz.scriptableobject.variables.extensions` declared **no** `dependencies` in `package.json`, while both of its asmdefs referenced `madratzz.scriptableobject.variables.runtime` — the only undeclared cross-package dependency in the repo. On Verdaccio this package would install standalone and then fail to resolve that assembly reference.
+- **Fixed by removing the two dead references, not by declaring the dependency** — the extensions package uses **zero** types from the variables package (verified case-sensitively against its full export set: `Bool`, `Float`, `Int`, `String`, `IVariable`, `IApplyChange`). The two packages only share the `ProjectCore.Variables` namespace, which is what made the reference look load-bearing. `package.json`, the asmdefs, and the code now all agree that the package is standalone.
+
+Files touched:
+
+- `Packages/com.madratzz.scriptableobject.variables.extensions/Runtime/madratzz.scriptableobject.variables.extensions.runtime.asmdef`
+- `Packages/com.madratzz.scriptableobject.variables.extensions/Tests/EditMode/com.madratzz.scriptableobject.variables.extensions.tests.asmdef`
+- `Docs/Packages/SOAP - Variables Extensions.md`
+- `.agents/LOGS.md`, `.agents/LEARNINGS.md`
+
+Decisions made:
+
+- Removed the dead asmdef references rather than adding `com.madratzz.scriptableobject.variables` to `package.json`. Declaring it would have recorded a dependency the code provably does not have, and `AGENTS.md` prefers clear boundaries over convenience coupling. Trivially reversible if the package is later meant to build on the variables types.
+- Left the 11 other **dead-but-declared** references alone (see LEARNINGS) — they are harmless at compile time and cleaning them spans 6 packages, which is a separate reviewable change, not this fix.
+- Did not touch the unrelated working-tree changes (`ProjectSettings/EditorBuildSettings.asset`, `ProjectSettings/ShaderGraphSettings.asset`, untracked `.vscode/`), per `AGENTS.md`'s "do not stage unrelated modifications".
+
+Issues found (not fixed here):
+
+- **11 dead asmdef references across 6 packages** — assemblies referenced but none of their types used. Notably `madratzz.scriptableobject.eventsystem.extensions.runtime` → `eventsystem.core.runtime` (the extensions define their own `GameEventWithParam<T> : ScriptableObject` rather than building on `GameEvent`), and `time.machine.runtime` → `utilities.core.runtime` (it uses `CoroutineHandler` from *coroutines*, not anything from *core*). Where these are also declared in `package.json` (`time.machine` → `utilities.core`, `eventsystem.extensions` → `eventsystem.core`) they over-declare the published dependency graph.
+- **12 packages ship EditMode tests referencing `UnityEngine.TestRunner`/`UnityEditor.TestRunner` but none declares `com.unity.test-framework`** in `package.json`. Consistent across the family, so it reads as convention rather than oversight, but Unity's own packages (e.g. `com.unity.addressables`) do declare it. Worth a deliberate decision before first Verdaccio publish.
+- `ProjectSettings/EditorBuildSettings.asset` + `ShaderGraphSettings.asset` are modified on disk by the running Editor, still unresolved alongside the `ProjectSettings.asset` item logged on 2026-09-22.
+
+Next steps:
+
+- Decide whether to sweep the 11 dead references and the over-declared `package.json` deps.
+- Decide the `com.unity.test-framework` declaration convention for packages with tests.
+
 
 ### 2026-09-22T01:34:41+05:00 — deepseek-v4.1-flash/editmode-test-failures
 
