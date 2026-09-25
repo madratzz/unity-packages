@@ -58,4 +58,5 @@ MonoBehaviour:
   MainMenuViewClosed: {fileID: 11400000, guid: 842e9b4ab20d4b779008b2e852208245, type: 2}
   SettingsViewClosed: {fileID: 11400000, guid: 26019137ee1c42fa9f8c82bd9825fe83, type: 2}
   StoreViewClosed: {fileID: 11400000, guid: 3dd79349aaef49d8938a344aefe247c4, type: 2}
+  GameplayViewClosed: {fileID: 11400000, guid: d5113de72ccc4328b6ff140d338a8dd5, type: 2}
   UseCustomLogic: 0

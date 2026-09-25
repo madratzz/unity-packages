@@ -1,8 +1,52 @@
 # Active Logs
 
-Last updated: 2026-09-25
+Last updated: 2026-09-26
 
 ## Current Session
+
+### 2026-09-26T00:55:00+05:00 — claude-opus-5/screen-flow-ui-views
+
+Summary of what was done:
+
+- **Fixed "runs but sticks on BootstrapScene".** User reported the game never leaves the boot scene and that the screen states had no views. Both correct. The 2026-09-25 commit wired the *assets* to each other but gave them no behaviour: the four screen states were bare `State` instances whose `Init`/`Execute`/`Tick` are all `yield break`, so the FSM entered `MainMenuState` and sat there forever. The previous session's claim that it shipped "a working screen graph" was an overstatement — it was an inert one.
+- **Added the missing layer** (`Assets/Runtime/UI`): `UIViewState : State` instantiates its `ViewPrefab` on `Execute`, hides on `Pause`, re-shows on `Resume` and destroys on `Exit`; `UIView` sits on the prefab and reports dismissal via `Close(int reason)` raising a `GameEventWithInt` carrying a `UICloseReasons`. Views never navigate — the controller resolves `(context, reason)` into the next transition, so screens stay ignorant of each other.
+- **Built four placeholder uGUI prefabs** (`Assets/UI`) via a re-runnable editor tool, **Tools → Project Bootstrap → Build Screen Views** (`Assets/Editor/ProjectBootstrap/ViewPrefabBuilder.cs`), which also converts the four `State` assets to `UIViewState` **in place** (retargeting `m_Script` through `SerializedObject`, so the asset GUIDs survive and every Transition + the FSM's `BootState` keep resolving) and adds the missing `EventSystem`.
+- **Closed a gap left by the previous session**: there was no `e_GameplayViewClosed` event or matching controller field, so Gameplay's buttons would have had nothing to raise. Added both.
+
+Files touched:
+
+- New: `Assets/Runtime/UI/{UIView,UIViewState}.cs`, `Assets/Editor/ProjectBootstrap/{ViewPrefabBuilder.cs,com.madratzz.projectbootstrap.editor.asmdef}`, `Assets/UI/*.prefab` (4), `Assets/GameEvents/e_GameplayViewClosed.asset`
+- Modified: `ApplicationFlowController.cs` (+`GameplayViewClosed`), the 4 State assets, `ApplicationFlowController.prefab`, `BootstrapScene.unity` (EventSystem), `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`
+
+Decisions made:
+
+- **Views are prefabs instantiated by the state**, not scene objects toggled active and not additive scenes (user chose this from three options). It maps onto the FSM lifecycle already in place and makes the `PausesPreviousState` overlay semantics work without extra machinery.
+- **Types live in `Assets/Runtime`**, not a new package (user's choice) — template glue for now, promotable later.
+- **Legacy `UnityEngine.UI.Text`, not TextMeshPro.** TMP's essential resources are not imported in this project, so TMP labels would render as missing-font boxes. Noted in both READMEs as the thing to change after importing TMP.
+- **`EventSystem` uses `InputSystemUIInputModule`.** `ProjectSettings.activeInputHandler` is `1` (new Input System only), where `StandaloneInputModule` does nothing and every button would be silently dead.
+- **`Boot()` left alone.** The FSM's `BootState` decides the first screen, so the shipped flow needs no startup hook; `Boot()` stays for a game that wants to skip to gameplay.
+- Kept the builder tool in the repo rather than deleting it after use — it is idempotent and documents how the prefabs were made.
+
+Verification (all in the live Editor, via the Unity CLI):
+
+- **Ran the game and drove the whole flow.** FSM reached `MainMenuState` with `MainMenuView` instantiated; then MainMenu→(Play)→Gameplay→(Settings)→Settings overlay→(Back)→Gameplay→(Home)→MainMenu, and MainMenu→(Store)→Store→(Back)→MainMenu. **Overlay semantics confirmed**: entering Settings over Gameplay left `GameplayView(hidden)` alive rather than destroyed, and Back restored it.
+- **Clicked the real buttons**, not just raised the events: each button reported `persistentListeners=1` (serialized wiring, Inspector-editable) and `onClick.Invoke()` drove the same transitions.
+- **`EventSystem.RaycastAll` at the Play button's screen position hit `PlayButton`**, proving the canvas is on screen and raycastable.
+- **EditMode suite: 138/138 passing**; zero console errors throughout.
+
+Gotchas found:
+
+- **`capture_game_view` / `screenshot` do not capture `ScreenSpaceOverlay` UI** — both render through the camera, so the game view came back as bare skybox while the UI was demonstrably present. Do not read an empty capture as "the UI is missing"; verify with a raycast or a component probe instead.
+- **`simulate_pointer` did not trigger the button** even though the raycast hit it — synthetic Input System pointer events appear to need the Game view focused. `onClick.Invoke()` is the reliable headless substitute.
+- **Swapping `m_Script` via `SerializedObject` destroys and re-creates the managed instance**, so the original reference dangles immediately afterwards — reload via `AssetDatabase.LoadAssetAtPath` before touching the asset again. The first builder run threw `MissingReferenceException` on a trailing `EditorUtility.SetDirty(asset)` for exactly this reason.
+- `find_gameobjects` and `get_scene_hierarchy` do not see objects in `DontDestroyOnLoad`; use `FindObjectsByType` through `eval_file`.
+
+Next steps:
+
+- Replace the placeholder prefabs with real screens (import TMP first).
+- `Assets/Scenes/GameScene.unity` is now unused — the flow is prefab-driven and only `BootstrapScene` is in Build Settings. Decide whether to delete it or make Gameplay load it.
+- Author a LevelFail screen if that flow is still wanted; `LevelFailTransition` remains unassigned.
+
 
 ### 2026-09-25T19:15:00+05:00 — claude-opus-5/screen-flow-states-and-assets
 

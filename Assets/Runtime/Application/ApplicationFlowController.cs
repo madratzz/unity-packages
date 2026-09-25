@@ -42,6 +42,7 @@ namespace ProjectCore.Architecture
         [SerializeField] private GameEventWithInt MainMenuViewClosed;
         [SerializeField] private GameEventWithInt SettingsViewClosed;
         [SerializeField] private GameEventWithInt StoreViewClosed;
+        [SerializeField] private GameEventWithInt GameplayViewClosed;
 
         [Tooltip("Replace with a richer IFlowLogic to override the default Boot/LevelFail→GoToGame strategy.")]
         [SerializeField] private bool UseCustomLogic;
@@ -163,6 +164,8 @@ namespace ProjectCore.Architecture
             ResolveDecision(FlowContext.Settings, (UICloseReasons)value);
         private void OnStoreViewClose(int value) =>
             ResolveDecision(FlowContext.Store, (UICloseReasons)value);
+        private void OnGameplayViewClose(int value) =>
+            ResolveDecision(FlowContext.Gameplay, (UICloseReasons)value);
 
         private void SubscribeEvents()
         {
@@ -175,6 +178,7 @@ namespace ProjectCore.Architecture
             if (MainMenuViewClosed)  MainMenuViewClosed.Handler  += OnMainMenuViewClose;
             if (SettingsViewClosed)  SettingsViewClosed.Handler  += OnSettingsViewClose;
             if (StoreViewClosed)     StoreViewClosed.Handler     += OnStoreViewClose;
+            if (GameplayViewClosed)  GameplayViewClosed.Handler  += OnGameplayViewClose;
         }
 
         private void UnsubscribeEvents()
@@ -188,6 +192,7 @@ namespace ProjectCore.Architecture
             if (MainMenuViewClosed)  MainMenuViewClosed.Handler  -= OnMainMenuViewClose;
             if (SettingsViewClosed)  SettingsViewClosed.Handler  -= OnSettingsViewClose;
             if (StoreViewClosed)     StoreViewClosed.Handler     -= OnStoreViewClose;
+            if (GameplayViewClosed)  GameplayViewClosed.Handler  -= OnGameplayViewClose;
         }
     }
 }

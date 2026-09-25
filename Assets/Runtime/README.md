@@ -57,7 +57,26 @@ Then on the `ApplicationFlowController` GameObject, enable **UseCustomLogic** an
 
 ## Shipped screen flow
 
-The template ships assets for four screens — **MainMenu, Gameplay, Settings, Store** — under `Assets/StateMachine`, `Assets/GameEvents` and `Assets/Variables`, and both prefabs come pre-wired to them. The FSM boots into `MainMenuState`.
+The template ships a **working** four-screen flow — **MainMenu, Gameplay, Settings, Store** — under `Assets/StateMachine`, `Assets/GameEvents`, `Assets/Variables` and `Assets/UI`. Press Play in `BootstrapScene` and the main menu appears; the buttons navigate. The FSM boots into `MainMenuState`.
+
+### How a screen gets on screen
+
+| Type | Role |
+|---|---|
+| `UIViewState` | A `State` that owns one screen. Instantiates its `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
+| `UIView` | Sits on the screen prefab. Exposes `Show`/`Hide`, and `Close(int reason)` which raises its `ClosedEvent` with a `UICloseReasons` value. |
+
+A view never decides where to go next — it only reports *why* it closed. The controller turns that `(context, reason)` pair into the next transition, so screens stay ignorant of each other.
+
+Wire a Button's `onClick` to `UIView.Close` with the reason as the int argument (`Home` 1, `Game` 2, `Settings` 3, `ResumeGame` 4, `Store` 7).
+
+Because `Pause`/`Resume` hide and re-show rather than destroy and rebuild, an overlay is cheap: opening Settings over Gameplay leaves the gameplay screen alive and merely hidden, and closing it restores exactly what was there.
+
+The placeholder prefabs in `Assets/UI` use **legacy `UnityEngine.UI.Text`, not TextMeshPro** — TMP's essential resources are not imported in this project, so TMP labels would render as missing-font boxes. Swap them once you import TMP.
+
+`BootstrapScene` carries an `EventSystem` with an **`InputSystemUIInputModule`**; this project is set to the new Input System only (`activeInputHandler: 1`), where the legacy `StandaloneInputModule` does nothing and every button would be dead.
+
+`Tools → Project Bootstrap → Build Screen Views` regenerates the four prefabs and re-wires the states. It is re-runnable and overwrites rather than duplicates.
 
 `SettingsState` and `StoreState` set `PausesPreviousState`, so they overlay whatever is running: closing one with `UICloseReasons.ResumeGame` resolves to `ResumePrevious` and drops back underneath, while `UICloseReasons.Home` routes to the menu.
 

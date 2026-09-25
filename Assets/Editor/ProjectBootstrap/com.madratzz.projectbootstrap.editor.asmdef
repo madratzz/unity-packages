@@ -1,0 +1,21 @@
+{
+    "name": "com.madratzz.projectbootstrap.editor",
+    "rootNamespace": "ProjectBootstrap",
+    "references": [
+        "madratzz.scriptableobject.architecture.runtime",
+        "madratzz.scriptableobject.eventsystem.extensions.runtime",
+        "madratzz.scriptableobject.statemachine.core.runtime",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

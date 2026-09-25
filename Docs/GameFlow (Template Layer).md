@@ -30,6 +30,8 @@ Nothing — this is the top of the dependency graph (see [[Architecture Overview
 | `ApplicationFlowLogic` | Default `IFlowLogic` — subclass and override the strategy table to add contexts without forking the controller. |
 | `IFlowLogic` | Pure-function decision contract. |
 | `FlowContext` / `FlowIntent` / `UICloseReasons` | Enums for screen context, navigation intent, and UI-close reason. |
+| `UIViewState` | A `State` that owns one screen, instantiating and destroying its view across the FSM lifecycle. |
+| `UIView` | Sits on a screen prefab; reports dismissal via `Close(int reason)`. |
 
 ## Usage
 
@@ -40,19 +42,37 @@ Nothing — this is the top of the dependency graph (see [[Architecture Overview
 //    AppPaused/AppResumed GameEvents, AppPausedTime (DBInt), transitions +
 //    GameEvents on the controller, and ApplicationFlowController.ApplicationBase
 //    (the same ApplicationBase from step 1).
-// 3. Hook ApplicationFlowController.Boot() to a startup event
-//    (e.g. GameEventRaiserOnEnable).
+// 3. Nothing else: the FSM's BootState decides the first screen, so the
+//    shipped flow needs no startup hook. Boot() remains available for a
+//    game that should skip straight to gameplay — hook it to a startup
+//    event (e.g. GameEventRaiserOnEnable) if you want that instead.
 ```
 
 To extend the decision table, subclass `ApplicationFlowLogic`, add entries in the constructor, then enable **UseCustomLogic** on the controller and attach your subclass. `Add` writes through an indexer, so it overrides a shipped entry as readily as it adds a new one.
 
 ## Shipped screen flow
 
-The template ships wired assets for four screens — **MainMenu, Gameplay, Settings, Store**:
+The template ships a **runnable** four-screen flow — **MainMenu, Gameplay, Settings, Store**. Press Play in `BootstrapScene` and the menu appears; its buttons navigate.
+
+Two types carry it (`Assets/Runtime/UI`):
+
+| Type | Role |
+|---|---|
+| `UIViewState` | A `State` owning one screen: instantiates `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
+| `UIView` | On the screen prefab. `Show`/`Hide`, plus `Close(int reason)` raising `ClosedEvent` with a `UICloseReasons` value. |
+
+A view never decides what comes next — it reports why it closed, and the controller resolves the transition. Because overlays pause rather than destroy, opening Settings over Gameplay leaves the gameplay screen alive and hidden, and closing it restores it intact.
+
+Two environment constraints are baked in: the placeholder prefabs use **legacy `UnityEngine.UI.Text`** (TMP essentials are not imported here, so TMP would render missing-font boxes), and `BootstrapScene`'s EventSystem uses an **`InputSystemUIInputModule`** (the project is new-Input-System only, where the legacy module leaves every button dead).
+
+`Tools → Project Bootstrap → Build Screen Views` regenerates the prefabs and re-wires the states; it is re-runnable.
+
+Asset layout:
 
 | Folder | Contents |
 |---|---|
-| `Assets/StateMachine` | `ApplicationStateMachine` (boots into `MainMenuState`), `States/` and `Transitions/` for the four screens |
+| `Assets/StateMachine` | `ApplicationStateMachine` (boots into `MainMenuState`), `States/` (now `UIViewState`s) and `Transitions/` for the four screens |
+| `Assets/UI` | `MainMenuView`, `GameplayView`, `SettingsView`, `StoreView` prefabs |
 | `Assets/GameEvents` | `e_Goto*` command events, `e_*ViewClosed` (`GameEventWithInt`, payload is a `UICloseReasons`), `e_AppPaused` / `e_AppResumed` |
 | `Assets/Variables` | `Settings/` (`v_MusicVolume`, `v_SfxVolume`, `v_VibrationEnabled`), `Store/` (`v_Coins`, `v_Gems`), `Gameplay/` (`v_Score`, `v_CurrentLevel`, `v_HighScore`), `Application/` (`v_AppPausedTime`) |
 
