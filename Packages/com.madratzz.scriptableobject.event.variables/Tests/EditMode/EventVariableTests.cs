@@ -152,5 +152,47 @@ namespace Madratzz.Tests.EventVariables
             Assert.AreEqual(4, variable.GetValue());
             Object.DestroyImmediate(variable);
         }
+
+        [Test]
+        public void FloatWithEvent_SetValue_RaisesValueChanged()
+        {
+            var variable = ScriptableObject.CreateInstance<FloatWithEvent>();
+            Wire(variable);
+            int calls = 0;
+            _valueChanged.Handler += () => calls++;
+
+            variable.SetValue(0.35f);
+
+            Assert.AreEqual(1, calls);
+            Assert.AreEqual(0.35f, variable.GetValue(), 0.0001f);
+            Object.DestroyImmediate(variable);
+        }
+
+        [Test]
+        public void FloatWithEvent_ApplyChange_RaisesValueChanged()
+        {
+            var variable = ScriptableObject.CreateInstance<FloatWithEvent>();
+            Wire(variable);
+            variable.SetValue(0.5f);
+            int calls = 0;
+            _valueChanged.Handler += () => calls++;
+
+            variable.ApplyChange(0.25f);
+
+            Assert.AreEqual(1, calls);
+            Assert.AreEqual(0.75f, variable.GetValue(), 0.0001f);
+            Object.DestroyImmediate(variable);
+        }
+
+        [Test]
+        public void FloatWithEvent_WithNoEventAssigned_DoesNotThrow()
+        {
+            var variable = ScriptableObject.CreateInstance<FloatWithEvent>();
+
+            Assert.DoesNotThrow(() => variable.SetValue(0.2f));
+            Assert.DoesNotThrow(() => variable.ApplyChange(0.1f));
+            Assert.AreEqual(0.3f, variable.GetValue(), 0.0001f);
+            Object.DestroyImmediate(variable);
+        }
     }
 }

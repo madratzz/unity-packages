@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3769d412d734f4f05b7715d8d40852e9, type: 3}
+  m_Script: {fileID: 11500000, guid: 712f3b0e08d4245b2baf3a1ab5a0be76, type: 3}
   m_Name: v_VibrationEnabled
   m_EditorClassIdentifier: madratzz.scriptableobject.variables.database.runtime::ProjectCore.Variables.DBBool
-  Value: 1
+  Value: 0
   DefaultValue: 1
   ResetToDefaultOnPlay: 0
   Key: settings.vibration
+  ValueChanged: {fileID: 11400000, guid: cef86c275c834b22a4b35a0d7244af6f, type: 2}

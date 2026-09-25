@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28a1e8bea11164f45ad083c03f297f90, type: 3}
   m_Name: v_Coins
   m_EditorClassIdentifier: madratzz.scriptableobject.variables.database.runtime::ProjectCore.Variables.DBInt
-  Value: 0
+  Value: 12
   DefaultValue: 0
   ResetToDefaultOnPlay: 0
   Key: store.coins

@@ -44,6 +44,12 @@ namespace ProjectBootstrap
                 "Packages/com.madratzz.scriptableobject.event.variables/Runtime/IntWithEvent.cs", "e_ScoreChanged");
             UpgradeVariableToEventing("Variables/Store/v_Coins",
                 "Packages/com.madratzz.scriptableobject.event.variables/Runtime/DBIntWithEvent.cs", "e_CoinsChanged");
+            UpgradeVariableToEventing("Variables/Settings/v_MusicVolume",
+                "Packages/com.madratzz.scriptableobject.event.variables/Runtime/FloatWithEvent.cs", "e_MusicVolumeChanged");
+            UpgradeVariableToEventing("Variables/Settings/v_SfxVolume",
+                "Packages/com.madratzz.scriptableobject.event.variables/Runtime/FloatWithEvent.cs", "e_SfxVolumeChanged");
+            UpgradeVariableToEventing("Variables/Settings/v_VibrationEnabled",
+                "Packages/com.madratzz.scriptableobject.event.variables/Runtime/DBBoolWithEvent.cs", "e_VibrationChanged");
 
             BuildView("MainMenuView", new Color(0.13f, 0.17f, 0.25f), "MAIN MENU", "e_MainMenuViewClosed",
                 ("Play", Game), ("Settings", Settings), ("Store", Store));
@@ -51,8 +57,7 @@ namespace ProjectBootstrap
             BuildHud("GameHudView", "e_GameplayViewClosed",
                 ("Settings", Settings), ("Store", Store), ("Home", Home));
 
-            BuildView("SettingsView", new Color(0.24f, 0.19f, 0.10f), "SETTINGS  (overlay)", "e_SettingsViewClosed",
-                ("Back", ResumeGame), ("Home", Home));
+            BuildSettingsView();
 
             BuildView("StoreView", new Color(0.23f, 0.12f, 0.24f), "STORE  (overlay)", "e_StoreViewClosed",
                 ("Back", ResumeGame), ("Home", Home));
@@ -279,6 +284,200 @@ namespace ProjectBootstrap
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(typed);
             Debug.Log($"[ViewPrefabBuilder] {variablePath} -> {script.GetClass().Name} raising {changedEventName}");
+        }
+
+        /// <summary>
+        /// Settings gets its own builder because it carries real controls —
+        /// two volume sliders and a vibration toggle — bound two-way to the
+        /// ScriptableObject variables, rather than just navigation buttons.
+        /// </summary>
+        static void BuildSettingsView()
+        {
+            const string viewName = "SettingsView";
+
+            var root = new GameObject(viewName, typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var canvas = root.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 10; // overlay: above whatever it covers
+
+            var scaler = root.GetComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
+
+            var panel = NewRect("Panel", root.transform);
+            Stretch(panel);
+            panel.gameObject.AddComponent<Image>().color = new Color(0.24f, 0.19f, 0.10f);
+
+            var titleRect = NewRect("Title", panel);
+            titleRect.anchorMin = titleRect.anchorMax = new Vector2(0.5f, 1f);
+            titleRect.pivot = new Vector2(0.5f, 1f);
+            titleRect.anchoredPosition = new Vector2(0, -140);
+            titleRect.sizeDelta = new Vector2(900, 110);
+            StyleText(titleRect.gameObject.AddComponent<Text>(), "SETTINGS  (overlay)", 60, FontStyle.Bold);
+
+            var view = root.AddComponent<UIView>();
+
+            MakeSlider(panel, "MusicVolumeSlider", "Music", 380,
+                "Variables/Settings/v_MusicVolume", "e_MusicVolumeChanged");
+            MakeSlider(panel, "SfxVolumeSlider", "SFX", 200,
+                "Variables/Settings/v_SfxVolume", "e_SfxVolumeChanged");
+            MakeToggle(panel, "VibrationToggle", "Vibration", 20,
+                "Variables/Settings/v_VibrationEnabled", "e_VibrationChanged");
+
+            AddButton(panel, view, "Back", ResumeGame, new Vector2(0, -260));
+            AddButton(panel, view, "Home", Home, new Vector2(0, -420));
+
+            AssignClosedEvent(view, "e_SettingsViewClosed", viewName);
+
+            PrefabUtility.SaveAsPrefabAsset(root, $"{UIDir}/{viewName}.prefab");
+            Object.DestroyImmediate(root);
+            Debug.Log($"[ViewPrefabBuilder] Built {viewName}.prefab (2 sliders + 1 toggle, bound)");
+        }
+
+        static void AddButton(RectTransform parent, UIView view, string label, int reason, Vector2 anchored)
+        {
+            var btnRect = NewRect(label + "Button", parent);
+            btnRect.anchorMin = btnRect.anchorMax = new Vector2(0.5f, 0.5f);
+            btnRect.pivot = new Vector2(0.5f, 0.5f);
+            btnRect.sizeDelta = new Vector2(520, 120);
+            btnRect.anchoredPosition = anchored;
+
+            btnRect.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.9f, 0.92f);
+            var button = btnRect.gameObject.AddComponent<Button>();
+
+            var labelRect = NewRect("Text", btnRect);
+            Stretch(labelRect);
+            var t = labelRect.gameObject.AddComponent<Text>();
+            StyleText(t, label, 40, FontStyle.Normal);
+            t.color = new Color(0.08f, 0.08f, 0.1f);
+
+            UnityAction<int> call = view.Close;
+            UnityEventTools.AddIntPersistentListener(button.onClick, call, reason);
+        }
+
+        /// <summary>
+        /// A uGUI Slider needs a Background, a Fill Area/Fill and a Handle Slide
+        /// Area/Handle to render and drag; building it by hand means assembling
+        /// all of them and pointing fillRect/handleRect at the right children.
+        /// </summary>
+        static void MakeSlider(RectTransform parent, string name, string caption, float y,
+            string variablePath, string changedEventName)
+        {
+            var row = NewRect(name + "Row", parent);
+            row.anchorMin = row.anchorMax = new Vector2(0.5f, 0.5f);
+            row.pivot = new Vector2(0.5f, 0.5f);
+            row.sizeDelta = new Vector2(820, 130);
+            row.anchoredPosition = new Vector2(0, y);
+
+            var cap = NewRect("Caption", row);
+            cap.anchorMin = new Vector2(0f, 0.5f);
+            cap.anchorMax = new Vector2(0f, 1f);
+            cap.pivot = new Vector2(0f, 0.5f);
+            cap.sizeDelta = new Vector2(400, 50);
+            cap.anchoredPosition = new Vector2(0, -10);
+            var capText = cap.gameObject.AddComponent<Text>();
+            StyleText(capText, caption, 38, FontStyle.Normal);
+            capText.alignment = TextAnchor.MiddleLeft;
+
+            var sliderRect = NewRect(name, row);
+            sliderRect.anchorMin = new Vector2(0f, 0f);
+            sliderRect.anchorMax = new Vector2(1f, 0f);
+            sliderRect.pivot = new Vector2(0.5f, 0f);
+            sliderRect.offsetMin = new Vector2(0, 10);
+            sliderRect.offsetMax = new Vector2(0, 50);
+
+            var bg = NewRect("Background", sliderRect);
+            Stretch(bg);
+            bg.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.12f, 0.06f);
+
+            var fillArea = NewRect("Fill Area", sliderRect);
+            Stretch(fillArea);
+            var fill = NewRect("Fill", fillArea);
+            Stretch(fill);
+            fill.gameObject.AddComponent<Image>().color = new Color(0.95f, 0.78f, 0.3f);
+
+            var handleArea = NewRect("Handle Slide Area", sliderRect);
+            Stretch(handleArea);
+            var handle = NewRect("Handle", handleArea);
+            handle.sizeDelta = new Vector2(40, 60);
+            handle.gameObject.AddComponent<Image>().color = Color.white;
+
+            var slider = sliderRect.gameObject.AddComponent<Slider>();
+            slider.fillRect = fill;
+            slider.handleRect = handle;
+            slider.targetGraphic = handle.GetComponent<Image>();
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+
+            BindSlider(sliderRect.gameObject, variablePath, changedEventName);
+        }
+
+        static void MakeToggle(RectTransform parent, string name, string caption, float y,
+            string variablePath, string changedEventName)
+        {
+            var toggleRect = NewRect(name, parent);
+            toggleRect.anchorMin = toggleRect.anchorMax = new Vector2(0.5f, 0.5f);
+            toggleRect.pivot = new Vector2(0.5f, 0.5f);
+            toggleRect.sizeDelta = new Vector2(820, 90);
+            toggleRect.anchoredPosition = new Vector2(0, y);
+
+            var box = NewRect("Background", toggleRect);
+            box.anchorMin = new Vector2(0f, 0.5f);
+            box.anchorMax = new Vector2(0f, 0.5f);
+            box.pivot = new Vector2(0f, 0.5f);
+            box.sizeDelta = new Vector2(64, 64);
+            box.anchoredPosition = Vector2.zero;
+            box.gameObject.AddComponent<Image>().color = new Color(0.15f, 0.12f, 0.06f);
+
+            var check = NewRect("Checkmark", box);
+            Stretch(check);
+            check.offsetMin = new Vector2(10, 10);
+            check.offsetMax = new Vector2(-10, -10);
+            var checkImage = check.gameObject.AddComponent<Image>();
+            checkImage.color = new Color(0.95f, 0.78f, 0.3f);
+
+            var cap = NewRect("Label", toggleRect);
+            cap.anchorMin = new Vector2(0f, 0f);
+            cap.anchorMax = new Vector2(1f, 1f);
+            cap.offsetMin = new Vector2(90, 0);
+            cap.offsetMax = Vector2.zero;
+            var capText = cap.gameObject.AddComponent<Text>();
+            StyleText(capText, caption, 38, FontStyle.Normal);
+            capText.alignment = TextAnchor.MiddleLeft;
+
+            var toggle = toggleRect.gameObject.AddComponent<Toggle>();
+            toggle.targetGraphic = box.GetComponent<Image>();
+            toggle.graphic = checkImage;
+
+            BindToggle(toggleRect.gameObject, variablePath, changedEventName);
+        }
+
+        static void BindSlider(GameObject go, string variablePath, string changedEventName)
+        {
+            var variable = LoadAsset<ProjectCore.Variables.Float>($"Assets/{variablePath}.asset");
+            var changed = LoadAsset<GameEvent>($"{EventsDir}/{changedEventName}.asset");
+            if (variable == null) { Debug.LogError($"[ViewPrefabBuilder] Float '{variablePath}' not found."); return; }
+
+            var binder = go.AddComponent<VariableSlider>();
+            var so = new SerializedObject(binder);
+            so.FindProperty("Variable").objectReferenceValue = variable;
+            so.FindProperty("ValueChanged").objectReferenceValue = changed;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static void BindToggle(GameObject go, string variablePath, string changedEventName)
+        {
+            var variable = LoadAsset<ProjectCore.Variables.Bool>($"Assets/{variablePath}.asset");
+            var changed = LoadAsset<GameEvent>($"{EventsDir}/{changedEventName}.asset");
+            if (variable == null) { Debug.LogError($"[ViewPrefabBuilder] Bool '{variablePath}' not found."); return; }
+
+            var binder = go.AddComponent<VariableToggle>();
+            var so = new SerializedObject(binder);
+            so.FindProperty("Variable").objectReferenceValue = variable;
+            so.FindProperty("ValueChanged").objectReferenceValue = changed;
+            so.ApplyModifiedPropertiesWithoutUndo();
         }
 
         static void AssignClosedEvent(UIView view, string closedEventName, string viewName)

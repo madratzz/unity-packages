@@ -4,6 +4,45 @@ Last updated: 2026-09-26
 
 ## Current Session
 
+### 2026-09-26T02:50:00+05:00 — claude-opus-5/settings-variable-binding
+
+Summary of what was done:
+
+- **Bound the Settings screen two-way.** `SettingsView` now carries two volume sliders and a vibration toggle wired to the ScriptableObject variables, replacing a screen that had only Back/Home buttons.
+- **Added `VariableSlider` and `VariableToggle`** (`Assets/Runtime/UI`) — unlike the read-only `VariableLabel` these go both ways: the control writes the variable, and a change from anywhere else moves the control.
+- **Added `FloatWithEvent`** to `event.variables`; the package had no eventing `Float` at all.
+- **Upgraded three variables in place** (GUIDs preserved): `v_MusicVolume`/`v_SfxVolume` → `FloatWithEvent`, `v_VibrationEnabled` → `DBBoolWithEvent`, each raising a new `e_*Changed` event.
+
+Files touched:
+
+- New: `Assets/Runtime/UI/{VariableSlider,VariableToggle}.cs`, `Packages/.../Runtime/FloatWithEvent.cs`, `Assets/GameEvents/{e_MusicVolumeChanged,e_SfxVolumeChanged,e_VibrationChanged}.asset`
+- Modified: `ViewPrefabBuilder.cs` (`BuildSettingsView`, `MakeSlider`, `MakeToggle`, `AddButton`, `BindSlider`, `BindToggle`), `Assets/UI/SettingsView.prefab`, the three variable assets, event.variables tests/README/CHANGELOG, `Assets/Runtime/README.md`, `Docs/*`
+
+Decisions made:
+
+- **Write back with `SetValueWithoutNotify` / `SetIsOnWithoutNotify`.** This is the whole trick to two-way binding: a plain `slider.value =` fires `onValueChanged`, writes the variable, raises its event, refreshes the slider and loops. Using the no-notify setter removes the cycle structurally rather than with a re-entrancy flag.
+- `OnSliderMoved` also skips the write when the value has not actually moved (`Mathf.Approximately`) — `SetValue` on a `*WithEvent` variable raises an event, and doing that on every pixel of a drag wakes every listener for nothing.
+- Binders are typed against the base classes (`Float`, `Bool`), so they accept the plain, DB and WithEvent variants interchangeably.
+- `SettingsView` got its own builder method rather than extending the generic `BuildView`, since a uGUI `Slider` needs a Background + Fill Area/Fill + Handle Slide Area/Handle hierarchy with `fillRect`/`handleRect` wired, and a `Toggle` needs Background + Checkmark with `graphic` wired.
+
+Verification:
+
+- **Drove all three directions live**: dragging the music slider 1.00 → 0.25 wrote `v_MusicVolume` = 0.25; `SetValue(0.4)` on `v_SfxVolume` from code moved its slider to 0.40; flipping the toggle wrote `v_VibrationEnabled` = true. No feedback loop.
+- **EditMode 147/147** (144 + 3 new `FloatWithEvent` tests), zero console errors, and the play-mode writes did not leak into the committed assets.
+
+Bug found, NOT fixed — needs a decision:
+
+- **The `DB*` variables ignore `DefaultValue` when no saved value exists.** `DBBool.Load()` (and `DBInt`, `DBFloat`, `DBString`) does: if the PlayerPrefs key is missing and `ResetToDefaultOnPlay` is false, set the value to a hard `false`/`0`/`string.Empty` rather than to `DefaultValue`. So a first-run user gets the type's zero, not the author's default.
+- Two shipped variables are visibly wrong because of it: `v_VibrationEnabled` (`DefaultValue: 1`) loads **false**, and `v_CurrentLevel` (`DefaultValue: 1`) loads **0**. Confirmed at runtime — the vibration toggle came up unticked despite its default.
+- `ResetToDefaultOnPlay: false` should mean "prefer the saved value", not "ignore DefaultValue even when nothing is saved". The fix is one line per type (`else Value = DefaultValue;`) but it changes semantics for every consumer of four distributed types, so it is left for the user to decide.
+
+Next steps:
+
+- Decide on the `DB*` `DefaultValue` fallback above.
+- Consume the volumes: they broadcast changes but nothing listens — an `AudioMixer` binding is the obvious next step.
+- `v_Gems` and `v_HighScore` remain unbound (no UI shows them yet).
+
+
 ### 2026-09-26T02:10:00+05:00 — claude-opus-5/hud-variable-binding
 
 Summary of what was done:

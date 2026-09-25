@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36060838b794b4f199cf2e4b99022b9c, type: 3}
+  m_Script: {fileID: 11500000, guid: 96d5381acae5d6e4d8cf6e6a88517796, type: 3}
   m_Name: v_MusicVolume
   m_EditorClassIdentifier: madratzz.scriptableobject.variables.runtime::ProjectCore.Variables.Float
   Value: 1
   DefaultValue: 1
   ResetToDefaultOnPlay: 1
+  ValueChanged: {fileID: 11400000, guid: 8de07d5fa1eb4d8787669956b1a14ad2, type: 2}

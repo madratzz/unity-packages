@@ -66,7 +66,9 @@ The template ships a **working** four-screen flow — **MainMenu, Gameplay, Sett
 | `UIViewState` | A `State` that owns one screen. Instantiates its `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
 | `GameState` | `UIViewState` + a scene. Loads `GameScene` **additively** before showing its view, and unloads it on `Exit`. `GameplayState` uses this. |
 | `UIView` | Sits on the screen prefab. Exposes `Show`/`Hide`, and `Close(int reason)` which raises its `ClosedEvent` with a `UICloseReasons` value. |
-| `VariableLabel` | Writes a ScriptableObject `Int` into a UI `Text`, refreshing when the variable's `ValueChanged` event fires. |
+| `VariableLabel` | Writes a ScriptableObject `Int` into a UI `Text`, refreshing when the variable's `ValueChanged` event fires. Read-only. |
+| `VariableSlider` | Two-way binding between a `Slider` and a `Float`. |
+| `VariableToggle` | Two-way binding between a `Toggle` and a `Bool`. |
 
 ### Gameplay: scene + HUD
 
@@ -95,6 +97,18 @@ Score.ApplyChange(100);               // HUD updates
 ```
 
 `VariableLabel.Variable` is typed as `Int`, so it accepts `Int`, `DBInt`, `IntWithEvent` and `DBIntWithEvent` alike. The `ValueChanged` event is wired on both the variable and the label rather than the label reaching into the variable, so a plain `Int` someone else raises an event for works too. Leave the event empty for a read-once value: the label still shows the right number on enable, it just won't follow later changes.
+
+### Settings are bound two-way
+
+| Control | Variable | Refreshes on |
+|---|---|---|
+| Music slider | `v_MusicVolume` (`FloatWithEvent`) | `e_MusicVolumeChanged` |
+| SFX slider | `v_SfxVolume` (`FloatWithEvent`) | `e_SfxVolumeChanged` |
+| Vibration toggle | `v_VibrationEnabled` (`DBBoolWithEvent`, persisted) | `e_VibrationChanged` |
+
+Unlike the HUD labels these go both ways: dragging writes the variable, and a change from anywhere else moves the control. `VariableSlider` and `VariableToggle` write back with `SetValueWithoutNotify` / `SetIsOnWithoutNotify` — that is what stops the two directions chasing each other, since a plain `slider.value =` would fire `onValueChanged`, write the variable, raise its event and loop.
+
+Nothing consumes the volumes yet: they hold the value and broadcast changes, but wiring them to an `AudioMixer` is left to you.
 
 A view never decides where to go next — it only reports *why* it closed. The controller turns that `(context, reason)` pair into the next transition, so screens stay ignorant of each other.
 
