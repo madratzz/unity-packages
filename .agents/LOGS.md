@@ -8,7 +8,8 @@ Last updated: 2026-09-25
 
 Summary of what was done:
 
-- **Swept the project for compiler errors and package issues.** Result: **no current compiler errors.** The ~60 `error CS0246` lines still sitting in `~/AppData/Local/Unity/Editor/Editor.log` (all in `com.unity.addressables`, for `IBundleWriteData` / `IBuildTask` / `InjectContext` / `BundleDetails` / `UnityEditor.Build.Pipeline`) are **stale** — they are the 2026-09-22 session's `com.unity.scriptablebuildpipeline` download failure, already repaired. Confirmed stale three ways: the last error is at log line 40761 of 68235 with clean recompiles after it, `Library/PackageCache/com.unity.scriptablebuildpipeline@36e3b5898ee2` is now present, and all 126 assemblies in `Library/ScriptAssemblies` (including `Unity.Addressables.Editor.dll` and every `com.madratzz.*`) carry the same 18:08 build timestamp.
+- **Swept the project for compiler errors and package issues.** Result: **no evidence of current compiler errors** — all 126 assemblies in this project's `Library/ScriptAssemblies` (including `Unity.Addressables.Editor.dll` and every `com.madratzz.*`) carry one uniform 18:08 build timestamp, which a failed compile would not produce. Not confirmed by an actual compile: see the tooling caveat below.
+- **`~/AppData/Local/Unity/Editor/Editor.log` is NOT this project's log.** Its `COMMAND LINE ARGUMENTS` block reads `-projectpath E:\UnityProjects\PersonalProjects\unity-di-starter-template`. Several Editors run concurrently on this machine and they contend for that single log path, so it belonged to the sibling DI template (and had rotated from 8.1 MB to 36 KB within the hour). The ~60 Addressables `error CS0246` lines analysed there (`IBundleWriteData` / `IBuildTask` / `InjectContext` / `BundleDetails`) describe **that** project, not this one. Always check the `-projectpath` line before reading `Editor.log`.
 - **Found and fixed one real package defect**: `com.madratzz.scriptableobject.variables.extensions` declared **no** `dependencies` in `package.json`, while both of its asmdefs referenced `madratzz.scriptableobject.variables.runtime` — the only undeclared cross-package dependency in the repo. On Verdaccio this package would install standalone and then fail to resolve that assembly reference.
 - **Fixed by removing the two dead references, not by declaring the dependency** — the extensions package uses **zero** types from the variables package (verified case-sensitively against its full export set: `Bool`, `Float`, `Int`, `String`, `IVariable`, `IApplyChange`). The two packages only share the `ProjectCore.Variables` namespace, which is what made the reference look load-bearing. `package.json`, the asmdefs, and the code now all agree that the package is standalone.
 
@@ -22,18 +23,27 @@ Files touched:
 Decisions made:
 
 - Removed the dead asmdef references rather than adding `com.madratzz.scriptableobject.variables` to `package.json`. Declaring it would have recorded a dependency the code provably does not have, and `AGENTS.md` prefers clear boundaries over convenience coupling. Trivially reversible if the package is later meant to build on the variables types.
-- Left the 11 other **dead-but-declared** references alone (see LEARNINGS) — they are harmless at compile time and cleaning them spans 6 packages, which is a separate reviewable change, not this fix.
+- Left the other flagged references alone in this commit — see the corrected analysis below; most of them are **not** dead, and the genuinely dead ones are a separate reviewable change.
 - Did not touch the unrelated working-tree changes (`ProjectSettings/EditorBuildSettings.asset`, `ProjectSettings/ShaderGraphSettings.asset`, untracked `.vscode/`), per `AGENTS.md`'s "do not stage unrelated modifications".
 
 Issues found (not fixed here):
 
-- **11 dead asmdef references across 6 packages** — assemblies referenced but none of their types used. Notably `madratzz.scriptableobject.eventsystem.extensions.runtime` → `eventsystem.core.runtime` (the extensions define their own `GameEventWithParam<T> : ScriptableObject` rather than building on `GameEvent`), and `time.machine.runtime` → `utilities.core.runtime` (it uses `CoroutineHandler` from *coroutines*, not anything from *core*). Where these are also declared in `package.json` (`time.machine` → `utilities.core`, `eventsystem.extensions` → `eventsystem.core`) they over-declare the published dependency graph.
+- **A first pass claimed "11 dead asmdef references that over-declare the published graph". That was wrong and is retracted.** A type-name usage scan cannot see references that are load-bearing through an *inheritance chain*: if a consumer uses type `X` from assembly A and `X`'s base type lives in assembly B, the consumer must reference B too or the compiler raises **CS0012**. Re-checked with base types and member signatures in view, the 12 flagged candidates break down as:
+  - **4 are load-bearing and must keep their reference** — `time.machine.runtime` → `utilities.core` (it calls `CoroutineHandler`, and `CoroutineHandler : SingletonPersistent<CoroutineHandler>` with `SingletonPersistent<T>` living in *core*); `event.variables.tests` → `variables` (`BoolWithEvent : Bool`) and → `variables.database` (`DBBoolWithEvent : DBBool`); `variables.database.tests` → `variables` (`DBInt : Int`). Their `package.json` declarations are **correct**, not over-declared.
+  - **2 were the real defect**, fixed in this commit (`variables.extensions`, whose types derive from `ScriptableObject`/Odin rather than from the variables package — which is exactly why it was the one genuine case).
+  - **6 are genuinely dead**: `eventsystem.extensions.runtime` and `.tests` → `eventsystem.core` (the extensions define their own `GameEventWithParam<T> : ScriptableObject` rather than building on `GameEvent`), and `time.machine.tests` / `.playmodetests` → `utilities.core` and `utilities.coroutines` (the tests touch only `TimeMachine`, whose base is `ScriptableObject` and whose public surface exposes no type from either).
+  - The only genuine **over-declaration** candidate left is `eventsystem.extensions` → `eventsystem.core` in `package.json`; keeping it is still defensible since consumers of the extensions will normally want core too.
 - **12 packages ship EditMode tests referencing `UnityEngine.TestRunner`/`UnityEditor.TestRunner` but none declares `com.unity.test-framework`** in `package.json`. Consistent across the family, so it reads as convention rather than oversight, but Unity's own packages (e.g. `com.unity.addressables`) do declare it. Worth a deliberate decision before first Verdaccio publish.
 - `ProjectSettings/EditorBuildSettings.asset` + `ShaderGraphSettings.asset` are modified on disk by the running Editor, still unresolved alongside the `ProjectSettings.asset` item logged on 2026-09-22.
 
+Tooling caveat (why nothing here was compile-verified):
+
+- This project's Editor (PID 15968 per `Library/EditorInstance.json`) holds `Temp/UnityLockfile`, so a headless `-batchmode` compile of the same project is impossible. The Unity CLI could not reach it either: `unity command editor_status --project-path <this project>` answers *"No Pipeline instance found"*, because a **different** project's Editor (the DI template) currently owns the Pipeline port — the same reason its log occupies `Editor.log`. Verification therefore needs either that Editor closed, or this project's Editor focused so its asset watcher picks the change up.
+
 Next steps:
 
-- Decide whether to sweep the 11 dead references and the over-declared `package.json` deps.
+- Recompile and re-run the EditMode suite once this project's Editor is reachable, to confirm the reference removals.
+- Decide whether to remove the 6 genuinely dead references (and whether `eventsystem.extensions` should keep its `eventsystem.core` `package.json` dep).
 - Decide the `com.unity.test-framework` declaration convention for packages with tests.
 
 
