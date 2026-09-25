@@ -13,6 +13,7 @@ namespace ProjectCore.Architecture
         Settings    = 3,
         ResumeGame  = 4,
         Revive      = 5,
-        SkipLevel   = 6
+        SkipLevel   = 6,
+        Store       = 7
     }
 }

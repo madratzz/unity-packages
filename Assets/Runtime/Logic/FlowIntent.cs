@@ -17,6 +17,8 @@ namespace ProjectCore.Architecture
         GoToGame       = 101,
         GoToLevelFail  = 102,
         OpenSettings   = 103,
+        GoToMainMenu   = 104,
+        OpenStore      = 105,
 
         // Logic actions (200 range)
         ResumePrevious = 200

@@ -27,13 +27,21 @@ namespace ProjectCore.Architecture
         [SerializeField] private Transition GameStateTransition;
         [SerializeField] private Transition LevelFailTransition;
         [SerializeField] private Transition SettingsTransition;
+        [SerializeField] private Transition MainMenuTransition;
+        [SerializeField] private Transition StoreTransition;
 
         [Header("Events (The Triggers)")]
         [SerializeField] private GameEvent GotoGame;
         [SerializeField] private GameEvent GotoLevelFail;
+        [SerializeField] private GameEvent GotoMainMenu;
+        [SerializeField] private GameEvent GotoStore;
 
+        [Tooltip("Each carries a UICloseReasons value as its int payload — the view raises it with the reason it was dismissed, and the decision table turns (context, reason) into an intent.")]
         [Header("View Closed Events")]
         [SerializeField] private GameEventWithInt LevelFailViewClosed;
+        [SerializeField] private GameEventWithInt MainMenuViewClosed;
+        [SerializeField] private GameEventWithInt SettingsViewClosed;
+        [SerializeField] private GameEventWithInt StoreViewClosed;
 
         [Tooltip("Replace with a richer IFlowLogic to override the default Boot/LevelFail→GoToGame strategy.")]
         [SerializeField] private bool UseCustomLogic;
@@ -98,6 +106,8 @@ namespace ProjectCore.Architecture
                 { FlowIntent.GoToGame,        () => PerformTransition(GameStateTransition) },
                 { FlowIntent.GoToLevelFail,   () => PerformTransition(LevelFailTransition) },
                 { FlowIntent.OpenSettings,    () => PerformTransition(SettingsTransition) },
+                { FlowIntent.GoToMainMenu,    () => PerformTransition(MainMenuTransition) },
+                { FlowIntent.OpenStore,       () => PerformTransition(StoreTransition) },
 
                 // Logic actions
                 { FlowIntent.ResumePrevious,  () => _stateMachine.ShouldResumePreviousState() },
@@ -138,23 +148,46 @@ namespace ProjectCore.Architecture
         }
 
         // Event handlers — wire to [SerializeField] GameEvents in the Inspector.
+        // The Goto* events are direct commands; the *ViewClosed events carry a
+        // UICloseReasons payload and go through the decision table instead.
         private void OnGotoGame()        => ExecuteIntent(FlowIntent.GoToGame);
         private void OnGotoLevelFail()   => ExecuteIntent(FlowIntent.GoToLevelFail);
+        private void OnGotoMainMenu()    => ExecuteIntent(FlowIntent.GoToMainMenu);
+        private void OnGotoStore()       => ExecuteIntent(FlowIntent.OpenStore);
+
         private void OnLevelFailViewClose(int value) =>
             ResolveDecision(FlowContext.LevelFail, (UICloseReasons)value);
+        private void OnMainMenuViewClose(int value) =>
+            ResolveDecision(FlowContext.MainMenu, (UICloseReasons)value);
+        private void OnSettingsViewClose(int value) =>
+            ResolveDecision(FlowContext.Settings, (UICloseReasons)value);
+        private void OnStoreViewClose(int value) =>
+            ResolveDecision(FlowContext.Store, (UICloseReasons)value);
 
         private void SubscribeEvents()
         {
             if (GotoGame)        GotoGame.Handler       += OnGotoGame;
             if (GotoLevelFail)   GotoLevelFail.Handler  += OnGotoLevelFail;
+            if (GotoMainMenu)    GotoMainMenu.Handler   += OnGotoMainMenu;
+            if (GotoStore)       GotoStore.Handler      += OnGotoStore;
+
             if (LevelFailViewClosed) LevelFailViewClosed.Handler += OnLevelFailViewClose;
+            if (MainMenuViewClosed)  MainMenuViewClosed.Handler  += OnMainMenuViewClose;
+            if (SettingsViewClosed)  SettingsViewClosed.Handler  += OnSettingsViewClose;
+            if (StoreViewClosed)     StoreViewClosed.Handler     += OnStoreViewClose;
         }
 
         private void UnsubscribeEvents()
         {
             if (GotoGame)        GotoGame.Handler       -= OnGotoGame;
             if (GotoLevelFail)   GotoLevelFail.Handler  -= OnGotoLevelFail;
+            if (GotoMainMenu)    GotoMainMenu.Handler   -= OnGotoMainMenu;
+            if (GotoStore)       GotoStore.Handler      -= OnGotoStore;
+
             if (LevelFailViewClosed) LevelFailViewClosed.Handler -= OnLevelFailViewClose;
+            if (MainMenuViewClosed)  MainMenuViewClosed.Handler  -= OnMainMenuViewClose;
+            if (SettingsViewClosed)  SettingsViewClosed.Handler  -= OnSettingsViewClose;
+            if (StoreViewClosed)     StoreViewClosed.Handler     -= OnStoreViewClose;
         }
     }
 }
