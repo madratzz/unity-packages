@@ -4,6 +4,50 @@ Last updated: 2026-09-22
 
 ## Current Session
 
+### 2026-09-22T15:16:44+05:00 — claude-opus-5/playmode-test-run-guard
+
+Summary of what was done:
+
+- **Fixed the `alwaysstartfromscenezero` PlayMode-test hang at its root.** `PlayFromFirstScene` now records at `ExitingEditMode` whether the active scene is the Unity Test Framework's bootstrap scene, and `LoadFirstSceneAtGameBegins` skips the scene-0 load for that session. The flag goes through `SessionState`, which survives the domain reload into Play Mode and is cleared when the Editor exits. The manual `EditorPrefs.SetBool(..., false)` ritual is no longer needed and has been removed from LEARNINGS.
+- **Kept the fix reference-free.** Detection matches UTF's bootstrap-scene name/path (`Assets/InitTestScene<guid>.unity`) and, as a second signal, a scene-resident GameObject named `Code-based tests runner`. No `UnityEditor.TestRunner` reference and no `versionDefines` were added, so `com.unity.test-framework` does not become a dependency of a package that has nothing to do with testing.
+- **Caught and fixed a self-inflicted regression during verification.** The first cut used an unscoped `GameObject.Find("Code-based tests runner")`. UTF leaves a detached `HideFlags.DontSave` object of that name alive for the rest of the Editor session, so after one PlayMode run every ordinary Play Mode session was misdetected as a test run and scene 0 stopped loading — the package's entire feature, silently off. Scoping the check with `controller.scene.IsValid()` fixed it.
+
+Verification (live Editor on port 7800, `EditorUtilities/Always Start From Scene 0` left **enabled** throughout):
+
+| Scenario | Result |
+| --- | --- |
+| PlayMode run, guard reverted (control) | Hung — `playMode: "playing"` indefinitely, BootstrapScene logs proved scene 0 replaced the test scene, `TestResults.xml` never written, `Assets/InitTestScene<guid>.unity` stranded |
+| PlayMode run, with guard | 4/4 passed in ~10s, detector flag `True`, UTF cleaned up its bootstrap scene |
+| Normal Play from `GameScene` | Loaded `BootstrapScene` (scene 0), detector flag `False` — feature intact |
+| Normal Play immediately after a PlayMode run | Loaded `BootstrapScene` — the regression above no longer reproduces |
+| EditMode suite | 124/124 passed |
+
+Files touched:
+
+- `Packages/com.madratzz.utilities.unity.alwaysstartfromscenezero/Editor/PlayFromFirstScene.cs`
+- `Packages/com.madratzz.utilities.unity.alwaysstartfromscenezero/{CHANGELOG.md,README.md}`
+- `.agents/LOGS.md`, `.agents/LEARNINGS.md`
+
+Decisions made:
+
+- Read the signal at `ExitingEditMode` and stash it in `SessionState` rather than reading it at `BeforeSceneLoad`, so the check runs while the active scene is unambiguously readable and does not depend on what is valid during the runtime-init window.
+- Rejected `Application.isBatchMode` — this repo runs tests against a live Editor over the Pipeline, where it is `false`.
+- Rejected adding `UnityEngine.TestRunner`/`UnityEditor.TestRunner` to the package asmdef, and rejected `versionDefines` as unnecessary once detection was reflection-free: both would pull a test-framework dependency into a general-purpose utility package.
+- Left the `EditorUtilities/Always Start From Scene 0` EditorPref **enabled** in this Editor (I set it during verification; it is user-local, not repo state). That is now the safe default and no longer needs toggling before a test run.
+
+Issues found:
+
+- **`unity command run_tests --mode PlayMode` is a no-op on Pipeline `0.7.0-exp.1`** — returns `0/0 passed (0s)` in ~2s without entering Play Mode, while `list_tests --mode PlayMode` finds all 4 tests and EditMode works normally. All PlayMode verification here had to go through `TestRunnerApi` via `eval_file`. Worth reporting upstream; recorded in LEARNINGS.
+- Force-stopping the hung control run left `Assets/InitTestScene<guid>.unity` on disk, and deleting it while UTF still held the job wedged the Editor main thread. Needed a `pkill` + `unity open .` restart. Recorded in LEARNINGS.
+- `ProjectSettings/ProjectSettings.asset` still carries the unrelated Unity-generated `Android:` define change from the previous session. Left unstaged per AGENTS.md; still awaiting a decision.
+- `.agents/LOGS.md` is 764 lines / ~78 KB against the 300–500 line / ~20 KB soft budget, and the archive trigger in AGENTS.md has fired. **Not archived here** — a ~700-line archive migration does not belong in a single-file bug fix, and folding it in would break "keep changes reviewable". It needs its own commit.
+
+Next steps:
+
+- Archive `.agents/LOGS.md` into `.archive/logs/` and trim the active file (pre-existing debt, own commit).
+- Decide what to do with the stray `ProjectSettings.asset` define change.
+- Correct the `.agents/LEARNINGS.md` claim that "EditMode tests never receive Unity lifecycle callbacks" — it is false for `ScriptableObject`, whose `OnEnable` fires on `CreateInstance`, asset load, and every domain reload (15 such types in this repo mutate state there).
+
 ### 2026-09-22T01:34:41+05:00 — deepseek-v4.1-flash/editmode-test-failures
 
 Summary of what was done:
