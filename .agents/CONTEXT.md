@@ -1,6 +1,6 @@
 # Active Project Context
 
-Last updated: 2026-09-21
+Last updated: 2026-09-25
 
 ## Project Summary
 
@@ -49,6 +49,9 @@ Last updated: 2026-09-21
 - What Verdaccio package naming, versioning, publishing, and access conventions should this repository adopt?
 - The 2026-09-20 editor bump to `6000.3.24f1` added `com.unity.sdk.linux-x86_64` and `com.unity.toolchain.linux-x86_64-linux` to `Packages/manifest.json` as project-wide dependencies. Assumption: these were pulled in by Unity Hub/Editor package resolution during the version bump rather than a deliberate Linux-build-target decision — not confirmed. Open question: should these be scoped/conditional rather than a default dependency for every contributor?
 - Should `Assets/GameEvents/` (currently empty) hold hand-authored `GameEvent` assets checked into the repo, or should the template ship with none and expect consumers to create their own?
+
+- Should the 12 packages that ship EditMode tests declare `com.unity.test-framework` in their `package.json`? None currently does, though their test asmdefs reference `UnityEngine.TestRunner`/`UnityEditor.TestRunner` and Unity's own packages (e.g. `com.unity.addressables`) declare it. Consistent across the family, so it reads as convention rather than oversight — but it should be a deliberate decision before the first Verdaccio publish. (Raised 2026-09-25.)
+- Should the 6 genuinely dead asmdef references be swept — `eventsystem.extensions.runtime`/`.tests` → `eventsystem.core`, and `time.machine.tests`/`.playmodetests` → `utilities.core` and `utilities.coroutines`? Harmless at compile time. A related question: should `eventsystem.extensions` keep its `eventsystem.core` `package.json` dependency, the one remaining genuine over-declaration? (Raised 2026-09-25. An earlier count of "11 dead references over-declaring the graph" was wrong — 4 of those are load-bearing via inheritance; see LEARNINGS.)
 
 ## Archive Summary
 

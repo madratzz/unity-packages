@@ -3,7 +3,6 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "madratzz.scriptableobject.variables.runtime",
         "madratzz.scriptableobject.variables.extensions.runtime"
     ],
     "includePlatforms": [

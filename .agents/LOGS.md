@@ -1,8 +1,55 @@
 # Active Logs
 
-Last updated: 2026-09-22
+Last updated: 2026-09-25
 
 ## Current Session
+
+### 2026-09-25T18:24:30+05:00 — claude-opus-5/variables-extensions-undeclared-dependency
+
+Summary of what was done:
+
+- **Swept the project for compiler errors and package issues.** Result: **no evidence of current compiler errors** — all 126 assemblies in this project's `Library/ScriptAssemblies` (including `Unity.Addressables.Editor.dll` and every `com.madratzz.*`) carry one uniform 18:08 build timestamp, which a failed compile would not produce. Not confirmed by an actual compile: see the tooling caveat below.
+- **`~/AppData/Local/Unity/Editor/Editor.log` is NOT this project's log.** Its `COMMAND LINE ARGUMENTS` block reads `-projectpath E:\UnityProjects\PersonalProjects\unity-di-starter-template`. Several Editors run concurrently on this machine and they contend for that single log path, so it belonged to the sibling DI template (and had rotated from 8.1 MB to 36 KB within the hour). The ~60 Addressables `error CS0246` lines analysed there (`IBundleWriteData` / `IBuildTask` / `InjectContext` / `BundleDetails`) describe **that** project, not this one. Always check the `-projectpath` line before reading `Editor.log`.
+- **Found and fixed one real package defect**: `com.madratzz.scriptableobject.variables.extensions` declared **no** `dependencies` in `package.json`, while both of its asmdefs referenced `madratzz.scriptableobject.variables.runtime` — the only undeclared cross-package dependency in the repo. On Verdaccio this package would install standalone and then fail to resolve that assembly reference.
+- **Fixed by removing the two dead references, not by declaring the dependency** — the extensions package uses **zero** types from the variables package (verified case-sensitively against its full export set: `Bool`, `Float`, `Int`, `String`, `IVariable`, `IApplyChange`). The two packages only share the `ProjectCore.Variables` namespace, which is what made the reference look load-bearing. `package.json`, the asmdefs, and the code now all agree that the package is standalone.
+
+Files touched:
+
+- `Packages/com.madratzz.scriptableobject.variables.extensions/Runtime/madratzz.scriptableobject.variables.extensions.runtime.asmdef`
+- `Packages/com.madratzz.scriptableobject.variables.extensions/Tests/EditMode/com.madratzz.scriptableobject.variables.extensions.tests.asmdef`
+- `Docs/Packages/SOAP - Variables Extensions.md`
+- `.agents/LOGS.md`, `.agents/LEARNINGS.md`
+
+Decisions made:
+
+- Removed the dead asmdef references rather than adding `com.madratzz.scriptableobject.variables` to `package.json`. Declaring it would have recorded a dependency the code provably does not have, and `AGENTS.md` prefers clear boundaries over convenience coupling. Trivially reversible if the package is later meant to build on the variables types.
+- Left the other flagged references alone in this commit — see the corrected analysis below; most of them are **not** dead, and the genuinely dead ones are a separate reviewable change.
+- Did not touch the unrelated working-tree changes (`ProjectSettings/EditorBuildSettings.asset`, `ProjectSettings/ShaderGraphSettings.asset`, untracked `.vscode/`), per `AGENTS.md`'s "do not stage unrelated modifications".
+
+Issues found (not fixed here):
+
+- **A first pass claimed "11 dead asmdef references that over-declare the published graph". That was wrong and is retracted.** A type-name usage scan cannot see references that are load-bearing through an *inheritance chain*: if a consumer uses type `X` from assembly A and `X`'s base type lives in assembly B, the consumer must reference B too or the compiler raises **CS0012**. Re-checked with base types and member signatures in view, the 12 flagged candidates break down as:
+  - **4 are load-bearing and must keep their reference** — `time.machine.runtime` → `utilities.core` (it calls `CoroutineHandler`, and `CoroutineHandler : SingletonPersistent<CoroutineHandler>` with `SingletonPersistent<T>` living in *core*); `event.variables.tests` → `variables` (`BoolWithEvent : Bool`) and → `variables.database` (`DBBoolWithEvent : DBBool`); `variables.database.tests` → `variables` (`DBInt : Int`). Their `package.json` declarations are **correct**, not over-declared.
+  - **2 were the real defect**, fixed in this commit (`variables.extensions`, whose types derive from `ScriptableObject`/Odin rather than from the variables package — which is exactly why it was the one genuine case).
+  - **6 are genuinely dead**: `eventsystem.extensions.runtime` and `.tests` → `eventsystem.core` (the extensions define their own `GameEventWithParam<T> : ScriptableObject` rather than building on `GameEvent`), and `time.machine.tests` / `.playmodetests` → `utilities.core` and `utilities.coroutines` (the tests touch only `TimeMachine`, whose base is `ScriptableObject` and whose public surface exposes no type from either).
+  - The only genuine **over-declaration** candidate left is `eventsystem.extensions` → `eventsystem.core` in `package.json`; keeping it is still defensible since consumers of the extensions will normally want core too.
+- **12 packages ship EditMode tests referencing `UnityEngine.TestRunner`/`UnityEditor.TestRunner` but none declares `com.unity.test-framework`** in `package.json`. Consistent across the family, so it reads as convention rather than oversight, but Unity's own packages (e.g. `com.unity.addressables`) do declare it. Worth a deliberate decision before first Verdaccio publish.
+- `ProjectSettings/EditorBuildSettings.asset` + `ShaderGraphSettings.asset` are modified on disk by the running Editor, still unresolved alongside the `ProjectSettings.asset` item logged on 2026-09-22.
+
+Verified (2026-09-26, after the Editor was closed):
+
+- **EditMode suite: 124/124 passing, 0 failed, 0 skipped** via `unity test . --mode EditMode`. The three assemblies whose references this branch removes all compiled and passed — `eventsystem.extensions.tests` (8), `time.machine.tests` (3), `variables.extensions.tests` (10) — confirming none of the six removals raises CS0012.
+- The earlier "not compile-verified" caveat is resolved and retracted.
+
+Tooling note (why it could not be verified at the time):
+
+- A running Editor holds `Temp/UnityLockfile`, so `unity test` refuses outright (*"already open in a running Editor (PID …). Close it and run the command again"*) and a headless `-batchmode` compile of the same project is impossible. Closing the Editor is the fix — `unity test` then drives its own batchmode instance.
+- The CLI could not reach the running Editor either, but **not** for the reason first recorded: `com.unity.pipeline` had never been downloaded into this project at all (present in `manifest.json` and `packages-lock.json`, absent from `Library/PackageCache`), so there was no Pipeline server to reach. The port collision with the DI template's Editor was real but incidental. The package finally downloaded during the first batchmode run, so the CLI should reach this project's Editor from now on.
+
+Next steps:
+
+- Decide whether `eventsystem.extensions` should keep its `eventsystem.core` `package.json` dependency — the one remaining genuine over-declaration, now that the asmdef reference behind it is gone. (The 6 dead references themselves were removed in `f31c0e2`.)
+- Decide the `com.unity.test-framework` declaration convention for packages with tests.
 
 ### 2026-09-22T15:16:44+05:00 — claude-opus-5/playmode-test-run-guard
 
@@ -26,7 +73,6 @@ Files touched:
 
 - `Packages/com.madratzz.utilities.unity.alwaysstartfromscenezero/Editor/PlayFromFirstScene.cs`
 - `Packages/com.madratzz.utilities.unity.alwaysstartfromscenezero/{CHANGELOG.md,README.md}`
-- `.agents/LOGS.md`, `.agents/LEARNINGS.md`
 
 Decisions made:
 
