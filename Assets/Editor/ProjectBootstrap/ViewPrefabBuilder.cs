@@ -39,6 +39,12 @@ namespace ProjectBootstrap
         {
             Directory.CreateDirectory(UIDir);
 
+            // Upgrade first: the HUD labels bind to the events these raise.
+            UpgradeVariableToEventing("Variables/Gameplay/v_Score",
+                "Packages/com.madratzz.scriptableobject.event.variables/Runtime/IntWithEvent.cs", "e_ScoreChanged");
+            UpgradeVariableToEventing("Variables/Store/v_Coins",
+                "Packages/com.madratzz.scriptableobject.event.variables/Runtime/DBIntWithEvent.cs", "e_CoinsChanged");
+
             BuildView("MainMenuView", new Color(0.13f, 0.17f, 0.25f), "MAIN MENU", "e_MainMenuViewClosed",
                 ("Play", Game), ("Settings", Settings), ("Store", Store));
 
@@ -167,6 +173,7 @@ namespace ProjectBootstrap
             var scoreText = score.gameObject.AddComponent<Text>();
             StyleText(scoreText, "SCORE  0", 40, FontStyle.Bold);
             scoreText.alignment = TextAnchor.MiddleLeft;
+            BindLabel(score.gameObject, "Variables/Gameplay/v_Score", "e_ScoreChanged", "SCORE  {0}");
 
             var coins = NewRect("CoinsLabel", bar);
             coins.anchorMin = new Vector2(0.5f, 0f);
@@ -176,6 +183,7 @@ namespace ProjectBootstrap
             var coinsText = coins.gameObject.AddComponent<Text>();
             StyleText(coinsText, "COINS  0", 40, FontStyle.Bold);
             coinsText.alignment = TextAnchor.MiddleRight;
+            BindLabel(coins.gameObject, "Variables/Store/v_Coins", "e_CoinsChanged", "COINS  {0}");
 
             // Compact buttons, bottom-right.
             for (int i = 0; i < buttons.Length; i++)
@@ -205,6 +213,72 @@ namespace ProjectBootstrap
             PrefabUtility.SaveAsPrefabAsset(root, $"{UIDir}/{viewName}.prefab");
             Object.DestroyImmediate(root);
             Debug.Log($"[ViewPrefabBuilder] Built {viewName}.prefab (HUD)");
+        }
+
+        /// <summary>
+        /// Attach a VariableLabel so the HUD reads the live ScriptableObject value
+        /// instead of the static placeholder text baked into the prefab.
+        /// </summary>
+        static void BindLabel(GameObject go, string variablePath, string changedEventName, string format)
+        {
+            var variable = LoadAsset<ProjectCore.Variables.Int>($"Assets/{variablePath}.asset");
+            var changed = LoadAsset<GameEvent>($"{EventsDir}/{changedEventName}.asset");
+
+            if (variable == null)
+            {
+                Debug.LogError($"[ViewPrefabBuilder] Variable '{variablePath}' not found; '{go.name}' stays a static label.");
+                return;
+            }
+
+            var binder = go.AddComponent<VariableLabel>();
+            var so = new SerializedObject(binder);
+            so.FindProperty("Variable").objectReferenceValue = variable;
+            so.FindProperty("ValueChanged").objectReferenceValue = changed;
+            so.FindProperty("Format").stringValue = format;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            if (changed == null)
+                Debug.LogWarning($"[ViewPrefabBuilder] '{changedEventName}' not found; '{go.name}' will show the value once but not follow changes.");
+        }
+
+        /// <summary>
+        /// Retarget a variable asset onto its *WithEvent subclass in place (GUID
+        /// preserved, so existing references survive) and wire the event it raises.
+        /// </summary>
+        static void UpgradeVariableToEventing(string variablePath, string scriptPath, string changedEventName)
+        {
+            var path = $"Assets/{variablePath}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+            var script = AssetDatabase.LoadAssetAtPath<MonoScript>(scriptPath);
+            var changed = LoadAsset<GameEvent>($"{EventsDir}/{changedEventName}.asset");
+
+            if (asset == null || script == null || changed == null)
+            {
+                Debug.LogError($"[ViewPrefabBuilder] Cannot upgrade {variablePath} (asset/script/event missing).");
+                return;
+            }
+
+            if (asset.GetType() != script.GetClass())
+            {
+                var swap = new SerializedObject(asset);
+                swap.FindProperty("m_Script").objectReferenceValue = script;
+                swap.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            // The script swap re-creates the managed instance; reload before use.
+            var typed = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+            var so = new SerializedObject(typed);
+            var prop = so.FindProperty("ValueChanged");
+            if (prop == null)
+            {
+                Debug.LogError($"[ViewPrefabBuilder] {variablePath} has no ValueChanged field — script swap did not take.");
+                return;
+            }
+
+            prop.objectReferenceValue = changed;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(typed);
+            Debug.Log($"[ViewPrefabBuilder] {variablePath} -> {script.GetClass().Name} raising {changedEventName}");
         }
 
         static void AssignClosedEvent(UIView view, string closedEventName, string viewName)

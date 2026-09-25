@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4f739f8fadea43868635eae401a0a13, type: 3}
+  m_Script: {fileID: 11500000, guid: 28a1e8bea11164f45ad083c03f297f90, type: 3}
   m_Name: v_Coins
   m_EditorClassIdentifier: madratzz.scriptableobject.variables.database.runtime::ProjectCore.Variables.DBInt
   Value: 0
   DefaultValue: 0
   ResetToDefaultOnPlay: 0
   Key: store.coins
+  ValueChanged: {fileID: 11400000, guid: f8fcadcff85647cbbbe01959a098e439, type: 2}

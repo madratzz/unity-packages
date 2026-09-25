@@ -11,8 +11,11 @@ Event Variables are thin wrappers over the base and DB variable types that add a
 | Type | Extends | Raises event on |
 |------|---------|----------------|
 | `BoolWithEvent` | `Bool` | `SetValue` |
+| `IntWithEvent` | `Int` | `SetValue`, `ApplyChange` |
 | `DBBoolWithEvent` | `DBBool` | `SetValue` |
 | `DBIntWithEvent` | `DBInt` | `SetValue`, `ApplyChange` |
+
+The `Int` variants raise on `ApplyChange` too, not just `SetValue` — incrementing a counter is the common path and would otherwise change the value silently. `IntWithEvent` is the session-only counterpart to `DBIntWithEvent`.
 
 ## Installation
 

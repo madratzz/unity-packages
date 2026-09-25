@@ -8,6 +8,7 @@ The initial release collects all pre-release changes into a single entry; versio
 ## [0.0.1] - Unreleased
 
 ### Added
+- `IntWithEvent` — a non-persistent `Int` that raises its `ValueChanged` `GameEvent` on change, completing the set: `BoolWithEvent` already covered plain `Bool`, but plain `Int` had no eventing counterpart (only the persistent `DBIntWithEvent`). Overrides `ApplyChange` as well as `SetValue`, since incrementing is the common path for a score and would otherwise change the value without notifying anyone.
 - Initial release
 - `BoolWithEvent` — `Bool` variable that raises a `GameEvent` on value change
 - `DBBoolWithEvent` — `DBBool` variable that raises a `GameEvent` on value change

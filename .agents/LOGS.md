@@ -4,6 +4,44 @@ Last updated: 2026-09-26
 
 ## Current Session
 
+### 2026-09-26T02:10:00+05:00 — claude-opus-5/hud-variable-binding
+
+Summary of what was done:
+
+- **Bound the HUD's SCORE/COINS labels to the ScriptableObject variables** instead of static placeholder text, so the variables shipped on 2026-09-25 now do real work.
+- **Added `VariableLabel`** (`Assets/Runtime/UI`): writes an `Int` into a UI `Text` using a format string, subscribing to a `GameEvent` for refreshes. Typed as `Int`, so it accepts `Int`, `DBInt`, `IntWithEvent` and `DBIntWithEvent` alike.
+- **Added `IntWithEvent` to `com.madratzz.scriptableobject.event.variables`** — the set had `BoolWithEvent` for plain `Bool` and `DBIntWithEvent` for persistent `Int`, but nothing for a plain session-only `Int`, which is exactly what a score is. Overrides `ApplyChange` as well as `SetValue`.
+- **Upgraded the two variables in place**: `v_Score` → `IntWithEvent` raising `e_ScoreChanged`, `v_Coins` → `DBIntWithEvent` raising `e_CoinsChanged`. Retargeted via `SerializedObject` so the asset GUIDs (and every existing reference) survive; `Value`, `DefaultValue`, `ResetToDefaultOnPlay` and `Key` all verified intact afterwards.
+
+Files touched:
+
+- New: `Assets/Runtime/UI/VariableLabel.cs`, `Packages/com.madratzz.scriptableobject.event.variables/Runtime/IntWithEvent.cs`, `Assets/GameEvents/{e_ScoreChanged,e_CoinsChanged}.asset`
+- Modified: `ViewPrefabBuilder.cs` (`BindLabel`, `UpgradeVariableToEventing`), `Assets/UI/GameHudView.prefab`, `Assets/Variables/{Gameplay/v_Score,Store/v_Coins}.asset`, both asmdefs, event.variables tests + README + CHANGELOG, `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`, `Docs/Packages/SOAP - Event Variables.md`
+
+Decisions made:
+
+- **The label subscribes to a `GameEvent` asset wired on both sides**, rather than casting the variable to a `*WithEvent` type and calling `AddListener`. That keeps `VariableLabel` working with a plain `Int` whose event someone else raises, and keeps the variable ignorant of the UI.
+- **No polling.** With no event assigned the label reads once on enable and then stays put — deliberate, so a static readout is not forced into `Update`. `Refresh()` also skips the `string.Format` allocation when the value has not moved.
+- `UnityEngine.UI` had to be added to the `Assets/Runtime` asmdef (first use of `Text` there), and `eventsystem.core.runtime` to the bootstrap editor asmdef (first use of plain `GameEvent`; it previously only touched `GameEventWithInt`).
+
+Verification:
+
+- **Drove it live**: entered gameplay, then `ApplyChange` on each variable. `SCORE 0 → 250 → 263` and `COINS 7 → 12`, each label repainting off its event with no polling. The initial read was also proven real — the HUD showed `COINS 7` from a previously persisted PlayerPrefs value rather than the prefab's baked-in `0`.
+- **EditMode 144/144** (141 + 3 new `IntWithEvent` tests), zero console errors.
+- Confirmed the play-mode writes did **not** leak into the committed assets: both are back at `Value: 0` with all other fields intact.
+
+Gotchas found:
+
+- **Escaped quotes inside an `eval_file` probe's return string corrupt the parsed result.** A probe returning `name="value"` came back truncated at the first `\"` and read as an empty label, which looked like the binding had failed. Return delimiters that survive JSON, e.g. `[...]`.
+- An asmdef referencing `eventsystem.extensions.runtime` does **not** transitively give you `eventsystem.core.runtime`, so plain `GameEvent` fails to resolve with CS0246 while `GameEventWithInt` compiles fine. Same trap as the inheritance-chain CS0012 case logged on 2026-09-25.
+- Inserting a test method by line number lands inside the previous method if you target its closing brace; check the brace balance after any awk/sed insertion into C#.
+
+Next steps:
+
+- The local PlayerPrefs `store.coins` holds 12 from this session's testing — harmless and machine-local, but clear it if a fresh-looking demo is wanted.
+- Bind the Settings screen's sliders/toggles to `v_MusicVolume`, `v_SfxVolume` and `v_VibrationEnabled` the same way (would need a `VariableSlider` / `VariableToggle`, plus `FloatWithEvent` for the volumes).
+
+
 ### 2026-09-26T01:30:00+05:00 — claude-opus-5/gamestate-scene-and-hud
 
 Summary of what was done:

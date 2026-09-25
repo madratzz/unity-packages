@@ -62,6 +62,9 @@ Two types carry it (`Assets/Runtime/UI`):
 | `UIViewState` | A `State` owning one screen: instantiates `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
 | `GameState` | `UIViewState` + a scene — loads `GameScene` additively before showing its HUD, unloads on `Exit`. `GameplayState` uses this. |
 | `UIView` | On the screen prefab. `Show`/`Hide`, plus `Close(int reason)` raising `ClosedEvent` with a `UICloseReasons` value. |
+| `VariableLabel` | Writes a ScriptableObject `Int` into a UI `Text`, refreshing when the variable's `ValueChanged` event fires. |
+
+The HUD's labels are bound, not static: `SCORE` reads `v_Score` (an `IntWithEvent`, session-only) and `COINS` reads `v_Coins` (a `DBIntWithEvent`, persisted). Calling `SetValue` or `ApplyChange` on either repaints the HUD — no polling and no reference from the variable back to the UI. `IntWithEvent` was added to [[SOAP - Event Variables]] for this: `BoolWithEvent` already existed for plain `Bool`, but plain `Int` had only the persistent `DBIntWithEvent`.
 
 A view never decides what comes next — it reports why it closed, and the controller resolves the transition. Because overlays pause rather than destroy, opening Settings over Gameplay leaves the gameplay screen alive and hidden, and closing it restores it intact.
 

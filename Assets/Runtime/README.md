@@ -66,6 +66,7 @@ The template ships a **working** four-screen flow — **MainMenu, Gameplay, Sett
 | `UIViewState` | A `State` that owns one screen. Instantiates its `ViewPrefab` on `Execute`, `Hide` on `Pause`, `Show` on `Resume`, destroys on `Exit`. |
 | `GameState` | `UIViewState` + a scene. Loads `GameScene` **additively** before showing its view, and unloads it on `Exit`. `GameplayState` uses this. |
 | `UIView` | Sits on the screen prefab. Exposes `Show`/`Hide`, and `Close(int reason)` which raises its `ClosedEvent` with a `UICloseReasons` value. |
+| `VariableLabel` | Writes a ScriptableObject `Int` into a UI `Text`, refreshing when the variable's `ValueChanged` event fires. |
 
 ### Gameplay: scene + HUD
 
@@ -76,6 +77,24 @@ The load is **additive, never single**: `ApplicationBase` and `ApplicationFlowCo
 `GameScene` has no camera or `AudioListener` of its own — the boot scene's are the persistent pair. A second set would render twice and log *"there are 2 audio listeners in the scene"*.
 
 Opening Settings or Store over gameplay hides the HUD but leaves `GameScene` loaded and running underneath; closing returns to it untouched.
+
+### The HUD reads live variables
+
+The HUD's two labels are bound to ScriptableObject variables through `VariableLabel`, so they are not static text:
+
+| Label | Variable | Refreshes on |
+|---|---|---|
+| `SCORE {0}` | `v_Score` (`IntWithEvent`, session-only) | `e_ScoreChanged` |
+| `COINS {0}` | `v_Coins` (`DBIntWithEvent`, persisted) | `e_CoinsChanged` |
+
+Anything that calls `SetValue` or `ApplyChange` on those variables repaints the HUD — no polling, no `Update`, no reference from the variable back to the UI:
+
+```csharp
+[SerializeField] private Int Score;   // drop v_Score in
+Score.ApplyChange(100);               // HUD updates
+```
+
+`VariableLabel.Variable` is typed as `Int`, so it accepts `Int`, `DBInt`, `IntWithEvent` and `DBIntWithEvent` alike. The `ValueChanged` event is wired on both the variable and the label rather than the label reaching into the variable, so a plain `Int` someone else raises an event for works too. Leave the event empty for a read-once value: the label still shows the right number on enable, it just won't follow later changes.
 
 A view never decides where to go next — it only reports *why* it closed. The controller turns that `(context, reason)` pair into the next transition, so screens stay ignorant of each other.
 
