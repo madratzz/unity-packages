@@ -36,14 +36,19 @@ Issues found (not fixed here):
 - **12 packages ship EditMode tests referencing `UnityEngine.TestRunner`/`UnityEditor.TestRunner` but none declares `com.unity.test-framework`** in `package.json`. Consistent across the family, so it reads as convention rather than oversight, but Unity's own packages (e.g. `com.unity.addressables`) do declare it. Worth a deliberate decision before first Verdaccio publish.
 - `ProjectSettings/EditorBuildSettings.asset` + `ShaderGraphSettings.asset` are modified on disk by the running Editor, still unresolved alongside the `ProjectSettings.asset` item logged on 2026-09-22.
 
-Tooling caveat (why nothing here was compile-verified):
+Verified (2026-09-26, after the Editor was closed):
 
-- This project's Editor (PID 15968 per `Library/EditorInstance.json`) holds `Temp/UnityLockfile`, so a headless `-batchmode` compile of the same project is impossible. The Unity CLI could not reach it either: `unity command editor_status --project-path <this project>` answers *"No Pipeline instance found"*, because a **different** project's Editor (the DI template) currently owns the Pipeline port — the same reason its log occupies `Editor.log`. Verification therefore needs either that Editor closed, or this project's Editor focused so its asset watcher picks the change up.
+- **EditMode suite: 124/124 passing, 0 failed, 0 skipped** via `unity test . --mode EditMode`. The three assemblies whose references this branch removes all compiled and passed — `eventsystem.extensions.tests` (8), `time.machine.tests` (3), `variables.extensions.tests` (10) — confirming none of the six removals raises CS0012.
+- The earlier "not compile-verified" caveat is resolved and retracted.
+
+Tooling note (why it could not be verified at the time):
+
+- A running Editor holds `Temp/UnityLockfile`, so `unity test` refuses outright (*"already open in a running Editor (PID …). Close it and run the command again"*) and a headless `-batchmode` compile of the same project is impossible. Closing the Editor is the fix — `unity test` then drives its own batchmode instance.
+- The CLI could not reach the running Editor either, but **not** for the reason first recorded: `com.unity.pipeline` had never been downloaded into this project at all (present in `manifest.json` and `packages-lock.json`, absent from `Library/PackageCache`), so there was no Pipeline server to reach. The port collision with the DI template's Editor was real but incidental. The package finally downloaded during the first batchmode run, so the CLI should reach this project's Editor from now on.
 
 Next steps:
 
-- Recompile and re-run the EditMode suite once this project's Editor is reachable, to confirm the reference removals.
-- Decide whether to remove the 6 genuinely dead references (and whether `eventsystem.extensions` should keep its `eventsystem.core` `package.json` dep).
+- Decide whether `eventsystem.extensions` should keep its `eventsystem.core` `package.json` dependency — the one remaining genuine over-declaration, now that the asmdef reference behind it is gone. (The 6 dead references themselves were removed in `f31c0e2`.)
 - Decide the `com.unity.test-framework` declaration convention for packages with tests.
 
 
