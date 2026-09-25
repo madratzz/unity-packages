@@ -21,6 +21,7 @@ The initial release collects all pre-release changes into a single entry; versio
 ### Fixed
 - Corrected asmdef `name` typo `madratzz.scriptableoject.variables.database` → `madratzz.scriptableobject.variables.database.runtime`
 - Save and Load methods
+- **`Load()` no longer discards `DefaultValue` on a first run.** `DBInt`, `DBBool`, `DBFloat` and `DBString` previously fell back to a hard `0` / `false` / `string.Empty` whenever no value was saved *and* `ResetToDefaultOnPlay` was false, silently ignoring the author's `DefaultValue`. A variable defaulted to `1` loaded as `0` until something happened to save it. `ResetToDefaultOnPlay` governs what to do with a value that **has** been saved; it was never a reason to throw away the default when nothing is stored. With nothing saved, `Load()` now always uses `DefaultValue`; a saved value still wins over it. `DBEpochTime` inherits the fix from `DBInt`.
 
 ### Removed
 - `DBManager.GetJsonData()` — stub that silently returned `null`; JSON export will return as a real implementation in a future release

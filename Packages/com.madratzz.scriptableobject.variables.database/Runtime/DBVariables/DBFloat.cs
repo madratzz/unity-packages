@@ -62,14 +62,11 @@ namespace ProjectCore.Variables
             }
             else
             {
-                if (ResetToDefaultOnPlay)
-                {
-                    Value = DefaultValue;
-                }
-                else
-                {
-                    Value = 0;
-                }
+                // Nothing saved yet, so the author's DefaultValue is the only
+                // sensible starting point. ResetToDefaultOnPlay decides what to do
+                // with a value that HAS been saved; it is not a reason to discard
+                // DefaultValue for a hard 0 on a first run.
+                Value = DefaultValue;
             }
         }
 

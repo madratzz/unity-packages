@@ -4,6 +4,36 @@ Last updated: 2026-09-26
 
 ## Current Session
 
+### 2026-09-26T03:20:00+05:00 — claude-opus-5/db-defaultvalue-fallback
+
+Summary of what was done:
+
+- **Fixed the `DB*` `DefaultValue` fallback** raised in the previous entry (user approved the change). `DBInt`, `DBBool`, `DBFloat` and `DBString` fell back to a hard `0` / `false` / `string.Empty` whenever nothing was saved **and** `ResetToDefaultOnPlay` was false, silently discarding the author's `DefaultValue`. With nothing saved, `Load()` now always uses `DefaultValue`; a saved value still wins over it. `DBEpochTime` inherits the fix from `DBInt`.
+- Two regression tests in `DBIntTests` cover both halves: no saved value → `DefaultValue`, and a saved value → the saved value wins.
+- Documented in the package CHANGELOG and README, including the consequence that `ResetToDefaultOnPlay` no longer affects the DB load path at all.
+
+Files touched:
+
+- `Packages/com.madratzz.scriptableobject.variables.database/Runtime/DBVariables/{DBInt,DBBool,DBFloat,DBString}.cs`
+- `.../Tests/EditMode/DBIntTests.cs`, `.../CHANGELOG.md`, `.../README.md`
+
+Decisions made:
+
+- **Scoped strictly to the fallback.** `ResetToDefaultOnPlay` could arguably also mean "ignore the saved value and reset on every play", which would be a second and larger semantic change affecting anyone relying on a saved value winning. Not done — the user asked for the fallback, and that is a separate decision.
+- Both branches of the old inner `if` now collapse to `Value = DefaultValue`, so the `if` was removed rather than left as dead structure, with a comment explaining why `ResetToDefaultOnPlay` is deliberately not consulted there.
+
+Verification:
+
+- **Reproduced the original symptom, then confirmed the fix at runtime.** Cleared the PlayerPrefs keys to simulate a genuine first run, entered play and opened Settings: the vibration toggle now comes up **ticked** (`v_VibrationEnabled = True`, `DefaultValue 1`) where it previously came up unticked, and `v_CurrentLevel` loads **1** where it previously loaded 0.
+- **EditMode 149/149** (147 + 2 regression tests), zero console errors.
+- Also cleared the stale PlayerPrefs this session's earlier testing had written (`settings.vibration`, `store.coins`, `app.pausedTime`), so the local project no longer carries 12 coins from a probe.
+
+Next steps:
+
+- Decide whether `ResetToDefaultOnPlay: true` should additionally discard a *saved* value on play — currently the saved value always wins, which makes the flag inert for `DB*` types.
+- Consume the volumes (`AudioMixer`); `v_Gems` and `v_HighScore` still have no UI.
+
+
 ### 2026-09-26T02:50:00+05:00 — claude-opus-5/settings-variable-binding
 
 Summary of what was done:
