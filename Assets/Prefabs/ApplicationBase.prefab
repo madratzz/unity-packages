@@ -47,7 +47,7 @@ MonoBehaviour:
   IOSTargetFrameRate: 60
   AndroidTargetFrameRate: 60
   ApplicationTimeMachine: {fileID: 0}
-  AppPaused: {fileID: 0}
-  AppResumed: {fileID: 0}
-  AppPausedTime: {fileID: 0}
-  ApplicationStateMachine: {fileID: 0}
+  AppPaused: {fileID: 11400000, guid: d2d5ff7f55974919b7fb29fde8b7c972, type: 2}
+  AppResumed: {fileID: 11400000, guid: 424149dbef614f1e89cd1ca3bc9dfbef, type: 2}
+  AppPausedTime: {fileID: 11400000, guid: fd1d9bcf131f4cde80cac1a31dde7e87, type: 2}
+  ApplicationStateMachine: {fileID: 11400000, guid: 210e1c6fb4b9449f87865b1a031f1fa3, type: 2}

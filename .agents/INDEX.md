@@ -2,16 +2,16 @@
 
 Schema version: 1
 
-Last updated: 2026-09-25
+Last updated: 2026-09-26
 
 ## Active Files
 
 | File | Purpose | Last Updated | Notes |
 |---|---|---:|---|
-| [CONTEXT.md](CONTEXT.md) | Current holistic project context | 2026-09-25 | Active summary |
+| [CONTEXT.md](CONTEXT.md) | Current holistic project context | 2026-09-26 | Active summary |
 | [MEMORY.md](MEMORY.md) | Persistent project memory | 2026-09-16 | Stable facts |
 | [LEARNINGS.md](LEARNINGS.md) | Lessons and discoveries | 2026-09-25 | Recent learnings |
-| [LOGS.md](LOGS.md) | Recent working logs | 2026-09-25 | Current session logs |
+| [LOGS.md](LOGS.md) | Recent working logs | 2026-09-26 | Current session logs |
 | [agents/DEFAULT-AGENT.md](agents/DEFAULT-AGENT.md) | Default agent operating file | 2026-09-16 | Agent-specific rules |
 
 ## Archive Links

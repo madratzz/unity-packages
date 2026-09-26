@@ -11,6 +11,8 @@ namespace ProjectCore.Architecture
         Boot      = 1,
         MainMenu  = 2,
         LevelFail = 3,
-        Settings  = 4
+        Settings  = 4,
+        Store     = 5,
+        Gameplay  = 6
     }
 }

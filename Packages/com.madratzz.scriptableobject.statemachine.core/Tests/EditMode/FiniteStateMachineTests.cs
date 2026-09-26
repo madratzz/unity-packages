@@ -211,6 +211,55 @@ namespace Madratzz.Tests.StateMachine
                     return;
             }
         }
+
+        [Test]
+        public void ResetRuntimeState_ClearsCurrentState_SoTheMachineCanBootAgain()
+        {
+            // Drive the boot block once so CurrentState is populated.
+            var tick = _fsm.Tick();
+            tick.MoveNext();
+            Assert.AreEqual(_stateA, _fsm.RunningState, "precondition: the FSM should have booted into stateA");
+
+            _fsm.ResetRuntimeState();
+
+            Assert.IsNull(_fsm.RunningState);
+        }
+
+        [Test]
+        public void OnDisable_ResetsRuntimeState()
+        {
+            // A ScriptableObject's non-serialized fields survive exiting play mode,
+            // so a leftover CurrentState would make the next Tick skip the boot
+            // block and never enter (or Execute) the boot state again. Unity calls
+            // OnDisable on play-mode exit; invoked here by reflection because
+            // EditMode tests get no lifecycle callbacks.
+            var tick = _fsm.Tick();
+            tick.MoveNext();
+            Assert.AreEqual(_stateA, _fsm.RunningState, "precondition: the FSM should have booted into stateA");
+
+            typeof(FiniteStateMachine)
+                .GetMethod("OnDisable", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                .Invoke(_fsm, null);
+
+            Assert.IsNull(_fsm.RunningState);
+        }
+
+        [Test]
+        public void AfterReset_TickRunsTheBootStateLifecycleAgain()
+        {
+            var first = _fsm.Tick();
+            Advance(first, 2); // Init, Execute
+            Assert.AreEqual(1, _stateA.InitCount);
+            Assert.AreEqual(1, _stateA.ExecuteCount);
+
+            _fsm.ResetRuntimeState();
+
+            var second = _fsm.Tick();
+            Advance(second, 2); // Init, Execute again
+
+            Assert.AreEqual(2, _stateA.InitCount, "boot state should be re-initialised after a reset");
+            Assert.AreEqual(2, _stateA.ExecuteCount, "boot state should re-execute after a reset");
+        }
     }
 
     public class TestState : State

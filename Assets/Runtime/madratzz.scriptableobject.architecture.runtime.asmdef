@@ -8,7 +8,8 @@
         "madratzz.scriptableobject.statemachine.core.runtime",
         "madratzz.scriptableobject.time.machine.runtime",
         "madratzz.scriptableobject.variables.runtime",
-        "madratzz.scriptableobject.variables.database.runtime"
+        "madratzz.scriptableobject.variables.database.runtime",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

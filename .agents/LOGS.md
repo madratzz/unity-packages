@@ -1,5 +1,242 @@
 # Active Logs
 
+Last updated: 2026-09-26
+
+## Current Session
+
+### 2026-09-26T03:20:00+05:00 — claude-opus-5/db-defaultvalue-fallback
+
+Summary of what was done:
+
+- **Fixed the `DB*` `DefaultValue` fallback** raised in the previous entry (user approved the change). `DBInt`, `DBBool`, `DBFloat` and `DBString` fell back to a hard `0` / `false` / `string.Empty` whenever nothing was saved **and** `ResetToDefaultOnPlay` was false, silently discarding the author's `DefaultValue`. With nothing saved, `Load()` now always uses `DefaultValue`; a saved value still wins over it. `DBEpochTime` inherits the fix from `DBInt`.
+- Two regression tests in `DBIntTests` cover both halves: no saved value → `DefaultValue`, and a saved value → the saved value wins.
+- Documented in the package CHANGELOG and README, including the consequence that `ResetToDefaultOnPlay` no longer affects the DB load path at all.
+
+Files touched:
+
+- `Packages/com.madratzz.scriptableobject.variables.database/Runtime/DBVariables/{DBInt,DBBool,DBFloat,DBString}.cs`
+- `.../Tests/EditMode/DBIntTests.cs`, `.../CHANGELOG.md`, `.../README.md`
+
+Decisions made:
+
+- **Scoped strictly to the fallback.** `ResetToDefaultOnPlay` could arguably also mean "ignore the saved value and reset on every play", which would be a second and larger semantic change affecting anyone relying on a saved value winning. Not done — the user asked for the fallback, and that is a separate decision.
+- Both branches of the old inner `if` now collapse to `Value = DefaultValue`, so the `if` was removed rather than left as dead structure, with a comment explaining why `ResetToDefaultOnPlay` is deliberately not consulted there.
+
+Verification:
+
+- **Reproduced the original symptom, then confirmed the fix at runtime.** Cleared the PlayerPrefs keys to simulate a genuine first run, entered play and opened Settings: the vibration toggle now comes up **ticked** (`v_VibrationEnabled = True`, `DefaultValue 1`) where it previously came up unticked, and `v_CurrentLevel` loads **1** where it previously loaded 0.
+- **EditMode 149/149** (147 + 2 regression tests), zero console errors.
+- Also cleared the stale PlayerPrefs this session's earlier testing had written (`settings.vibration`, `store.coins`, `app.pausedTime`), so the local project no longer carries 12 coins from a probe.
+
+Next steps:
+
+- Decide whether `ResetToDefaultOnPlay: true` should additionally discard a *saved* value on play — currently the saved value always wins, which makes the flag inert for `DB*` types.
+- Consume the volumes (`AudioMixer`); `v_Gems` and `v_HighScore` still have no UI.
+
+
+### 2026-09-26T02:50:00+05:00 — claude-opus-5/settings-variable-binding
+
+Summary of what was done:
+
+- **Bound the Settings screen two-way.** `SettingsView` now carries two volume sliders and a vibration toggle wired to the ScriptableObject variables, replacing a screen that had only Back/Home buttons.
+- **Added `VariableSlider` and `VariableToggle`** (`Assets/Runtime/UI`) — unlike the read-only `VariableLabel` these go both ways: the control writes the variable, and a change from anywhere else moves the control.
+- **Added `FloatWithEvent`** to `event.variables`; the package had no eventing `Float` at all.
+- **Upgraded three variables in place** (GUIDs preserved): `v_MusicVolume`/`v_SfxVolume` → `FloatWithEvent`, `v_VibrationEnabled` → `DBBoolWithEvent`, each raising a new `e_*Changed` event.
+
+Files touched:
+
+- New: `Assets/Runtime/UI/{VariableSlider,VariableToggle}.cs`, `Packages/.../Runtime/FloatWithEvent.cs`, `Assets/GameEvents/{e_MusicVolumeChanged,e_SfxVolumeChanged,e_VibrationChanged}.asset`
+- Modified: `ViewPrefabBuilder.cs` (`BuildSettingsView`, `MakeSlider`, `MakeToggle`, `AddButton`, `BindSlider`, `BindToggle`), `Assets/UI/SettingsView.prefab`, the three variable assets, event.variables tests/README/CHANGELOG, `Assets/Runtime/README.md`, `Docs/*`
+
+Decisions made:
+
+- **Write back with `SetValueWithoutNotify` / `SetIsOnWithoutNotify`.** This is the whole trick to two-way binding: a plain `slider.value =` fires `onValueChanged`, writes the variable, raises its event, refreshes the slider and loops. Using the no-notify setter removes the cycle structurally rather than with a re-entrancy flag.
+- `OnSliderMoved` also skips the write when the value has not actually moved (`Mathf.Approximately`) — `SetValue` on a `*WithEvent` variable raises an event, and doing that on every pixel of a drag wakes every listener for nothing.
+- Binders are typed against the base classes (`Float`, `Bool`), so they accept the plain, DB and WithEvent variants interchangeably.
+- `SettingsView` got its own builder method rather than extending the generic `BuildView`, since a uGUI `Slider` needs a Background + Fill Area/Fill + Handle Slide Area/Handle hierarchy with `fillRect`/`handleRect` wired, and a `Toggle` needs Background + Checkmark with `graphic` wired.
+
+Verification:
+
+- **Drove all three directions live**: dragging the music slider 1.00 → 0.25 wrote `v_MusicVolume` = 0.25; `SetValue(0.4)` on `v_SfxVolume` from code moved its slider to 0.40; flipping the toggle wrote `v_VibrationEnabled` = true. No feedback loop.
+- **EditMode 147/147** (144 + 3 new `FloatWithEvent` tests), zero console errors, and the play-mode writes did not leak into the committed assets.
+
+Bug found, NOT fixed — needs a decision:
+
+- **The `DB*` variables ignore `DefaultValue` when no saved value exists.** `DBBool.Load()` (and `DBInt`, `DBFloat`, `DBString`) does: if the PlayerPrefs key is missing and `ResetToDefaultOnPlay` is false, set the value to a hard `false`/`0`/`string.Empty` rather than to `DefaultValue`. So a first-run user gets the type's zero, not the author's default.
+- Two shipped variables are visibly wrong because of it: `v_VibrationEnabled` (`DefaultValue: 1`) loads **false**, and `v_CurrentLevel` (`DefaultValue: 1`) loads **0**. Confirmed at runtime — the vibration toggle came up unticked despite its default.
+- `ResetToDefaultOnPlay: false` should mean "prefer the saved value", not "ignore DefaultValue even when nothing is saved". The fix is one line per type (`else Value = DefaultValue;`) but it changes semantics for every consumer of four distributed types, so it is left for the user to decide.
+
+Next steps:
+
+- Decide on the `DB*` `DefaultValue` fallback above.
+- Consume the volumes: they broadcast changes but nothing listens — an `AudioMixer` binding is the obvious next step.
+- `v_Gems` and `v_HighScore` remain unbound (no UI shows them yet).
+
+
+### 2026-09-26T02:10:00+05:00 — claude-opus-5/hud-variable-binding
+
+Summary of what was done:
+
+- **Bound the HUD's SCORE/COINS labels to the ScriptableObject variables** instead of static placeholder text, so the variables shipped on 2026-09-25 now do real work.
+- **Added `VariableLabel`** (`Assets/Runtime/UI`): writes an `Int` into a UI `Text` using a format string, subscribing to a `GameEvent` for refreshes. Typed as `Int`, so it accepts `Int`, `DBInt`, `IntWithEvent` and `DBIntWithEvent` alike.
+- **Added `IntWithEvent` to `com.madratzz.scriptableobject.event.variables`** — the set had `BoolWithEvent` for plain `Bool` and `DBIntWithEvent` for persistent `Int`, but nothing for a plain session-only `Int`, which is exactly what a score is. Overrides `ApplyChange` as well as `SetValue`.
+- **Upgraded the two variables in place**: `v_Score` → `IntWithEvent` raising `e_ScoreChanged`, `v_Coins` → `DBIntWithEvent` raising `e_CoinsChanged`. Retargeted via `SerializedObject` so the asset GUIDs (and every existing reference) survive; `Value`, `DefaultValue`, `ResetToDefaultOnPlay` and `Key` all verified intact afterwards.
+
+Files touched:
+
+- New: `Assets/Runtime/UI/VariableLabel.cs`, `Packages/com.madratzz.scriptableobject.event.variables/Runtime/IntWithEvent.cs`, `Assets/GameEvents/{e_ScoreChanged,e_CoinsChanged}.asset`
+- Modified: `ViewPrefabBuilder.cs` (`BindLabel`, `UpgradeVariableToEventing`), `Assets/UI/GameHudView.prefab`, `Assets/Variables/{Gameplay/v_Score,Store/v_Coins}.asset`, both asmdefs, event.variables tests + README + CHANGELOG, `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`, `Docs/Packages/SOAP - Event Variables.md`
+
+Decisions made:
+
+- **The label subscribes to a `GameEvent` asset wired on both sides**, rather than casting the variable to a `*WithEvent` type and calling `AddListener`. That keeps `VariableLabel` working with a plain `Int` whose event someone else raises, and keeps the variable ignorant of the UI.
+- **No polling.** With no event assigned the label reads once on enable and then stays put — deliberate, so a static readout is not forced into `Update`. `Refresh()` also skips the `string.Format` allocation when the value has not moved.
+- `UnityEngine.UI` had to be added to the `Assets/Runtime` asmdef (first use of `Text` there), and `eventsystem.core.runtime` to the bootstrap editor asmdef (first use of plain `GameEvent`; it previously only touched `GameEventWithInt`).
+
+Verification:
+
+- **Drove it live**: entered gameplay, then `ApplyChange` on each variable. `SCORE 0 → 250 → 263` and `COINS 7 → 12`, each label repainting off its event with no polling. The initial read was also proven real — the HUD showed `COINS 7` from a previously persisted PlayerPrefs value rather than the prefab's baked-in `0`.
+- **EditMode 144/144** (141 + 3 new `IntWithEvent` tests), zero console errors.
+- Confirmed the play-mode writes did **not** leak into the committed assets: both are back at `Value: 0` with all other fields intact.
+
+Gotchas found:
+
+- **Escaped quotes inside an `eval_file` probe's return string corrupt the parsed result.** A probe returning `name="value"` came back truncated at the first `\"` and read as an empty label, which looked like the binding had failed. Return delimiters that survive JSON, e.g. `[...]`.
+- An asmdef referencing `eventsystem.extensions.runtime` does **not** transitively give you `eventsystem.core.runtime`, so plain `GameEvent` fails to resolve with CS0246 while `GameEventWithInt` compiles fine. Same trap as the inheritance-chain CS0012 case logged on 2026-09-25.
+- Inserting a test method by line number lands inside the previous method if you target its closing brace; check the brace balance after any awk/sed insertion into C#.
+
+Next steps:
+
+- The local PlayerPrefs `store.coins` holds 12 from this session's testing — harmless and machine-local, but clear it if a fresh-looking demo is wanted.
+- Bind the Settings screen's sliders/toggles to `v_MusicVolume`, `v_SfxVolume` and `v_VibrationEnabled` the same way (would need a `VariableSlider` / `VariableToggle`, plus `FloatWithEvent` for the volumes).
+
+
+### 2026-09-26T01:30:00+05:00 — claude-opus-5/gamestate-scene-and-hud
+
+Summary of what was done:
+
+- **Gameplay is now a scene + HUD, not a full-screen menu.** Added `GameState : UIViewState` (`Assets/Runtime/UI`) which loads `GameScene` **additively** before showing its view and unloads it on `Exit`. `GameplayState.asset` was converted to this type in place (GUID preserved), with `SceneName = GameScene`.
+- **Replaced `GameplayView` with `GameHudView`** — a transparent HUD (top stat bar with SCORE/COINS placeholders, compact buttons bottom-right) rather than an opaque full-screen panel, so the game scene shows through.
+- **Made `GameScene` loadable**: added it to Build Settings (index 1; `BootstrapScene` stays at 0 so `alwaysstartfromscenezero` still boots correctly) and stripped its `Main Camera` — the boot scene's camera/AudioListener are the persistent pair, and a second set renders twice and logs "there are 2 audio listeners in the scene".
+- **Fixed a pre-existing FSM bug this exposed** (see below).
+
+Files touched:
+
+- New: `Assets/Runtime/UI/GameState.cs`, `Assets/UI/GameHudView.prefab` (replaces `GameplayView.prefab`)
+- Modified: `Assets/Editor/ProjectBootstrap/ViewPrefabBuilder.cs` (HUD builder, per-state script targeting, Build Settings + camera steps), `Assets/StateMachine/States/GameplayState.asset`, `Assets/Scenes/GameScene.unity`, `ProjectSettings/EditorBuildSettings.asset`, `Packages/com.madratzz.scriptableobject.statemachine.core/{Runtime/StateMachine/FiniteStateMachine.cs,Tests/EditMode/FiniteStateMachineTests.cs,CHANGELOG.md}`, `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`
+
+Decisions made:
+
+- **Additive load, never single.** `ApplicationBase` and `ApplicationFlowController` live in the boot scene and are *not* `DontDestroyOnLoad`, so a single-mode load would destroy the FSM owner mid-transition and strand the whole flow. `GameState` also refuses to unload the last remaining scene.
+- **Scene loads before the HUD is created** so the HUD is instantiated last and draws on top; on exit the HUD is destroyed *before* the scene, so it can never reference destroyed scene objects.
+- `GameState` guards on `Application.CanStreamedLevelBeLoaded` and logs a pointed error rather than silently showing a HUD over an empty boot scene when the scene is missing from Build Settings.
+
+Bug found and fixed (pre-existing, in `statemachine.core`):
+
+- **`FiniteStateMachine` never reset its runtime state, so only the first Play worked.** A ScriptableObject is an asset: its `[NonSerialized]` fields survive exiting play mode in the Editor. A leftover `CurrentState` made the next `Tick()` skip the boot block entirely (`if (CurrentState == null)`), so the boot state was never re-entered and nothing it does — loading a scene, showing a view — ever happened. Symptom: press Play, works; Stop; press Play again, blank screen; until a script recompile happened to clear it. Latent until now only because the states did nothing visible.
+- Fixed with an `OnDisable` reset plus a public `ResetRuntimeState()`, and three regression tests. **141/141 EditMode passing.**
+
+Verification:
+
+- Drove **two consecutive play sessions** (the case that used to fail) with polling between every step. Both identical: boot → `MainMenuState` + `MainMenuView`; Play → `GameplayState`, `scenes=[BootstrapScene GameScene]`, `GameHudView` shown; Home → back to `MainMenuState` with `GameScene` unloaded. Settings over gameplay keeps `GameScene` loaded and hides the HUD.
+- EditMode suite **141/141**, zero console errors.
+
+Gotchas found:
+
+- **Do not probe the live Editor with fixed sleeps right after `editor_play`.** Entering play triggers a domain reload during which `eval_file` returns empty, which reads as "the object does not exist". An earlier run reported `views=[]` at boot purely for this reason and looked like a regression. Poll for the expected condition instead.
+- `perl -0pi` without correct encoding flags double-encodes UTF-8 (an em dash became `C3 A2 C2 80 C2 94`). Prefer the Edit tool for prose, and check with `grep -P '\xc3\xa2\xc2\x80'` after any perl pass over Markdown.
+- In an FSM `Tick()` iterator, one `MoveNext()` only reaches the first `yield return CurrentState.Init(...)`; `Execute` needs a further step. The test file's `Advance(it, 2)` helper exists for this — a new test that used a bare `MoveNext()` failed on `ExecuteCount` until corrected.
+
+Next steps:
+
+- Replace placeholder prefabs with real screens (import TMP first).
+- Bind the HUD's SCORE/COINS labels to `v_Score` / `v_Coins` instead of static text.
+- Author a LevelFail screen if wanted; `LevelFailTransition` is still unassigned.
+
+
+### 2026-09-26T00:55:00+05:00 — claude-opus-5/screen-flow-ui-views
+
+Summary of what was done:
+
+- **Fixed "runs but sticks on BootstrapScene".** User reported the game never leaves the boot scene and that the screen states had no views. Both correct. The 2026-09-25 commit wired the *assets* to each other but gave them no behaviour: the four screen states were bare `State` instances whose `Init`/`Execute`/`Tick` are all `yield break`, so the FSM entered `MainMenuState` and sat there forever. The previous session's claim that it shipped "a working screen graph" was an overstatement — it was an inert one.
+- **Added the missing layer** (`Assets/Runtime/UI`): `UIViewState : State` instantiates its `ViewPrefab` on `Execute`, hides on `Pause`, re-shows on `Resume` and destroys on `Exit`; `UIView` sits on the prefab and reports dismissal via `Close(int reason)` raising a `GameEventWithInt` carrying a `UICloseReasons`. Views never navigate — the controller resolves `(context, reason)` into the next transition, so screens stay ignorant of each other.
+- **Built four placeholder uGUI prefabs** (`Assets/UI`) via a re-runnable editor tool, **Tools → Project Bootstrap → Build Screen Views** (`Assets/Editor/ProjectBootstrap/ViewPrefabBuilder.cs`), which also converts the four `State` assets to `UIViewState` **in place** (retargeting `m_Script` through `SerializedObject`, so the asset GUIDs survive and every Transition + the FSM's `BootState` keep resolving) and adds the missing `EventSystem`.
+- **Closed a gap left by the previous session**: there was no `e_GameplayViewClosed` event or matching controller field, so Gameplay's buttons would have had nothing to raise. Added both.
+
+Files touched:
+
+- New: `Assets/Runtime/UI/{UIView,UIViewState}.cs`, `Assets/Editor/ProjectBootstrap/{ViewPrefabBuilder.cs,com.madratzz.projectbootstrap.editor.asmdef}`, `Assets/UI/*.prefab` (4), `Assets/GameEvents/e_GameplayViewClosed.asset`
+- Modified: `ApplicationFlowController.cs` (+`GameplayViewClosed`), the 4 State assets, `ApplicationFlowController.prefab`, `BootstrapScene.unity` (EventSystem), `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`
+
+Decisions made:
+
+- **Views are prefabs instantiated by the state**, not scene objects toggled active and not additive scenes (user chose this from three options). It maps onto the FSM lifecycle already in place and makes the `PausesPreviousState` overlay semantics work without extra machinery.
+- **Types live in `Assets/Runtime`**, not a new package (user's choice) — template glue for now, promotable later.
+- **Legacy `UnityEngine.UI.Text`, not TextMeshPro.** TMP's essential resources are not imported in this project, so TMP labels would render as missing-font boxes. Noted in both READMEs as the thing to change after importing TMP.
+- **`EventSystem` uses `InputSystemUIInputModule`.** `ProjectSettings.activeInputHandler` is `1` (new Input System only), where `StandaloneInputModule` does nothing and every button would be silently dead.
+- **`Boot()` left alone.** The FSM's `BootState` decides the first screen, so the shipped flow needs no startup hook; `Boot()` stays for a game that wants to skip to gameplay.
+- Kept the builder tool in the repo rather than deleting it after use — it is idempotent and documents how the prefabs were made.
+
+Verification (all in the live Editor, via the Unity CLI):
+
+- **Ran the game and drove the whole flow.** FSM reached `MainMenuState` with `MainMenuView` instantiated; then MainMenu→(Play)→Gameplay→(Settings)→Settings overlay→(Back)→Gameplay→(Home)→MainMenu, and MainMenu→(Store)→Store→(Back)→MainMenu. **Overlay semantics confirmed**: entering Settings over Gameplay left `GameplayView(hidden)` alive rather than destroyed, and Back restored it.
+- **Clicked the real buttons**, not just raised the events: each button reported `persistentListeners=1` (serialized wiring, Inspector-editable) and `onClick.Invoke()` drove the same transitions.
+- **`EventSystem.RaycastAll` at the Play button's screen position hit `PlayButton`**, proving the canvas is on screen and raycastable.
+- **EditMode suite: 138/138 passing**; zero console errors throughout.
+
+Gotchas found:
+
+- **`capture_game_view` / `screenshot` do not capture `ScreenSpaceOverlay` UI** — both render through the camera, so the game view came back as bare skybox while the UI was demonstrably present. Do not read an empty capture as "the UI is missing"; verify with a raycast or a component probe instead.
+- **`simulate_pointer` did not trigger the button** even though the raycast hit it — synthetic Input System pointer events appear to need the Game view focused. `onClick.Invoke()` is the reliable headless substitute.
+- **Swapping `m_Script` via `SerializedObject` destroys and re-creates the managed instance**, so the original reference dangles immediately afterwards — reload via `AssetDatabase.LoadAssetAtPath` before touching the asset again. The first builder run threw `MissingReferenceException` on a trailing `EditorUtility.SetDirty(asset)` for exactly this reason.
+- `find_gameobjects` and `get_scene_hierarchy` do not see objects in `DontDestroyOnLoad`; use `FindObjectsByType` through `eval_file`.
+
+Next steps:
+
+- Replace the placeholder prefabs with real screens (import TMP first).
+- `Assets/Scenes/GameScene.unity` is now unused — the flow is prefab-driven and only `BootstrapScene` is in Build Settings. Decide whether to delete it or make Gameplay load it.
+- Author a LevelFail screen if that flow is still wanted; `LevelFailTransition` remains unassigned.
+
+
+### 2026-09-25T19:15:00+05:00 — claude-opus-5/screen-flow-states-and-assets
+
+Summary of what was done:
+
+- **Shipped the MainMenu / Gameplay / Settings / Store screen flow** as wired assets plus the code needed to route to it. User asked for "all required states, SO Variables and GameEvents"; two forks were put to them first, since `Store` did not exist in the code at all and the repo documents no product spec. They chose full code wiring, and the conventional starter variable set.
+- **Code** (`Assets/Runtime`): `FlowContext` gained `Store = 5`, `Gameplay = 6`; `FlowIntent` gained `GoToMainMenu = 104`, `OpenStore = 105`; `UICloseReasons` gained `Store = 7`. `ApplicationFlowController` gained `MainMenuTransition` / `StoreTransition`, `GotoMainMenu` / `GotoStore`, and `MainMenuViewClosed` / `SettingsViewClosed` / `StoreViewClosed`, with command-map entries, handlers and subscribe/unsubscribe. `ApplicationFlowLogic` gained 13 strategy entries.
+- **Assets**: `Assets/StateMachine` (`ApplicationStateMachine` booting into `MainMenuState`, 4 `State`s, 4 `Transition`s), `Assets/GameEvents` (6 `GameEvent` + 4 `GameEventWithInt`), `Assets/Variables` (Settings / Store / Gameplay / Application). All hand-authored as Unity YAML with fresh `.meta` GUIDs, matching the format of the existing `time.machine` example assets.
+- **Both prefabs pre-wired** — `ApplicationBase.prefab` (FSM, AppPaused/AppResumed, AppPausedTime) and `ApplicationFlowController.prefab` (all 5 transitions, 4 command events, 4 view-closed events, plus its cross-prefab `ApplicationBase` reference). Every referenced GUID was resolved back to a real asset before committing.
+
+Files touched:
+
+- `Assets/Runtime/Logic/{FlowContext,FlowIntent,UICloseReasons,ApplicationFlowLogic}.cs`
+- `Assets/Runtime/Application/ApplicationFlowController.cs`
+- `Assets/Tests/EditMode/ApplicationFlowLogicTests.cs`
+- `Assets/Prefabs/{ApplicationBase,ApplicationFlowController}.prefab`
+- `Assets/StateMachine/**`, `Assets/GameEvents/**`, `Assets/Variables/**` (new)
+- `Assets/Runtime/README.md`, `Docs/GameFlow (Template Layer).md`, `.agents/*`
+
+Decisions made:
+
+- **FSM `BootState` = `MainMenuState`**, and `ApplicationFlowController.Boot()` was left asking for `(Boot, Game)`. Changing `Boot()` would have altered existing behaviour and its test; instead `(Boot, Home) → GoToMainMenu` was added to the table so a caller can opt in. Documented in both READMEs.
+- **`SettingsState` and `StoreState` set `PausesPreviousState`**, making them overlays so `ResumeGame → ResumePrevious` is meaningful; `MainMenu` and `Gameplay` do not.
+- **Persistent variables use `ResetToDefaultOnPlay: 0`** so the PlayerPrefs value wins on load — `ResetToDefaultOnPlay: 1` would overwrite saved progress on every `OnEnable`. Session-only `v_Score` keeps `1`.
+- **No `LevelFailState` / `ToLevelFail`** was invented: `LevelFail` predates these four screens and was not part of the request, so `LevelFailTransition` stays unassigned.
+- **Fixed a now-false-positive test.** `SubclassCanExtendStrategyTable` asserted `Settings + ResumeGame → ResumePrevious`, which the base table now defines itself — it would have passed even with `Add()` broken. Re-pointed at `(Gameplay, Revive)`, which the base deliberately leaves out, with an explicit precondition assertion guarding that. Added `SubclassCanOverrideAnExistingStrategy` and a 13-case `TestCase` matrix.
+
+Verification:
+
+- `Assets/Runtime` **compiles clean** — the whole assembly was built outside the Editor with Unity's bundled Roslyn (`Data/DotNetSdkRoslyn/csc.dll`) against `netstandard.dll`, `UnityEngine.dll` and the seven package DLLs in `Library/ScriptAssemblies`. Only CS0649 warnings (`[SerializeField]` never assigned in code), which are expected and pre-existing.
+- **The decision table was executed, not just compiled**: a console harness linked against the real logic sources checked all 15 shipped routes plus both fallbacks — 17/17 as expected, including the `(Gameplay, Revive) → DefaultToGame` precondition the subclass test depends on.
+- **In-Editor verification followed on 2026-09-26** (after closing the Editor that held `Temp/UnityLockfile`), and the earlier "not verified" caveat is retracted:
+  - **EditMode suite: 138/138 passing, 0 failed, 0 skipped** via `unity test . --mode EditMode` — 124 pre-existing plus the 14 added here. All 18 `ApplicationFlowLogicTests` cases ran, including every one of the 13 `TestCase` routes and both subclass tests.
+  - **Unity accepted all 40 hand-authored asset and `.meta` files byte-for-byte** — `git status Assets/` was clean after the import, so the script GUIDs, `.meta` format and every cross-reference were correct and needed no rewriting. No import errors or missing-script warnings in the Editor log.
+- **Batchmode aborts when any package cannot resolve**, which is unrelated to this change but will bite any CI run here: the first attempt exited 1 during resolution on `com.unity.ai.assistant` and `com.unity.toolchain.linux-x86_64-linux` (ECONNRESET against `download.packages.unity.com`; `packages.unity.com` itself answered 200, and three direct `curl` downloads of the tarball timed out). A GUI Editor tolerates the same gaps. A retry got through because the first run had meanwhile cached `com.unity.pipeline` and `com.unity.sdk.linux-x86_64`.
+
+Next steps:
+
+- Author a LevelFail screen (state + transition) if that flow is still wanted — `LevelFailTransition` stays unassigned until then.
+- Get `com.unity.ai.assistant` and `com.unity.toolchain.linux-x86_64-linux` cached (or dropped from the manifest): until they resolve, every batchmode/CI run here is a coin-flip on the CDN. This is concrete evidence for the standing open question about whether the Linux toolchain packages belong as default dependencies.
 Last updated: 2026-09-25
 
 ## Current Session

@@ -18,6 +18,12 @@ Persistent ScriptableObject variables backed by PlayerPrefs, providing typed DB 
 | `Database` | `ScriptableObject` | PlayerPrefs abstraction layer for testability |
 | `DBManager` | *(static)* | Registry of active DB variables with JSON import/export |
 
+## Loading and defaults
+
+`Load()` prefers whatever is stored under the variable's `Key`. When nothing is stored — a first run, or after the key is deleted — it falls back to `DefaultValue`.
+
+`ResetToDefaultOnPlay` therefore has no effect on that fallback: it governs the base `Variable`'s own play-mode reset, not what happens when the store is empty. Set a `Key` and a `DefaultValue` and the variable behaves as you'd expect on both a first and a subsequent run.
+
 ## Installation
 
 Install via the Unity Package Manager pointing to your Verdaccio registry.

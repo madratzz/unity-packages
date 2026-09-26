@@ -30,6 +30,32 @@ namespace ProjectCore.StateMachine
         /// <summary>The state currently executing.</summary>
         public State RunningState => CurrentState;
 
+        /// <summary>
+        /// Clears all runtime state. A ScriptableObject is an asset, so its
+        /// non-serialized fields survive exiting play mode in the Editor — and a
+        /// leftover <see cref="CurrentState"/> makes the next <see cref="Tick"/>
+        /// skip the boot block entirely, so the boot state is never entered and
+        /// nothing it does (loading a scene, showing a view) ever happens. Unity
+        /// calls this on play-mode exit and on domain reload.
+        /// </summary>
+        private void OnDisable()
+        {
+            ResetRuntimeState();
+        }
+
+        /// <summary>
+        /// Return the machine to its pre-boot condition, so the next
+        /// <see cref="Tick"/> enters <see cref="BootState"/> from scratch.
+        /// </summary>
+        public void ResetRuntimeState()
+        {
+            CurrentState = null;
+            PreviousState = null;
+            CurrentTransition = null;
+            ResumePreviousState = false;
+            PausedStates.Clear();
+        }
+
         /// <summary>True while a state is on the pause stack.</summary>
         public bool IsStatePaused(State state) => PausedStates.Contains(state);
 
