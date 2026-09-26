@@ -1,0 +1,39 @@
+{
+  "name": "com.madratzz.scriptableobject.event.variables",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz ScriptableObject: Event Variables",
+  "description": "ScriptableObject variables that automatically raise a GameEvent whenever their value changes, bridging the Variable and Event System packages.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "scriptable",
+    "variable",
+    "system",
+    "events",
+    "database",
+    "presistent"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "dependencies": {
+    "com.madratzz.scriptableobject.eventsystem.core": "0.0.1",
+    "com.madratzz.scriptableobject.variables": "0.0.1",
+    "com.madratzz.scriptableobject.variables.database": "0.0.1"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.event.variables"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}

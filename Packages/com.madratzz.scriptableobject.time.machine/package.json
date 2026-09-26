@@ -1,0 +1,47 @@
+{
+  "name": "com.madratzz.scriptableobject.time.machine",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz ScriptableObject: Time Machine",
+  "description": "ScriptableObject coroutine timer that fires a GameEvent every second, enabling time-driven logic without direct MonoBehaviour coupling.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "architecture",
+    "scriptable",
+    "unity",
+    "object",
+    "event",
+    "time",
+    "tick"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "samples": [
+    {
+      "displayName": "com.madratzz.scriptableobject.time.machine",
+      "description": "Contains Sample Assets for the TimeMachine Event Code",
+      "path": "Samples~/TimeMachineSampleAssets"
+    }
+  ],
+  "dependencies": {
+    "com.madratzz.scriptableobject.eventsystem.core": "0.0.1",
+    "com.madratzz.utilities.coroutines": "0.0.1",
+    "com.madratzz.utilities.core": "0.0.1"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.time.machine"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}

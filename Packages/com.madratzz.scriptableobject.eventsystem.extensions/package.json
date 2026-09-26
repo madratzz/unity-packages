@@ -1,0 +1,35 @@
+{
+  "name": "com.madratzz.scriptableobject.eventsystem.extensions",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz ScriptableObject: Event System Extensions",
+  "description": "Typed generic extensions to the Event System package, adding parameterised events for primitives, sprites, and Vector3, plus return-value events.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "scriptable",
+    "event",
+    "system"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "raxashafique@gmail.com"
+  },
+  "dependencies": {
+    "com.madratzz.scriptableobject.eventsystem.core": "0.0.1",
+    "com.madratzz.utilities.attributes": "0.0.1"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.eventsystem.extensions"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}

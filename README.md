@@ -1,31 +1,28 @@
 # unity-so-starter-template
-
-A Unity **6000.3.21f1** starter template: Universal Render Pipeline with mobile and
-PC render-pipeline assets, the Input System, and a sample scene — a clean project
-skeleton to start a new Unity project from.
+A collection of reusable Unity ScriptableObject Architecture (SOAP) packages, and a clonable template project that wires them into a working game scaffold. See `IDEA.md` for the intended role of `Packages/` vs. `Assets/`.
 
 ## Quick start
 
-This repository is a GitHub [template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template),
-so a new project starts as its own repository with its own history rather than a fork:
+**Prerequisites:** Unity **6000.3.24f1** (see `ProjectSettings/ProjectVersion.txt`) and Git.
 
-1. On GitHub, click **Use this template → Create a new repository**.
-2. Clone your new repository and open it in Unity.
+```bash
+git clone https://github.com/madratzz/unity-so-starter-template.git
+cd unity-so-starter-template
+git checkout development
+```
 
-**Prerequisites**
+Open the folder in Unity Hub — all packages under `Packages/` are embedded and resolve automatically, no registry setup required. See [`Docs/Getting Started.md`](Docs/Getting%20Started.md) for the full walkthrough, including using a package in another project and running tests.
 
-- Unity **6000.3.21f1** (this exact version; see `ProjectSettings/ProjectVersion.txt`)
-- **`git` on your `PATH`** if you add git-URL package dependencies — Unity's package
-  manager shells out to `git`, and without it UPM resolve fails on first open.
+## Running tests
 
-## What's in the box
+**Window → General → Test Runner → EditMode → Run All.** Most packages under `Packages/` ship EditMode tests (see [`Docs/Getting Started.md`](Docs/Getting%20Started.md) for which don't yet); the `Assets/` GameFlow layer has its own at `Assets/Tests/EditMode/`.
 
-| Path | Contents |
-|---|---|
-| `Assets/Scenes/SampleScene.unity` | Empty sample scene |
-| `Assets/Settings/` | URP assets — `Mobile_RPAsset` / `PC_RPAsset` (with their renderers), `DefaultVolumeProfile`, `SampleSceneProfile`, global URP settings |
-| `Assets/InputSystem_Actions.inputactions` | Input System action map |
-| `Packages/manifest.json` | URP 17.3.0, Input System 1.20.0, Test Framework 1.6.0, Timeline, uGUI, Visual Scripting, AI Navigation |
-| `ProjectSettings/` | Unity 6000.3.21f1 project settings |
+## Documentation
 
-The project ships no game code — add your own under `Assets/`.
+See [`Docs/Home.md`](Docs/Home.md) for the full wiki — architecture overview, a getting-started guide, and a per-package catalog. It's written as an [Obsidian](https://obsidian.md) vault; open this repository's root folder in Obsidian to browse it with working links.
+
+For AI-agent-specific guidance, see [`AGENTS.md`](AGENTS.md).
+
+## License
+
+[MIT](LICENSE) — Copyright (c) 2026 Raza Butt. Each package under `Packages/` also carries its own `LICENSE.md` (same terms) since packages are meant to be distributed independently.

@@ -1,0 +1,33 @@
+{
+  "name": "com.madratzz.utilities.unity.alwaysstartfromscenezero",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz Utilities: Always Start From Scene Zero",
+  "description": "Editor utility that loads scene index 0 when entering Play Mode, ensuring consistent game startup regardless of the currently active scene.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "tools",
+    "scene",
+    "always",
+    "utilities",
+    "editor"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "category": "Editor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.utilities.unity.alwaysstartfromscenezero"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "com.madratzz.scriptableobject.eventsystem.core",
+  "version": "0.0.1",
+  "license": "MIT",
+  "displayName": "Madratzz ScriptableObject: Event System",
+  "description": "ScriptableObject-based event bus providing parameterless GameEvent assets with MonoBehaviour listener and raiser components for decoupled scene communication.",
+  "unity": "6000.0",
+  "unityRelease": "0f1",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "scriptable",
+    "event",
+    "system"
+  ],
+  "author": {
+    "name": "Raza Butt",
+    "url": "https://portfolio.madratzz.net",
+    "email": "hello@madratzz.net"
+  },
+  "dependencies": {
+    "com.madratzz.utilities.attributes": "0.0.1"
+  },
+  "category": "Tooling",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/madratzz/unity-packages",
+    "directory": "Packages/com.madratzz.scriptableobject.eventsystem.core"
+  },
+  "bugs": {
+    "url": "https://github.com/madratzz/unity-packages/issues"
+  }
+}
